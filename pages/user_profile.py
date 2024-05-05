@@ -42,11 +42,18 @@ if st.session_state["authentication_status"]:
                 st.success('Entries updated successfully')
         except Exception as e:
             st.error(e)
+    authenticator.logout()
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
+    st.page_link("pages/register_user.py", label='Register New User', icon="📝")
+    st.page_link("pages/forgot_username.py", label='Forgot Username', icon="👤")
+    st.page_link("pages/forgot_password.py", label='Forgot Password', icon="🔑")
 elif st.session_state["authentication_status"] is None:
     st.warning('Please enter your username and password')
+    st.page_link("pages/register_user.py", label='Register New User', icon="📝")
+    st.page_link("pages/forgot_username.py", label='Forgot Username', icon="👤")
+    st.page_link("pages/forgot_password.py", label='Forgot Password', icon="🔑")
 
 with open('./config.yaml', 'w') as file:
     yaml.dump(config, file, default_flow_style=False)

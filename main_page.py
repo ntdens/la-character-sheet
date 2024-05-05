@@ -4,6 +4,7 @@ import streamlit as st
 import streamlit_authenticator as stauth
 import pandas as pd
 from st_pages import show_pages_from_config, add_page_title, hide_pages
+st.set_page_config(layout='wide')
 
 add_page_title()
 
@@ -27,13 +28,13 @@ authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
-    authenticator.logout()
-
     st.write(f'Welcome *{st.session_state["name"]}*')
     df = pd.read_excel('Skills_Table.xlsx')
 
     st.dataframe(df)
 
+
+    
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
