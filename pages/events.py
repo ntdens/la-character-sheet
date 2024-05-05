@@ -1,13 +1,15 @@
 import yaml
 from yaml.loader import SafeLoader
+import json
 import streamlit as st
 import streamlit_authenticator as stauth
 import pandas as pd
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 from datetime import date
+import firebase_admin
+from firebase_admin import credentials, db
 
-st.set_page_config(layout='wide')
-add_page_title()
+add_page_title(layout='wide')
 
 show_pages_from_config()
 
@@ -23,11 +25,22 @@ event_dict = {
 def df_on_change(df):
     state = st.session_state['df_editor']
     for updates in state["added_rows"]:
-           st.session_state["df"].loc[len(st.session_state["df"])] = updates
+        st.session_state["df"].loc[len(st.session_state["df"])] = updates
     for index, updates in state["edited_rows"].items():
         for key, value in updates.items():
             st.session_state["df"].loc[st.session_state["df"].index == index, key] = value
         st.session_state["df"].loc[st.session_state["df"].index == index, "Skill Points"] = st.session_state["df"].loc[st.session_state["df"].index == index, "Event Type"].replace(event_dict).astype(int) + st.session_state["df"].loc[st.session_state["df"].index == index, "NPC"].astype(int) + st.session_state["df"].loc[st.session_state["df"].index == index, "Merchant Overtime"].astype(int) + st.session_state["df"].loc[st.session_state["df"].index == index, "Bonus Skill Points"]
+    for update in state['deleted_rows']:
+        st.session_state["df"] = st.session_state["df"].drop(update)
+    st.session_state["df"].reset_index(drop=True, inplace=True)
+
+
+if not firebase_admin._apps:
+    key_dict = json.loads(st.secrets["firebase"], strict=False)
+    creds = credentials.Certificate(key_dict)
+    defualt_app = firebase_admin.initialize_app(creds, {
+        'databaseURL': 'https://la-character-sheets-default-rtdb.firebaseio.com'
+    })
 
 
 with open('./config.yaml') as file:
@@ -46,31 +59,33 @@ authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
-    data_df = pd.DataFrame(
-        {
-            'Event Name' : ['First Event!'],
-            'Event Date' : [date(2024, 1, 1)],
-            'Event Type' : ["☀️ Day Event"],
-            'NPC' : [False],
-            'Merchant Overtime': [False],
-            'Bonus Skill Points' : [0],
-        }
-    )
-    data_df['Skill Points'] = data_df['Event Type'].replace(event_dict).astype(int) + data_df['NPC'].astype(int) + data_df['Merchant Overtime'].astype(int) + data_df['Bonus Skill Points']
+    try:
+        user_data = db.reference("users/").child(st.session_state['username']).get()
+        user_events = user_data['event_info']
+        data_df = pd.DataFrame(json.loads(user_events))
+        data_df.reset_index(drop=True, inplace=True)
+    except:
+        data_df = pd.DataFrame(
+            {
+                'Event Name' : ['First Event!'],
+                'Event Date' : ['January 2024'],
+                'Event Type' : ["☀️ Day Event"],
+                'NPC' : [False],
+                'Merchant Overtime': [False],
+                'Bonus Skill Points' : [0],
+            }
+        )
+        data_df['Skill Points'] = data_df['Event Type'].replace(event_dict).astype(int) + data_df['NPC'].astype(int) + data_df['Merchant Overtime'].astype(int) + data_df['Bonus Skill Points']
     
     def editor():
         if "df" not in st.session_state:
             st.session_state["df"] = data_df
         st.data_editor(
-            st.session_state["df"].reset_index(drop=True),
+            st.session_state["df"],
             key="df_editor",
             column_config={
                 "Event Name": st.column_config.TextColumn(
                     help='Name of event',
-                    default='New Event'
-                ),
-                "Event Date" : st.column_config.DateColumn(
-                    format="MMMM YYYY",
                 ),
                 "Event Type": st.column_config.SelectboxColumn(
                     help='Type of Event',
@@ -100,6 +115,11 @@ if st.session_state["authentication_status"]:
             args=[data_df],
         )
     editor()
+    if st.button('Save Events'):
+        doc_ref = db.reference("users/").child(st.session_state['username'])
+        doc_ref.set({
+            "event_info":st.session_state['df'].to_json()
+        })
 
 
     

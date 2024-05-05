@@ -1,0 +1,6 @@
+streamlit
+streamlit_authenticator
+st_pages
+streamlit_extras
+firebase_admin
+pandas
