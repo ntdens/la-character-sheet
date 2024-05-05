@@ -1,0 +1,29 @@
+[[pages]]
+path = "main_page.py"
+name = "Home"
+icon = "🏠"
+
+[[pages]]
+path = "pages/user_profile.py"
+name = "Profile"
+icon = "🪪"
+
+[[pages]]
+name = "User Management"
+icon = "📇"
+is_section = true
+
+[[pages]]
+path = "pages/register_user.py"
+name='Register New User'
+icon="📝"
+
+[[pages]]
+path = "pages/forgot_username.py"
+name='Forgot Username'
+icon="👤"
+
+[[pages]]
+path = "pages/forgot_password.py"
+name='Forgot Password'
+icon="🔑"

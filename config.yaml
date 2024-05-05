@@ -10,3 +10,9 @@ credentials:
       logged_in: true
       name: Nate Densmore
       password: $2b$12$ZHdynQyq8MUpUG0U5rxrm.k8sy6WMkpiy4lyKUOlh4g6IjasAnwuW
+    test:
+      email: ntdensmore@yahoo.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: test subject
+      password: $2b$12$D4IsNxt4/W9mtKqlEJzGXuA02MttoPaaE6bpuVFaSu.7Z6Y36y9Ou
