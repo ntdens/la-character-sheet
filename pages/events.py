@@ -29,7 +29,7 @@ def df_on_change(df):
     for index, updates in state["edited_rows"].items():
         for key, value in updates.items():
             st.session_state["df"].loc[st.session_state["df"].index == index, key] = value
-        st.session_state["df"].loc[st.session_state["df"].index == index, "Skill Points"] = st.session_state["df"].loc[st.session_state["df"].index == index, "Event Type"].replace(event_dict).astype(int) + st.session_state["df"].loc[st.session_state["df"].index == index, "NPC"].astype(int) + st.session_state["df"].loc[st.session_state["df"].index == index, "Merchant Overtime"].astype(int) + st.session_state["df"].loc[st.session_state["df"].index == index, "Bonus Skill Points"]
+        st.session_state["df"].loc[st.session_state["df"].index == index, "Skill Points"] = st.session_state["df"].loc[st.session_state["df"].index == index, "Event Type"].replace(event_dict).astype(int) + st.session_state["df"].loc[st.session_state["df"].index == index, ["NPC","Merchant Overtime"]].astype(int).max(axis=1) + st.session_state["df"].loc[st.session_state["df"].index == index, "Bonus Skill Points"]
     for update in state['deleted_rows']:
         st.session_state["df"] = st.session_state["df"].drop(update)
     st.session_state["df"].reset_index(drop=True, inplace=True)
@@ -75,7 +75,7 @@ if st.session_state["authentication_status"]:
                 'Bonus Skill Points' : [0],
             }
         )
-        data_df['Skill Points'] = data_df['Event Type'].replace(event_dict).astype(int) + data_df['NPC'].astype(int) + data_df['Merchant Overtime'].astype(int) + data_df['Bonus Skill Points']
+        data_df['Skill Points'] = data_df['Event Type'].replace(event_dict).astype(int) + data_df[['NPC', 'Merchant Overtime']].astype(int).max() + data_df['Bonus Skill Points']
     
     def editor():
         if "df" not in st.session_state:
@@ -117,9 +117,10 @@ if st.session_state["authentication_status"]:
     editor()
     if st.button('Save Events'):
         doc_ref = db.reference("users/").child(st.session_state['username'])
-        doc_ref.set({
+        doc_ref.update({
             "event_info":st.session_state['df'].to_json()
         })
+        st.success('Events saved to database')
 
 
     
@@ -134,6 +135,3 @@ elif st.session_state["authentication_status"] is None:
     st.page_link("pages/register_user.py", label='Register New User', icon="📝")
     st.page_link("pages/forgot_username.py", label='Forgot Username', icon="👤")
     st.page_link("pages/forgot_password.py", label='Forgot Password', icon="🔑")
-
-with open('./config.yaml', 'w') as file:
-    yaml.dump(config, file, default_flow_style=False)

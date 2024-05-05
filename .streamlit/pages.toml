@@ -9,6 +9,11 @@ name = "Events"
 icon = "📆"
 
 [[pages]]
+path = "pages/skills.py"
+name = "Skills"
+icon = "📖"
+
+[[pages]]
 path = "pages/user_profile.py"
 name = "Profile"
 icon = "🪪"
