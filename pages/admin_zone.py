@@ -94,13 +94,18 @@ if st.session_state["authentication_status"]:
         tab1, tab2,tab3 = st.tabs(['Player List', 'Character View', 'Event View'])
         user_table = []
         for key in user_data.keys():
-            user_events = pd.DataFrame(json.loads(user_data[key]['event_info']))
-            user_events.reset_index(drop=True, inplace=True)
             try:
-                skill_points = int(user_events["Skill Points"].sum()) - int(user_data[key]['point_spend'])
+                user_events = pd.DataFrame(json.loads(user_data[key]['event_info']))
+                user_events.reset_index(drop=True, inplace=True)
+                tier = get_tier(len(user_events[user_events['Event Type'] != "🪚 Work Weekend"]))
+                try:
+                    skill_points = int(user_events["Skill Points"].sum()) - int(user_data[key]['point_spend'])
+                except:
+                    skill_points = int(user_events["Skill Points"].sum())
             except:
-                skill_points = int(user_events["Skill Points"].sum())
-            tier = get_tier(len(user_events[user_events['Event Type'] != "🪚 Work Weekend"]))
+                skill_points = 0
+                tier = 0
+
             user_table.append({
                 'Username':key,
                 'Player':config['credentials']['usernames'][key]['name'],
