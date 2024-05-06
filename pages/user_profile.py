@@ -5,6 +5,9 @@ import streamlit_authenticator as stauth
 import pandas as pd
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 from streamlit_extras.stateful_button import button
+import firebase_admin
+from firebase_admin import credentials, db
+import json
 
 add_page_title()
 
@@ -14,6 +17,14 @@ hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Man
 
 with open('./config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
+
+if not firebase_admin._apps:
+    key_dict = json.loads(st.secrets["firebase"], strict=False)
+    creds = credentials.Certificate(key_dict)
+    defualt_app = firebase_admin.initialize_app(creds, {
+        'databaseURL': 'https://la-character-sheets-default-rtdb.firebaseio.com',
+        'storageBucket':'la-character-sheets.appspot.com'
+    })
 
 #login widget
 authenticator = stauth.Authenticate(
@@ -27,9 +38,10 @@ authenticator = stauth.Authenticate(
 authenticator.login()
 #authenticate users
 if st.session_state["authentication_status"]:
+    doc_ref = db.reference("users/").child(st.session_state['username']).get()
     st.text('Username: {}'.format(st.session_state["username"]))
     st.text('Name: {}'.format(st.session_state["name"]))
-    st.text('Email: {}'.format(config['credentials']['usernames'][st.session_state["username"]]['email']))
+    st.text('Email: {}'.format(doc_ref['email']))
     if button("Reset Password", type='primary', key='reset_password'):
         try:
             if authenticator.reset_password(st.session_state["username"]):
