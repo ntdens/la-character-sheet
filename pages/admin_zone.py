@@ -108,7 +108,7 @@ if st.session_state["authentication_status"]:
 
             user_table.append({
                 'Username':key,
-                'Player':config['credentials']['usernames'][key]['name'],
+                'Player':user_data[key]['name'],
                 'Character':user_data[key]['character_name'],
                 'Faction':user_data[key]['faction'],
                 'Path':user_data[key]['path'],

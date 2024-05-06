@@ -325,6 +325,7 @@ if st.session_state["authentication_status"]:
                     "character_name":character_name_input,
                     "path":path_input,
                     "faction":faction_input,
+                    "name":st.session_state['name']
                 })
                 if uploaded_file is not None:
                     doc_ref.update({
