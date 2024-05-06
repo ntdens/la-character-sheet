@@ -41,7 +41,6 @@ if st.session_state["authentication_status"]:
     doc_ref = db.reference("users/").child(st.session_state['username']).get()
     st.text('Username: {}'.format(st.session_state["username"]))
     st.text('Name: {}'.format(st.session_state["name"]))
-    st.text('Email: {}'.format(doc_ref['email']))
     if button("Reset Password", type='primary', key='reset_password'):
         try:
             if authenticator.reset_password(st.session_state["username"]):
