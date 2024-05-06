@@ -2,9 +2,11 @@ import yaml
 from yaml.loader import SafeLoader
 import json
 import streamlit as st
+import streamlit.components.v1 as components
 import streamlit_authenticator as stauth
 from streamlit_extras.grid import grid
 from streamlit_extras.stylable_container import stylable_container
+from st_pages import show_pages_from_config, add_page_title, hide_pages
 import pandas as pd
 from pandas.api.types import (
     is_categorical_dtype,
@@ -12,16 +14,17 @@ from pandas.api.types import (
     is_numeric_dtype,
     is_object_dtype,
 )
-from st_pages import show_pages_from_config, add_page_title, hide_pages
 import firebase_admin
 from firebase_admin import credentials, db, storage
 from math import floor, sqrt
 import io
 import PIL.Image as Image
 import os
+import numpy as np
+import ast
 
 
-add_page_title()
+add_page_title(layout='wide')
 
 show_pages_from_config()
 
@@ -85,6 +88,10 @@ authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
+    # st.session_state["skill_points"] = 0
+    # st.session_state["tier"] = 0
+    # st.session_state["character_name"] = ""
+    # st.session_state["path"] = '🗡 Warrior'
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
         user_events = user_data['event_info']
@@ -109,7 +116,7 @@ if st.session_state["authentication_status"]:
 
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
-        faction= user_data['faction']
+        faction = user_data['faction']
     except:
         faction = "🧝 Unaffilated"
 
@@ -123,47 +130,157 @@ if st.session_state["authentication_status"]:
         profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
 
     
-    player = st.session_state["name"]
-    with st.container(border=True):
-        my_grid = grid([4,6], 1)
-        my_grid.container(border=True).image(profile_image)
-        my_grid.text(f"""
-                    Character: {character_name}
-                    Player: {player}
-                    Path: {path}
-                    Faction: {faction}
-                    Tier: {tier}
-                    Skill Points: {skill_points}
-                    """)
-        my_grid.dataframe()
+    tab1, tab2,tab3 = st.tabs(['Character Sheet', 'Edit Character', 'Add Skills'])
 
-    with st.form('my_form'):
-        character_name_input = st.text_input('Character Name', value=character_name)
-        path_input = st.selectbox('Path', path_list, index=path_list.index(path))
-        faction_input = st.selectbox('Faction', faction_list, index=faction_list.index(faction))
-        uploaded_file = st.file_uploader('Upload Profile Picture')
-        if uploaded_file is not None:
-            pic_data = uploaded_file.getvalue()
-            pic_name = '{}_{}'.format(st.session_state['username'],uploaded_file.name)
-            image = Image.open(io.BytesIO(pic_data))
-            image.save(pic_name)
-        submitted = st.form_submit_button('Save Edits')
-        if submitted:
+
+    player = st.session_state["name"]
+
+
+    with tab2:
+        with st.form('my_form'):
+            character_name_input = st.text_input('Character Name', value=character_name, key='form_char')
+            path_input = st.selectbox('Path', path_list, index=path_list.index(path), key='form_path')
+            faction_input = st.selectbox('Faction', faction_list, index=faction_list.index(faction), key='form_faction')
+            uploaded_file = st.file_uploader('Upload Profile Picture', type=['png','gif','jpg','jpeg'], key='form_image')
+            if uploaded_file is not None:
+                form_image = uploaded_file.getvalue()
+                pic_name = '{}.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
+                image = Image.open(io.BytesIO(form_image))
+                image.save(pic_name)
+            submitted = st.form_submit_button('Save Edits')
+            if submitted:
+                doc_ref = db.reference("users/").child(st.session_state['username'])
+                doc_ref.update({
+                    "character_name":character_name_input,
+                    "path":path_input,
+                    "faction":faction_input,
+                })
+                if uploaded_file is not None:
+                    doc_ref.update({
+                    "pic_name":pic_name
+                    })
+                    bucket = storage.bucket()
+                    blob = bucket.blob(pic_name)
+                    blob.upload_from_filename(pic_name)
+                    os.remove(pic_name)
+
+    if 'form_char' in st.session_state:
+        character_name = st.session_state['form_char']
+    if 'form_path' in st.session_state:
+        path = st.session_state['form_path']
+    if 'form_faction' in st.session_state:
+        faction = st.session_state['form_faction']
+    if uploaded_file is not None:
+        profile_image = st.session_state['form_image']
+
+
+    with tab3:
+        df = pd.read_excel('Skills_Table.xlsx')
+        df['Tier'] = df.Tier.astype(int)
+        skill_path = path[2:]
+        try:
+            user_data = db.reference("users/").child(st.session_state['username']).get()
+            st.session_state['point_spend'] = int(user_data['point_spend'])
+        except:
+            st.session_state['point_spend'] = 0  
+        if "available" not in st.session_state:
+            st.session_state['available'] = skill_points - st.session_state['point_spend']
+        try:
+            user_data = db.reference("users/").child(st.session_state['username']).get()
+            st.session_state['known'] = ast.literal_eval(user_data['known'])
+        except:
+            st.session_state["known"] = []     
+        point_cost = []
+        keep_rows = []
+        df['Prerequisite'] = df['Prerequisite'].fillna('None')
+        warrior_max = 0
+        rogue_max = 0
+        healer_max = 0
+        mage_max = 0
+        bard_max = 1
+        known_data = df[df['Skill Name'].isin(st.session_state['known'])]
+        if not known_data.empty:
+            "## Known Skills"
+            st.dataframe(known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep']], hide_index=True)
+            if not known_data[known_data['Path'] == 'Warrior'].empty:
+                warrior_max = known_data[known_data['Path'] == 'Warrior']['Tier'].max() + 1
+            if not known_data[known_data['Path'] == 'Rogue'].empty:
+                rogue_max = known_data[known_data['Path'] == 'Rogue']['Tier'].fillna(0).max() + 1
+            if not known_data[known_data['Path'] == 'Healer'].empty:
+                healer_max = known_data[known_data['Path'] == 'Healer']['Tier'].fillna(0).max() + 1
+            if not known_data[known_data['Path'] == 'Mage'].empty:
+                mage_max = known_data[known_data['Path'] == 'Mage']['Tier'].fillna(0).max() + 1
+            if not known_data[known_data['Path'] == 'Bard'].empty:
+                bard_max = known_data[known_data['Path'] == 'Bard']['Tier'].fillna(0).max() + 1
+        known_skill_list = list(known_data['Skill Name'].unique())
+        for index, row in df.iterrows():
+            if row['Path'] != skill_path:
+                if row['Path'] != 'Bard':
+                    if row['Tier'] == 0:
+                        point_cost.append(2)
+                    else:
+                        point_cost.append(row['Tier']*2)
+                else:
+                    point_cost.append(row['Tier'])
+            else:
+                point_cost.append(row['Tier'])
+            if row['Prerequisite'] != 'None':
+                if row['Prerequisite'] not in known_skill_list:
+                    pass
+            else:
+                keep_rows.append(index)
+        df['Point Cost'] = point_cost
+        if not known_data.empty:
+            tier_max = known_data[known_data['Path'] == skill_path]['Tier'].max() + 1
+            df = df[df['Point Cost'] <= tier_max]
+        else:
+            df = df[df['Point Cost'] == 0]
+        warrior_index = list(df[(df['Path'] == 'Warrior') & (df['Tier'] <= warrior_max)].index)
+        rogue_index = list(df[(df['Path'] == 'Rogue') & (df['Tier'] <= rogue_max)].index)
+        healer_index = list(df[(df['Path'] == 'Healer') & (df['Tier'] <= healer_max)].index)
+        mage_index = list(df[(df['Path'] == 'Mage') & (df['Tier'] <= mage_max)].index)
+        bard_index = list(df[(df['Path'] == 'Bard') & (df['Tier'] <= bard_max)].index)
+        if tier >= 3:
+            skill_keep = warrior_index + rogue_index + healer_index + mage_index + bard_index
+        else:
+            skill_keep = warrior_index + rogue_index + healer_index + mage_index
+        df = df.filter(items=keep_rows, axis=0)
+        df = df.filter(items=skill_keep, axis=0)
+        df = df[df['Point Cost'] <= st.session_state['available']]
+        df = df[df['Skill Name'] != 'Cross-Training']
+        known_index = list(df[df['Skill Name'].isin(st.session_state['known'])].index)
+        df = df.drop(known_index)
+        df = df[['Skill Name', 'Path', 'Tier', 'Prerequisite', 'Point Cost']]
+        "## Avaliable Skills:"
+        st.dataframe(df, hide_index=True, use_container_width=True)
+        new_skill = st.selectbox('Pick New Skill', df['Skill Name'])
+        if st.button('Gain Skill'):
+            skill_df = df[df['Skill Name'] == new_skill].iloc[0]
+            st.session_state['point_spend'] = st.session_state['point_spend'] + skill_df['Point Cost']
+            st.session_state['known'].append(skill_df['Skill Name'])
             doc_ref = db.reference("users/").child(st.session_state['username'])
             doc_ref.update({
-                "character_name":character_name_input,
-                "path":path_input,
-                "faction":faction_input,
+                "known":str(st.session_state['known']),
+                "point_spend":str(st.session_state['point_spend']),
             })
-            if uploaded_file is not None:
-                doc_ref.update({
-                "pic_name":pic_name
-                })
-                bucket = storage.bucket()
-                blob = bucket.blob(pic_name)
-                blob.upload_from_filename(pic_name)
-                os.remove(pic_name)
-            st.rerun()
+
+    
+
+
+    with tab1:
+        with st.container(border=True):
+            my_grid = grid([4,6], 1)
+            my_grid.container(border=True).image(profile_image)
+            player_data = pd.DataFrame({
+                'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
+                'Information': [character_name,player,path,faction,tier,st.session_state['available']]
+                                })
+            my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
+            my_grid.dataframe(known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep']], hide_index=True)
+
+
+
+
 
 
     
