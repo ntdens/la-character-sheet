@@ -21,7 +21,7 @@ icon = "🪪"
 [[pages]]
 path = "pages/admin_zone.py"
 name = "Admin Zone"
-icon = "🛍️"
+icon = "🔒"
 
 [[pages]]
 name = "User Management"
