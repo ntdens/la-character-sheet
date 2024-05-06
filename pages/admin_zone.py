@@ -121,31 +121,37 @@ if st.session_state["authentication_status"]:
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
             character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user')
-            character_data = user_data[character_choice]
-            user_events = pd.DataFrame(json.loads(character_data['event_info']))
-            user_events.reset_index(drop=True, inplace=True)
-            known = ast.literal_eval(character_data['known'])
-            known_data = df[df['Skill Name'].isin(known)]
-            display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
-            image_location = character_data['pic_name']
-            bucket = storage.bucket()
-            blob = bucket.blob(image_location)
-            profile_image = blob.download_as_bytes()
-            with st.container(border=True):
-                my_grid = grid([4,6],1)
-                my_grid.container(border=True).image(profile_image)
-                player_data = pd.DataFrame({
-                    'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
-                    'Information': [character_data['character_name'],config['credentials']['usernames'][character_choice]['name'],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Skill Points'].values[0]]
-                                    })
-                my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
-                my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True)
+            try:
+                character_data = user_data[character_choice]
+                user_events = pd.DataFrame(json.loads(character_data['event_info']))
+                user_events.reset_index(drop=True, inplace=True)
+                known = ast.literal_eval(character_data['known'])
+                known_data = df[df['Skill Name'].isin(known)]
+                display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
+                image_location = character_data['pic_name']
+                bucket = storage.bucket()
+                blob = bucket.blob(image_location)
+                profile_image = blob.download_as_bytes()
+                with st.container(border=True):
+                    my_grid = grid([4,6],1)
+                    my_grid.container(border=True).image(profile_image)
+                    player_data = pd.DataFrame({
+                        'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
+                        'Information': [character_data['character_name'],config['credentials']['usernames'][character_choice]['name'],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Skill Points'].values[0]]
+                                        })
+                    my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
+                    my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True)
+            except:
+                st.info("Data does not exist for this user")
         with tab3:
             character_choice = st.selectbox('Select User:', user_df['Username'], key='event_user')
-            character_data = user_data[character_choice]
-            user_events = pd.DataFrame(json.loads(character_data['event_info']))
-            user_events.reset_index(drop=True, inplace=True)
-            st.dataframe(user_events, hide_index=True)
+            try:
+                character_data = user_data[character_choice]
+                user_events = pd.DataFrame(json.loads(character_data['event_info']))
+                user_events.reset_index(drop=True, inplace=True)
+                st.dataframe(user_events, hide_index=True)
+            except:
+                st.info("Data does not exist for this user")
     else:
         st.warning('Not an admin. Access denied. Whomp whomp.')
 
