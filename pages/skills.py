@@ -37,6 +37,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df.copy()
 
+    df['Spell'] = df.Spell.astype(str)
     modification_container = st.container()
 
     with modification_container:
