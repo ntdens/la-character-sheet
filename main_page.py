@@ -61,6 +61,181 @@ path_list = [
 def get_tier(events):
     return floor((sqrt(8*events)-1)/2)
 
+
+def skill_gain(df, skill_path, tier):
+    df = df.copy()
+    df1 = df.copy()
+    try:
+        user_data = db.reference("users/").child(st.session_state['username']).get()
+        st.session_state['point_spend'] = int(user_data['point_spend'])
+    except:
+        st.session_state['point_spend'] = 0  
+    if "available" not in st.session_state:
+        st.session_state['available'] = skill_points - st.session_state['point_spend']
+    try:
+        user_data = db.reference("users/").child(st.session_state['username']).get()
+        st.session_state['known'] = ast.literal_eval(user_data['known'])
+    except:
+        st.session_state["known"] = []  
+    point_cost = []
+    keep_rows = []
+    df['Prerequisite'] = df['Prerequisite'].fillna('None')
+    warrior_max = 0
+    rogue_max = 0
+    healer_max = 0
+    mage_max = 0
+    bard_max = 1
+    known_data = df[df['Skill Name'].isin(st.session_state['known'])]
+    display_data = known_data.copy()[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name'])
+    if not known_data.empty:
+        if not known_data[known_data['Path'] == 'Warrior'].empty:
+            warrior_max = known_data[known_data['Path'] == 'Warrior']['Tier'].max() + 1
+        if not known_data[known_data['Path'] == 'Rogue'].empty:
+            rogue_max = known_data[known_data['Path'] == 'Rogue']['Tier'].fillna(0).max() + 1
+        if not known_data[known_data['Path'] == 'Healer'].empty:
+            healer_max = known_data[known_data['Path'] == 'Healer']['Tier'].fillna(0).max() + 1
+        if not known_data[known_data['Path'] == 'Mage'].empty:
+            mage_max = known_data[known_data['Path'] == 'Mage']['Tier'].fillna(0).max() + 1
+        if not known_data[known_data['Path'] == 'Bard'].empty:
+            bard_max = known_data[known_data['Path'] == 'Bard']['Tier'].fillna(0).max() + 1
+    known_skill_list = list(known_data['Skill Name'].unique())
+    for index, row in df.iterrows():
+        if row['Path'] != skill_path:
+            if row['Path'] != 'Bard':
+                if row['Tier'] == 0:
+                    point_cost.append(2)
+                else:
+                    point_cost.append(row['Tier']*2)
+            else:
+                point_cost.append(row['Tier'])
+        else:
+            point_cost.append(row['Tier'])
+        if row['Prerequisite'] != 'None':
+            if row['Prerequisite'] not in known_skill_list:
+                pass
+        else:
+            keep_rows.append(index)
+    df['Point Cost'] = point_cost
+    if not known_data.empty:
+        tier_max = known_data[known_data['Path'] == skill_path]['Tier'].max() + 1
+    else:
+        tier_max = 0
+    df = df[df['Point Cost'] <= tier_max]
+    warrior_index = list(df[(df['Path'] == 'Warrior') & (df['Tier'] <= warrior_max)].index)
+    rogue_index = list(df[(df['Path'] == 'Rogue') & (df['Tier'] <= rogue_max)].index)
+    healer_index = list(df[(df['Path'] == 'Healer') & (df['Tier'] <= healer_max)].index)
+    mage_index = list(df[(df['Path'] == 'Mage') & (df['Tier'] <= mage_max)].index)
+    bard_index = list(df[(df['Path'] == 'Bard') & (df['Tier'] <= bard_max)].index)
+    if tier_max >= 3:
+        skill_keep = warrior_index + rogue_index + healer_index + mage_index + bard_index
+    else:
+        skill_keep = warrior_index + rogue_index + healer_index + mage_index
+    df = df.filter(items=keep_rows, axis=0)
+    df = df.filter(items=skill_keep, axis=0)
+    df = df[df['Point Cost'] <= st.session_state['available']]
+    df = df[df['Skill Name'] != 'Cross-Training']
+    df = df[df['Tier'] <= tier]
+    if 'Read/Write Arcana' not in known_skill_list:
+        df = df[df['Spell'] == False]
+    known_index = list(df[df['Skill Name'].isin(st.session_state['known'])].index)
+    df = df.drop(known_index)
+    new_skill = st.selectbox('Pick New Skill', list(df['Skill Name'].unique()))
+    if st.button('Gain Skill'):
+        gain_df = df[df['Skill Name'] == new_skill]
+        idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
+        skill_df = gain_df.loc[idxmin]
+        st.session_state['point_spend'] = st.session_state['point_spend'] + skill_df['Point Cost'].values[0]
+        st.session_state['available'] = skill_points - st.session_state['point_spend']
+        known_list = st.session_state['known']
+        known_list.append(skill_df['Skill Name'].values[0])
+        st.session_state['known'] = known_list
+        doc_ref = db.reference("users/").child(st.session_state['username'])
+        doc_ref.update({
+            "known":str(st.session_state['known']),
+            "point_spend":str(st.session_state['point_spend']),
+        })
+        point_cost = []
+        keep_rows = []
+        df['Prerequisite'] = df['Prerequisite'].fillna('None')
+        warrior_max = 0
+        rogue_max = 0
+        healer_max = 0
+        mage_max = 0
+        bard_max = 1
+        known_data = df[df['Skill Name'].isin(st.session_state['known'])]
+        display_data = known_data.copy()[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name'])
+        if not known_data.empty:
+            if not known_data[known_data['Path'] == 'Warrior'].empty:
+                warrior_max = known_data[known_data['Path'] == 'Warrior']['Tier'].max() + 1
+            if not known_data[known_data['Path'] == 'Rogue'].empty:
+                rogue_max = known_data[known_data['Path'] == 'Rogue']['Tier'].fillna(0).max() + 1
+            if not known_data[known_data['Path'] == 'Healer'].empty:
+                healer_max = known_data[known_data['Path'] == 'Healer']['Tier'].fillna(0).max() + 1
+            if not known_data[known_data['Path'] == 'Mage'].empty:
+                mage_max = known_data[known_data['Path'] == 'Mage']['Tier'].fillna(0).max() + 1
+            if not known_data[known_data['Path'] == 'Bard'].empty:
+                bard_max = known_data[known_data['Path'] == 'Bard']['Tier'].fillna(0).max() + 1
+        known_skill_list = list(known_data['Skill Name'].unique())
+        for index, row in df.iterrows():
+            if row['Path'] != skill_path:
+                if row['Path'] != 'Bard':
+                    if row['Tier'] == 0:
+                        point_cost.append(2)
+                    else:
+                        point_cost.append(row['Tier']*2)
+                else:
+                    point_cost.append(row['Tier'])
+            else:
+                point_cost.append(row['Tier'])
+            if row['Prerequisite'] != 'None':
+                if row['Prerequisite'] not in known_skill_list:
+                    pass
+            else:
+                keep_rows.append(index)
+        df['Point Cost'] = point_cost
+        if not known_data.empty:
+            tier_max = known_data[known_data['Path'] == skill_path]['Tier'].max() + 1
+        else:
+            tier_max = 0
+        df = df[df['Point Cost'] <= tier_max]
+        warrior_index = list(df[(df['Path'] == 'Warrior') & (df['Tier'] <= warrior_max)].index)
+        rogue_index = list(df[(df['Path'] == 'Rogue') & (df['Tier'] <= rogue_max)].index)
+        healer_index = list(df[(df['Path'] == 'Healer') & (df['Tier'] <= healer_max)].index)
+        mage_index = list(df[(df['Path'] == 'Mage') & (df['Tier'] <= mage_max)].index)
+        bard_index = list(df[(df['Path'] == 'Bard') & (df['Tier'] <= bard_max)].index)
+        if tier_max >= 3:
+            skill_keep = warrior_index + rogue_index + healer_index + mage_index + bard_index
+        else:
+            skill_keep = warrior_index + rogue_index + healer_index + mage_index
+        df = df.filter(items=keep_rows, axis=0)
+        df = df.filter(items=skill_keep, axis=0)
+        df = df[df['Point Cost'] <= st.session_state['available']]
+        df = df[df['Skill Name'] != 'Cross-Training']
+        df = df[df['Tier'] <= tier]
+        if 'Read/Write Arcana' not in known_skill_list:
+            df = df[df['Spell'] == False]
+        known_index = list(df[df['Skill Name'].isin(st.session_state['known'])].index)
+        df = df.drop(known_index)
+        st.rerun()
+    remove_skill = st.selectbox('Pick Skill To Remove', st.session_state['known'])
+    if st.button("Remove Skill"):
+        gain_df = df1[df1['Skill Name'] == remove_skill]
+        idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
+        skill_df = gain_df.loc[idxmin]
+        st.session_state['point_spend'] = st.session_state['point_spend'] - skill_df['Point Cost'].values[0]
+        st.session_state['available'] = skill_points - st.session_state['point_spend']
+        known_list = st.session_state['known']
+        known_list.remove(skill_df['Skill Name'].values[0])
+        st.session_state['known'] = known_list
+        doc_ref = db.reference("users/").child(st.session_state['username'])
+        doc_ref.update({
+            "known":str(st.session_state['known']),
+            "point_spend":str(st.session_state['point_spend']),
+        })
+        st.rerun()
+    return df, display_data
+
+
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
     creds = credentials.Certificate(key_dict)
@@ -88,10 +263,6 @@ authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
-    # st.session_state["skill_points"] = 0
-    # st.session_state["tier"] = 0
-    # st.session_state["character_name"] = ""
-    # st.session_state["path"] = '🗡 Warrior'
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
         user_events = user_data['event_info']
@@ -178,41 +349,7 @@ if st.session_state["authentication_status"]:
         df = pd.read_excel('Skills_Table.xlsx')
         df['Tier'] = df.Tier.astype(int)
         skill_path = path[2:]
-        try:
-            user_data = db.reference("users/").child(st.session_state['username']).get()
-            st.session_state['point_spend'] = int(user_data['point_spend'])
-        except:
-            st.session_state['point_spend'] = 0  
-        if "available" not in st.session_state:
-            st.session_state['available'] = skill_points - st.session_state['point_spend']
-        try:
-            user_data = db.reference("users/").child(st.session_state['username']).get()
-            st.session_state['known'] = ast.literal_eval(user_data['known'])
-        except:
-            st.session_state["known"] = []     
         point_cost = []
-        keep_rows = []
-        df['Prerequisite'] = df['Prerequisite'].fillna('None')
-        warrior_max = 0
-        rogue_max = 0
-        healer_max = 0
-        mage_max = 0
-        bard_max = 1
-        known_data = df[df['Skill Name'].isin(st.session_state['known'])]
-        if not known_data.empty:
-            "## Known Skills"
-            st.dataframe(known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep']], hide_index=True)
-            if not known_data[known_data['Path'] == 'Warrior'].empty:
-                warrior_max = known_data[known_data['Path'] == 'Warrior']['Tier'].max() + 1
-            if not known_data[known_data['Path'] == 'Rogue'].empty:
-                rogue_max = known_data[known_data['Path'] == 'Rogue']['Tier'].fillna(0).max() + 1
-            if not known_data[known_data['Path'] == 'Healer'].empty:
-                healer_max = known_data[known_data['Path'] == 'Healer']['Tier'].fillna(0).max() + 1
-            if not known_data[known_data['Path'] == 'Mage'].empty:
-                mage_max = known_data[known_data['Path'] == 'Mage']['Tier'].fillna(0).max() + 1
-            if not known_data[known_data['Path'] == 'Bard'].empty:
-                bard_max = known_data[known_data['Path'] == 'Bard']['Tier'].fillna(0).max() + 1
-        known_skill_list = list(known_data['Skill Name'].unique())
         for index, row in df.iterrows():
             if row['Path'] != skill_path:
                 if row['Path'] != 'Bard':
@@ -224,59 +361,31 @@ if st.session_state["authentication_status"]:
                     point_cost.append(row['Tier'])
             else:
                 point_cost.append(row['Tier'])
-            if row['Prerequisite'] != 'None':
-                if row['Prerequisite'] not in known_skill_list:
-                    pass
-            else:
-                keep_rows.append(index)
         df['Point Cost'] = point_cost
-        if not known_data.empty:
-            tier_max = known_data[known_data['Path'] == skill_path]['Tier'].max() + 1
-            df = df[df['Point Cost'] <= tier_max]
-        else:
-            df = df[df['Point Cost'] == 0]
-        warrior_index = list(df[(df['Path'] == 'Warrior') & (df['Tier'] <= warrior_max)].index)
-        rogue_index = list(df[(df['Path'] == 'Rogue') & (df['Tier'] <= rogue_max)].index)
-        healer_index = list(df[(df['Path'] == 'Healer') & (df['Tier'] <= healer_max)].index)
-        mage_index = list(df[(df['Path'] == 'Mage') & (df['Tier'] <= mage_max)].index)
-        bard_index = list(df[(df['Path'] == 'Bard') & (df['Tier'] <= bard_max)].index)
-        if tier >= 3:
-            skill_keep = warrior_index + rogue_index + healer_index + mage_index + bard_index
-        else:
-            skill_keep = warrior_index + rogue_index + healer_index + mage_index
-        df = df.filter(items=keep_rows, axis=0)
-        df = df.filter(items=skill_keep, axis=0)
-        df = df[df['Point Cost'] <= st.session_state['available']]
-        df = df[df['Skill Name'] != 'Cross-Training']
-        known_index = list(df[df['Skill Name'].isin(st.session_state['known'])].index)
-        df = df.drop(known_index)
-        df = df[['Skill Name', 'Path', 'Tier', 'Prerequisite', 'Point Cost']]
-        "## Avaliable Skills:"
+        df, display_df = skill_gain(df, skill_path, tier)
+        "## Known Skills"
+        st.dataframe(display_df, hide_index=True, use_container_width=True)
+        "## Available Skills"
         st.dataframe(df, hide_index=True, use_container_width=True)
-        new_skill = st.selectbox('Pick New Skill', df['Skill Name'])
-        if st.button('Gain Skill'):
-            skill_df = df[df['Skill Name'] == new_skill].iloc[0]
-            st.session_state['point_spend'] = st.session_state['point_spend'] + skill_df['Point Cost']
-            st.session_state['known'].append(skill_df['Skill Name'])
-            doc_ref = db.reference("users/").child(st.session_state['username'])
-            doc_ref.update({
-                "known":str(st.session_state['known']),
-                "point_spend":str(st.session_state['point_spend']),
-            })
 
     
 
 
     with tab1:
+        df = pd.read_excel('Skills_Table.xlsx')
+        known = st.session_state['known']
+        known_data = df[df['Skill Name'].isin(known)]
+        display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
+        points_available = skill_points - st.session_state['point_spend']
         with st.container(border=True):
-            my_grid = grid([4,6], 1)
+            my_grid = grid([4,6],1)
             my_grid.container(border=True).image(profile_image)
             player_data = pd.DataFrame({
                 'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
-                'Information': [character_name,player,path,faction,tier,st.session_state['available']]
+                'Information': [character_name,player,path,faction,tier,points_available]
                                 })
             my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
-            my_grid.dataframe(known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep']], hide_index=True)
+            my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True)
 
 
 

@@ -16,10 +16,11 @@ show_pages_from_config()
 hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
 
 event_dict = {
-    "☀️ Day Event":'1',
-    "⛺️ Campout Event":'2',
-    "🎆 Festival Event":'3',
-    "🪚 Work Weekend":'1'
+    "☀️ Day Event":1,
+    "⛺️ Campout Event":2,
+    "🎆 Festival Event":3,
+    "👾 Virtual Event":1,
+    "🪚 Work Weekend":1
 }
 
 def df_on_change(df):
@@ -39,9 +40,12 @@ if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
     creds = credentials.Certificate(key_dict)
     defualt_app = firebase_admin.initialize_app(creds, {
-        'databaseURL': 'https://la-character-sheets-default-rtdb.firebaseio.com'
+        'databaseURL': 'https://la-character-sheets-default-rtdb.firebaseio.com',
+        'storageBucket':'la-character-sheets.appspot.com'
     })
 
+with open( "style.css" ) as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
 with open('./config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
@@ -93,6 +97,7 @@ if st.session_state["authentication_status"]:
                         "☀️ Day Event",
                         "⛺️ Campout Event",
                         "🎆 Festival Event",
+                        "👾 Virtual Event",
                         "🪚 Work Weekend"
                     ],
                     width='medium',

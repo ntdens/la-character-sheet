@@ -19,6 +19,11 @@ name = "Profile"
 icon = "🪪"
 
 [[pages]]
+path = "pages/admin_zone.py"
+name = "Admin Zone"
+icon = "🛍️"
+
+[[pages]]
 name = "User Management"
 icon = "📇"
 is_section = true

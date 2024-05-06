@@ -17,6 +17,9 @@ show_pages_from_config()
 
 hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
 
+with open( "style.css" ) as css:
+    st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
+
 def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
     Adds a UI on top of a dataframe to let viewers filter columns
