@@ -81,10 +81,9 @@ authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
-    faction_leaders = json.loads(st.secrets['faction_leaders'], strict=False)
-    if st.session_state['username'] in (st.secrets['admins'] or faction_leaders.keys()):
+    if st.session_state['username'] in (st.secrets['admins'] or st.secrets['faction_leaders'].keys()):
         if st.session_state['username'] in st.secrets['faction_leaders'].keys():
-            faction_filter = faction_leaders[st.session_state['username']]
+            faction_filter = st.secrets['faction_leaders'][st.session_state['username']]
         else:
             faction_filter = None
         user_data = db.reference("users/").get()
