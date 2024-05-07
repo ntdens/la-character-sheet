@@ -117,7 +117,8 @@ if st.session_state["authentication_status"]:
             num_rows='dynamic',
             on_change=df_on_change,
             args=[data_df],
-            height=950
+            height=950,
+            use_container_width=True
         )
     st.info('Be patient, give table time to load after each entry')
     editor()
