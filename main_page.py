@@ -357,7 +357,7 @@ if st.session_state["authentication_status"]:
         df1 = pd.read_excel('Skills_Table.xlsx')
         known = st.session_state['known']
         known_data = df1[df1['Skill Name'].isin(known)]
-        display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
+        display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep']].drop_duplicates(subset=['Skill Name']).copy()
         st.dataframe(display_data, hide_index=True, use_container_width=True)
         "## Available Skills"
         st.dataframe(filter_dataframe(df), hide_index=True, use_container_width=True)
@@ -367,7 +367,7 @@ if st.session_state["authentication_status"]:
         df = pd.read_excel('Skills_Table.xlsx')
         known = st.session_state['known']
         known_data = df[df['Skill Name'].isin(known)]
-        display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
+        display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep']].drop_duplicates(subset=['Skill Name']).copy()
         display_data = display_data.fillna('')
         points_available = skill_points - st.session_state['point_spend']
         with st.container(border=True):
