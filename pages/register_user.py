@@ -39,7 +39,6 @@ try:
         doc_ref = db.reference("users/").child(username_of_registered_user)
         doc_ref.update({
             "name":name_of_registered_user,
-            "email":email_of_registered_user
         })
         st.success('User registered successfully')
     
