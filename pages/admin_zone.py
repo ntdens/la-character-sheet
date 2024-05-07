@@ -1,5 +1,3 @@
-import yaml
-from yaml.loader import SafeLoader
 import json
 import streamlit as st
 import streamlit.components.v1 as components
@@ -9,7 +7,6 @@ from streamlit_extras.stylable_container import stylable_container
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 import pandas as pd
 from pandas.api.types import (
-    is_categorical_dtype,
     is_datetime64_any_dtype,
     is_numeric_dtype,
     is_object_dtype,
@@ -17,11 +14,9 @@ from pandas.api.types import (
 import firebase_admin
 from firebase_admin import credentials, db, storage
 from math import floor, sqrt
-import io
-import PIL.Image as Image
-import os
-import numpy as np
 import ast
+import smtplib
+from email.mime.text import MIMEText
 
 add_page_title(layout='wide')
 
@@ -86,7 +81,11 @@ authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
-    if st.session_state['username'] in st.secrets['admins']:
+    if st.session_state['username'] in (st.secrets['admins'] or st.secrets['faction_leaders'].keys()):
+        if st.session_state['username'] in st.secrets['faction_leaders'].keys():
+            faction_filter = st.secrets['faction_leaders'][st.session_state['username']]
+        else:
+            faction_filter = None
         user_data = db.reference("users/").get()
         tab1, tab2,tab3 = st.tabs(['Player List', 'Character View', 'Event View'])
         user_table = []
@@ -95,13 +94,15 @@ if st.session_state["authentication_status"]:
                 user_events = pd.DataFrame(json.loads(user_data[key]['event_info']))
                 user_events.reset_index(drop=True, inplace=True)
                 tier = get_tier(len(user_events[user_events['Event Type'] != "🪚 Work Weekend"]))
+                skill_points = int(user_events["Skill Points"].sum())
                 try:
-                    skill_points = int(user_events["Skill Points"].sum()) - int(user_data[key]['point_spend'])
+                    avail_points = int(user_events["Skill Points"].sum()) - int(user_data[key]['point_spend'])
                 except:
-                    skill_points = int(user_events["Skill Points"].sum())
+                    avail_points = skill_points
             except:
                 skill_points = 0
                 tier = 0
+                avail_points = skill_points
 
             user_table.append({
                 'Username':key,
@@ -110,10 +111,15 @@ if st.session_state["authentication_status"]:
                 'Faction':user_data[key]['faction'],
                 'Path':user_data[key]['path'],
                 'Tier':tier,
-                'Skill Points':skill_points
+                'Earned Points':skill_points,
+                "Available Points":avail_points
             })
         user_df = pd.DataFrame(user_table)
+        if faction_filter != None:
+            user_df = user_df[user_df['Faction'] == faction_filter]
         with tab1:
+            leader_data = user_df[user_df['Username'] == st.session_state['username']]
+            "## Welcome {}, Leader of {}".format(leader_data['Character'].values[0],leader_data['Faction'].values[0])
             st.dataframe(user_df, hide_index=True)
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
@@ -154,7 +160,55 @@ if st.session_state["authentication_status"]:
                 st.info("Data does not exist for this user")
     else:
         st.warning('Not an admin. Access denied. Whomp whomp.')
-
+        if st.button("Request Admin Access"):
+            with st.form('admin_access'):
+                name_input = st.text_input('Name', value=st.session_state['name'], key='admin_name')
+                reason_input = st.text_input('Reason', key='admin_reason')
+                submitted = st.form_submit_button('Save Edits', key='admin_submit')
+                if submitted:
+                    st.info('Request email sent.')
+                    sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
+                    receiver_email = "larpadventerurescharactersheet@gmail.com"  # Enter receiver address
+                    password = st.secrets['email_password']
+                    body = """
+                    Username: {}
+                    Name: {}
+                    Reason: {}
+                    """.format(st.session_state['username'], name_input, reason_input)
+                    msg = MIMEText(body)
+                    msg['Subject'] = 'LARP Character Sheet Admin Request'
+                    msg['From'] = "larpadventerurescharactersheet@gmail.com"
+                    msg['To'] = "larpadventerurescharactersheet@gmail.com"
+                    server = smtplib.SMTP('smtp.gmail.com', 587)
+                    server.starttls()
+                    server.login(sender_email, password)
+                    server.sendmail(sender_email, receiver_email, msg.as_string())
+                    server.quit()
+        if st.button("Request Faction Leader Access"):
+            with st.form('faction_access'):
+                name_input = st.text_input('Name', value=st.session_state['name'], key='faction_name')
+                faction_input = st.selectbox('Faction', faction_list, key='form_faction')
+                submitted = st.form_submit_button('Save Edits', key='faction_submit')
+                if submitted:
+                    st.info('Request email sent.')
+                    sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
+                    receiver_email = "larpadventerurescharactersheet@gmail.com"  # Enter receiver address
+                    password = st.secrets['email_password']
+                    body = """
+                    Username: {}
+                    Name: {}
+                    Faction: {}
+                    """.format(st.session_state['username'], name_input, faction_input)
+                    msg = MIMEText(body)
+                    msg['Subject'] = 'LARP Character Sheet Faction Admin Request'
+                    msg['From'] = "larpadventerurescharactersheet@gmail.com"
+                    msg['To'] = "larpadventerurescharactersheet@gmail.com"
+                    server = smtplib.SMTP('smtp.gmail.com', 587)
+                    server.starttls()
+                    server.login(sender_email, password)
+                    server.sendmail(sender_email, receiver_email, msg.as_string())
+                    server.quit()
+                
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
     st.page_link("pages/register_user.py", label='Register New User', icon="📝")

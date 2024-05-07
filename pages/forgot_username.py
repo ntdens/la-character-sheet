@@ -1,9 +1,6 @@
-import yaml
-from yaml.loader import SafeLoader
 import streamlit as st
 import streamlit_authenticator as stauth
 import smtplib
-import ssl
 from email.mime.text import MIMEText
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 import firebase_admin
