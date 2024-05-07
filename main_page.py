@@ -164,6 +164,70 @@ def skill_gain(df, skill_path, tier):
         st.rerun()
     return df
 
+def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adds a UI on top of a dataframe to let viewers filter columns
+
+    Args:
+        df (pd.DataFrame): Original dataframe
+
+    Returns:
+        pd.DataFrame: Filtered dataframe
+    """
+    modify = st.checkbox("Add filters")
+
+    if not modify:
+        return df
+
+    df = df.copy()
+
+    df['Spell'] = df.Spell.astype(str)
+    modification_container = st.container()
+
+    with modification_container:
+        to_filter_columns = st.multiselect("Filter dataframe on", df.columns)
+        for column in to_filter_columns:
+            left, right = st.columns((1, 20))
+            if is_numeric_dtype(df[column]):
+                _min = df[column].min()
+                _max = df[column].max()
+                user_num_input = right.slider(
+                    f"Values for {column}",
+                    min_value=_min,
+                    max_value=_max,
+                    value=(_min, _max),
+                    step=1,
+                )
+                df = df[df[column].between(*user_num_input)]
+            # Treat columns with < 10 unique values as categorical
+            elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
+                user_cat_input = right.multiselect(
+                    f"Values for {column}",
+                    df[column].unique(),
+                    default=list(df[column].unique()),
+                )
+                df = df[df[column].isin(user_cat_input)]
+            elif is_datetime64_any_dtype(df[column]):
+                user_date_input = right.date_input(
+                    f"Values for {column}",
+                    value=(
+                        df[column].min(),
+                        df[column].max(),
+                    ),
+                )
+                if len(user_date_input) == 2:
+                    user_date_input = tuple(map(pd.to_datetime, user_date_input))
+                    start_date, end_date = user_date_input
+                    df = df.loc[df[column].between(start_date, end_date)]
+            else:
+                user_text_input = right.text_input(
+                    f"Substring or regex in {column}",
+                )
+                if user_text_input:
+                    df = df[df[column].astype(str).str.contains(user_text_input)]
+
+    return df
+
 
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
@@ -305,7 +369,7 @@ if st.session_state["authentication_status"]:
         display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
         st.dataframe(display_data, hide_index=True, use_container_width=True)
         "## Available Skills"
-        st.dataframe(df, hide_index=True, use_container_width=True)
+        st.dataframe(filter_dataframe(df), hide_index=True, use_container_width=True)
 
 
     with tab1:
