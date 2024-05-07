@@ -119,6 +119,7 @@ if st.session_state["authentication_status"]:
             on_change=df_on_change,
             args=[data_df],
         )
+    st.info('Be patient, give table time to load after each entry')
     editor()
     if st.button('Save Events'):
         doc_ref = db.reference("users/").child(st.session_state['username'])
