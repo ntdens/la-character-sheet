@@ -323,7 +323,7 @@ if st.session_state["authentication_status"]:
                 'Information': [character_name,player,path,faction,tier,points_available]
                                 })
             my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
-            my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True)
+            my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True, height=500)
 
 
 elif st.session_state["authentication_status"] is False:
