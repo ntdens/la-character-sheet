@@ -112,14 +112,19 @@ def available_skills(df, skill_path, tier):
             else:
                 path_data.append(df[(df['Path'] == 'Bard') & (df['Tier'] == 1)])
         df = pd.concat(path_data)
+        current_path = known_data[known_data['Path'] == skill_path]['Tier'].max() + 1
+        df = df[df['Point Cost'] <= current_path]
     else:
-        df = df[df['Path'] == skill_path]
+        df = df[(df['Path'] == skill_path) & (df['Tier'] == 0)]
+    
     df = df[df['Point Cost'] <= st.session_state['available']]
+    df = df[df['Skill Name'] != 'Cross-Training']
     if 'Read/Write Arcana' not in list(known_data['Skill Name']):
         df = df[df['Spell'] == False]
     known_skills = list(known_data['Skill Name'].unique())
     known_skills.append('None')
     df = df[df['Prerequisite'].fillna('None').isin(known_skills)]
+    df = pd.merge(df, known_data, on=list(df.columns), how='outer', indicator=True).query("_merge != 'both'").drop('_merge', axis=1).reset_index(drop=True)
     return df
 
 def skill_gain(df, skill_path, tier):
