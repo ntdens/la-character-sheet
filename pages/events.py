@@ -45,7 +45,7 @@ if not firebase_admin._apps:
     })
 
 with open( "style.css" ) as css:
-    st.markdown( f'<style>{css.read()}</style>' + """
+    st.markdown( """
                 <html>
                     <head>
                     <style>
@@ -68,6 +68,7 @@ with open( "style.css" ) as css:
                             ::-webkit-scrollbar-thumb:hover {
                             background: #555;
                             }
+                    """ + css.read() + """
                     </style>
                     </head>
                     <body>
