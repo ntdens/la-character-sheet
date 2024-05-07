@@ -269,6 +269,11 @@ if st.session_state["authentication_status"]:
 
 
     with tab3:
+        try:
+            user_data = db.reference("users/").child(st.session_state['username']).get()
+            st.session_state['point_spend'] = int(user_data['point_spend'])
+        except:
+            st.session_state['point_spend'] = 0
         points_available = skill_points - st.session_state['point_spend']
         st.write("### Points Available :",points_available)
         df = pd.read_excel('Skills_Table.xlsx')
