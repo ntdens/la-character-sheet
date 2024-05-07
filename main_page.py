@@ -53,8 +53,8 @@ faction_list = [
 
 path_list = [
     '🗡 Warrior',
-    '🪤 Rogue',
-    '🩹 Healer',
+    '🕳 Rogue',
+    '🩸 Healer',
     '🔮 Wizard'
 ]
 
