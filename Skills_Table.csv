@@ -5,7 +5,7 @@ Kindle Flame/Torch,"Player gains proficiency at creating normal fire, may make a
 Shield Control,Players learn the art of Shield Control and may use shields in combat.,Warrior,0,,,,False
 Advanced Weapon Training,"Study and become proficient in the use of two-handed weapons, polearms, and dual wielding.",Warrior,1,,,,False
 Archery,Players are taught the safety rules of archery at LARP Adventures and earn the use of bow and arrow in play.,Warrior,1,,,,False
-Armor Repair Non-metal,Repairs a single hit location of non-metal armors.,Warrior,1,,Repair Kit and rp of repair (30 Seconds),,False
+Non Metal Armor Repair,Repairs a single hit location of non-metal armors.,Warrior,1,,Repair Kit and rp of repair (30 Seconds),,False
 Shield Repair,Repairs normal shield for use.,Warrior,1,,Repair Kit and rp of repair (30 Seconds),Non Metal Armor Repair,False
 Armor Training,The Player has gained experience and is learning how to best wear and fight in their armor. They can now add 1 to maximum AP4 for Warriors by layering armor.,Warrior,2,,,Armor Proficiency,False
 Metal Armor Repair,Repairs AP to area repaired,Warrior,2,,Repair Kit and rp of repair (30 Seconds),Non Metal Armor Repair,False
