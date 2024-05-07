@@ -119,11 +119,11 @@ if st.session_state["authentication_status"]:
             user_df = user_df[user_df['Faction'] == faction_filter]
         with tab1:
             leader_data = user_df[user_df['Username'] == st.session_state['username']]
-            "## Welcome {}, Leader of {}".format(leader_data['Character'].values[0],leader_data['Faction'].values[0])
+            st.write("## Welcome {}, Leader of {}".format(leader_data['Character'].values[0],leader_data['Faction'].values[0]))
             st.dataframe(user_df, hide_index=True)
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
-            character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username']).index('ntdens'))
+            character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username']).index(st.session_state['username']))
             try:
                 character_data = user_data[character_choice]
                 user_events = pd.DataFrame(json.loads(character_data['event_info']))
@@ -150,7 +150,7 @@ if st.session_state["authentication_status"]:
             except:
                 st.info("Data does not exist for this user")
         with tab3:
-            character_choice = st.selectbox('Select User:', user_df['Username'], key='event_user', index=list(user_df['Username']).index('ntdens'))
+            character_choice = st.selectbox('Select User:', user_df['Username'], key='event_user', index=list(user_df['Username']).index(st.session_state['username']))
             try:
                 character_data = user_data[character_choice]
                 user_events = pd.DataFrame(json.loads(character_data['event_info']))
