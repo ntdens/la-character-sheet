@@ -2,17 +2,13 @@ import yaml
 from yaml.loader import SafeLoader
 import json
 import streamlit as st
-import streamlit.components.v1 as components
 import streamlit_authenticator as stauth
 from streamlit_extras.grid import grid
-from streamlit_extras.stylable_container import stylable_container
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 import pandas as pd
 from pandas.api.types import (
-    is_categorical_dtype,
     is_datetime64_any_dtype,
     is_numeric_dtype,
-    is_object_dtype,
 )
 import firebase_admin
 from firebase_admin import credentials, db, storage

@@ -3,20 +3,15 @@ import streamlit as st
 import streamlit.components.v1 as components
 import streamlit_authenticator as stauth
 from streamlit_extras.grid import grid
-from streamlit_extras.stylable_container import stylable_container
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 import pandas as pd
-from pandas.api.types import (
-    is_datetime64_any_dtype,
-    is_numeric_dtype,
-    is_object_dtype,
-)
 import firebase_admin
 from firebase_admin import credentials, db, storage
 from math import floor, sqrt
 import ast
 import smtplib
 from email.mime.text import MIMEText
+import plotly.express as px
 
 add_page_title(layout='wide')
 
@@ -121,6 +116,10 @@ if st.session_state["authentication_status"]:
             leader_data = user_df[user_df['Username'] == st.session_state['username']]
             st.write("## Welcome {}, Leader of {}".format(leader_data['Character'].values[0],leader_data['Faction'].values[0]))
             st.dataframe(user_df, hide_index=True)
+            chart_grid = grid(3)
+            chart_grid.plotly_chart(
+                px.histogram(user_df, x='Tier', category_orders=dict(Tier=list(range(0,10))))
+            )
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
             character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username']).index(st.session_state['username']))
