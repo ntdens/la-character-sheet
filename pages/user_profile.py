@@ -44,7 +44,7 @@ if st.session_state["authentication_status"]:
         try:
             if authenticator.reset_password(st.session_state["username"]):
                 st.success('Password modified successfully')
-                user_auth = db.reference("auth").child(f'credentials/usernames/{st.session_state['username']}')
+                user_auth = db.reference("auth").child('credentials/usernames/{}'.format(st.session_state['username']))
                 user_auth.update(config['credentials']['usernames'][st.session_state['username']])
         except Exception as e:
             st.error(e)
@@ -55,7 +55,7 @@ if st.session_state["authentication_status"]:
                 doc_ref.update({
                     "name":st.session_state['name'],
                 })
-                user_auth = db.reference("auth").child(f'credentials/usernames/{st.session_state['username']}')
+                user_auth = db.reference("auth").child('credentials/usernames/{}'.format(st.session_state['username']))
                 user_auth.update(config['credentials']['usernames'][st.session_state['username']])
         except Exception as e:
             st.error(e)
