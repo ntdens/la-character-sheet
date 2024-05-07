@@ -13,8 +13,7 @@ show_pages_from_config()
 
 hide_pages(['Forgot Username', 'Forgot Password'])
 
-with open('./config.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
+config = db.reference("auth").get()
 
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
@@ -40,10 +39,9 @@ try:
         doc_ref.update({
             "name":name_of_registered_user,
         })
+        user_auth = db.reference("auth").child(f'credentials/usernames/{username_of_registered_user}')
+        user_auth.update(config['credentials']['usernames'][username_of_registered_user])
         st.success('User registered successfully')
     
 except Exception as e:
     st.error(e)
-
-with open('./config.yaml', 'w') as file:
-    yaml.dump(config, file, default_flow_style=False)

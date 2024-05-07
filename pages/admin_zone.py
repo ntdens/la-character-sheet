@@ -71,8 +71,7 @@ if not firebase_admin._apps:
 with open( "style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
-with open('./config.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
+config = db.reference("auth").get()
 
 #login widget
 authenticator = stauth.Authenticate(

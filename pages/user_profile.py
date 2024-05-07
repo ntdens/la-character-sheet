@@ -15,9 +15,6 @@ show_pages_from_config()
 
 hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
 
-with open('./config.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
-
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
     creds = credentials.Certificate(key_dict)
@@ -25,6 +22,8 @@ if not firebase_admin._apps:
         'databaseURL': 'https://la-character-sheets-default-rtdb.firebaseio.com',
         'storageBucket':'la-character-sheets.appspot.com'
     })
+
+config = db.reference("auth").get()
 
 #login widget
 authenticator = stauth.Authenticate(
@@ -45,6 +44,8 @@ if st.session_state["authentication_status"]:
         try:
             if authenticator.reset_password(st.session_state["username"]):
                 st.success('Password modified successfully')
+                user_auth = db.reference("auth").child(f'credentials/usernames/{st.session_state['username']}')
+                user_auth.update(config['credentials']['usernames'][st.session_state['username']])
         except Exception as e:
             st.error(e)
     if button("Update User Details", key='user_details'):
@@ -54,6 +55,8 @@ if st.session_state["authentication_status"]:
                 doc_ref.update({
                     "name":st.session_state['name'],
                 })
+                user_auth = db.reference("auth").child(f'credentials/usernames/{st.session_state['username']}')
+                user_auth.update(config['credentials']['usernames'][st.session_state['username']])
         except Exception as e:
             st.error(e)
     authenticator.logout()

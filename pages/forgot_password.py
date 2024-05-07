@@ -6,6 +6,9 @@ import smtplib
 import ssl
 from email.mime.text import MIMEText
 from st_pages import show_pages_from_config, add_page_title, hide_pages
+import firebase_admin
+from firebase_admin import credentials, db
+import json
 
 add_page_title()
 
@@ -13,8 +16,15 @@ show_pages_from_config()
 
 hide_pages(['Register New User', 'Forgot Username'])
 
-with open('./config.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
+if not firebase_admin._apps:
+    key_dict = json.loads(st.secrets["firebase"], strict=False)
+    creds = credentials.Certificate(key_dict)
+    defualt_app = firebase_admin.initialize_app(creds, {
+        'databaseURL': 'https://la-character-sheets-default-rtdb.firebaseio.com',
+        'storageBucket':'la-character-sheets.appspot.com'
+    })
+
+config = db.reference("auth").get()
 
 #login widget
 authenticator = stauth.Authenticate(
@@ -42,10 +52,10 @@ try:
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
+        user_auth = db.reference("auth").child(f'credentials/usernames/{username_of_forgotten_password}')
+        user_auth.update(config['credentials']['usernames'][username_of_forgotten_password])
     elif username_of_forgotten_password == False:
         st.error('Username not found')
 except Exception as e:
     st.error(e)
 
-with open('./config.yaml', 'w') as file:
-    yaml.dump(config, file, default_flow_style=False)
