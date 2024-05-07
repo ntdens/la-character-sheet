@@ -38,8 +38,11 @@ authenticator.login()
 #authenticate users
 if st.session_state["authentication_status"]:
     doc_ref = db.reference("users/").child(st.session_state['username']).get()
+    user_auth = db.reference("auth").child('credentials/usernames/{}'.format(st.session_state['username'])).get()
+    user_email = user_auth['email']
     st.text('Username: {}'.format(st.session_state["username"]))
     st.text('Name: {}'.format(st.session_state["name"]))
+    st.text('Email: {}'.format(user_email))
     if button("Reset Password", type='primary', key='reset_password'):
         try:
             if authenticator.reset_password(st.session_state["username"]):
