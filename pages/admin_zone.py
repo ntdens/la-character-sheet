@@ -160,54 +160,54 @@ if st.session_state["authentication_status"]:
                 st.info("Data does not exist for this user")
     else:
         st.warning('Not an admin. Access denied. Whomp whomp.')
-        if st.button("Request Admin Access"):
-            with st.form('admin_access'):
-                name_input = st.text_input('Name', value=st.session_state['name'], key='admin_name')
-                reason_input = st.text_input('Reason', key='admin_reason')
-                submitted = st.form_submit_button('Submit Request')
-                if submitted:
-                    st.info('Request email sent.')
-                    sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
-                    receiver_email = "larpadventerurescharactersheet@gmail.com"  # Enter receiver address
-                    password = st.secrets['email_password']
-                    body = """
-                    Username: {}
-                    Name: {}
-                    Reason: {}
-                    """.format(st.session_state['username'], name_input, reason_input)
-                    msg = MIMEText(body)
-                    msg['Subject'] = 'LARP Character Sheet Admin Request'
-                    msg['From'] = "larpadventerurescharactersheet@gmail.com"
-                    msg['To'] = "larpadventerurescharactersheet@gmail.com"
-                    server = smtplib.SMTP('smtp.gmail.com', 587)
-                    server.starttls()
-                    server.login(sender_email, password)
-                    server.sendmail(sender_email, receiver_email, msg.as_string())
-                    server.quit()
-        if st.button("Request Faction Leader Access"):
-            with st.form('faction_access'):
-                name_input = st.text_input('Name', value=st.session_state['name'], key='faction_name')
-                faction_input = st.selectbox('Faction', faction_list, key='form_faction')
-                submitted = st.form_submit_button('Submit Request')
-                if submitted:
-                    st.info('Request email sent.')
-                    sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
-                    receiver_email = "larpadventerurescharactersheet@gmail.com"  # Enter receiver address
-                    password = st.secrets['email_password']
-                    body = """
-                    Username: {}
-                    Name: {}
-                    Faction: {}
-                    """.format(st.session_state['username'], name_input, faction_input)
-                    msg = MIMEText(body)
-                    msg['Subject'] = 'LARP Character Sheet Faction Admin Request'
-                    msg['From'] = "larpadventerurescharactersheet@gmail.com"
-                    msg['To'] = "larpadventerurescharactersheet@gmail.com"
-                    server = smtplib.SMTP('smtp.gmail.com', 587)
-                    server.starttls()
-                    server.login(sender_email, password)
-                    server.sendmail(sender_email, receiver_email, msg.as_string())
-                    server.quit()
+        st.write("### Request Admin Access")
+        with st.form('admin_access'):
+            name_input = st.text_input('Name', value=st.session_state['name'], key='admin_name')
+            reason_input = st.text_input('Reason', key='admin_reason')
+            submitted = st.form_submit_button('Submit Request')
+            if submitted:
+                st.info('Request email sent.')
+                sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
+                receiver_email = "larpadventerurescharactersheet@gmail.com"  # Enter receiver address
+                password = st.secrets['email_password']
+                body = """
+                Username: {}
+                Name: {}
+                Reason: {}
+                """.format(st.session_state['username'], name_input, reason_input)
+                msg = MIMEText(body)
+                msg['Subject'] = 'LARP Character Sheet Admin Request'
+                msg['From'] = "larpadventerurescharactersheet@gmail.com"
+                msg['To'] = "larpadventerurescharactersheet@gmail.com"
+                server = smtplib.SMTP('smtp.gmail.com', 587)
+                server.starttls()
+                server.login(sender_email, password)
+                server.sendmail(sender_email, receiver_email, msg.as_string())
+                server.quit()
+        st.write("### Request Faction Leader Access")
+        with st.form('faction_access'):
+            name_input = st.text_input('Name', value=st.session_state['name'], key='faction_name')
+            faction_input = st.selectbox('Faction', faction_list, key='form_faction')
+            submitted = st.form_submit_button('Submit Request')
+            if submitted:
+                st.info('Request email sent.')
+                sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
+                receiver_email = "larpadventerurescharactersheet@gmail.com"  # Enter receiver address
+                password = st.secrets['email_password']
+                body = """
+                Username: {}
+                Name: {}
+                Faction: {}
+                """.format(st.session_state['username'], name_input, faction_input)
+                msg = MIMEText(body)
+                msg['Subject'] = 'LARP Character Sheet Faction Admin Request'
+                msg['From'] = "larpadventerurescharactersheet@gmail.com"
+                msg['To'] = "larpadventerurescharactersheet@gmail.com"
+                server = smtplib.SMTP('smtp.gmail.com', 587)
+                server.starttls()
+                server.login(sender_email, password)
+                server.sendmail(sender_email, receiver_email, msg.as_string())
+                server.quit()
                 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
