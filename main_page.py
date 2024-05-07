@@ -313,6 +313,7 @@ if st.session_state["authentication_status"]:
         known = st.session_state['known']
         known_data = df[df['Skill Name'].isin(known)]
         display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
+        display_data = display_data.fillna('')
         points_available = skill_points - st.session_state['point_spend']
         with st.container(border=True):
             my_grid = grid([4,6],1)
