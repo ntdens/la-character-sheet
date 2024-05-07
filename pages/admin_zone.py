@@ -164,7 +164,7 @@ if st.session_state["authentication_status"]:
             with st.form('admin_access'):
                 name_input = st.text_input('Name', value=st.session_state['name'], key='admin_name')
                 reason_input = st.text_input('Reason', key='admin_reason')
-                submitted = st.form_submit_button('Save Edits', key='admin_submit')
+                submitted = st.form_submit_button('Submit Request')
                 if submitted:
                     st.info('Request email sent.')
                     sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
@@ -188,7 +188,7 @@ if st.session_state["authentication_status"]:
             with st.form('faction_access'):
                 name_input = st.text_input('Name', value=st.session_state['name'], key='faction_name')
                 faction_input = st.selectbox('Faction', faction_list, key='form_faction')
-                submitted = st.form_submit_button('Save Edits', key='faction_submit')
+                submitted = st.form_submit_button('Submit Request')
                 if submitted:
                     st.info('Request email sent.')
                     sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
