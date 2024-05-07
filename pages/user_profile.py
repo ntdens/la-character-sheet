@@ -50,7 +50,10 @@ if st.session_state["authentication_status"]:
     if button("Update User Details", key='user_details'):
         try:
             if authenticator.update_user_details(st.session_state["username"]):
-                st.success('Entries updated successfully')
+                doc_ref = db.reference("users/").child(st.session_state['username'])
+                doc_ref.update({
+                    "name":st.session_state['name'],
+                })
         except Exception as e:
             st.error(e)
     authenticator.logout()
