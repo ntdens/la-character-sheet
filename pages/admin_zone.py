@@ -118,7 +118,7 @@ if st.session_state["authentication_status"]:
             st.dataframe(user_df, hide_index=True)
             chart_grid = grid(3)
             chart_grid.plotly_chart(
-                px.histogram(user_df, x='Tier', category_orders=dict(Tier=list(range(0,10))))
+                px.histogram(user_df, x='Tier', category_orders=dict(Tier=list(range(0,10)))).update_layout(bargap=0.2)
             )
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
