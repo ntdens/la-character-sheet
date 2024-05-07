@@ -129,9 +129,6 @@ if st.session_state["authentication_status"]:
         })
         st.success('Events saved to database')
 
-
-    
-
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
     st.page_link("pages/register_user.py", label='Register New User', icon="📝")

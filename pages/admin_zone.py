@@ -23,7 +23,6 @@ import os
 import numpy as np
 import ast
 
-
 add_page_title(layout='wide')
 
 show_pages_from_config()
@@ -60,7 +59,6 @@ path_list = [
 
 def get_tier(events):
     return floor((sqrt(8*events)-1)/2)
-
 
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)

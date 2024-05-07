@@ -23,7 +23,6 @@ import os
 import numpy as np
 import ast
 
-
 add_page_title(layout='wide')
 
 show_pages_from_config()
@@ -228,7 +227,6 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
     creds = credentials.Certificate(key_dict)
@@ -271,19 +269,16 @@ if st.session_state["authentication_status"]:
         character_name = user_data['character_name']
     except:
         character_name = ""
-    
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
         path = user_data['path']
     except:
         path = '🗡 Warrior'
-
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
         faction = user_data['faction']
     except:
         faction = "🧝 Unaffilated"
-
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
         image_location = user_data['pic_name']
@@ -293,12 +288,9 @@ if st.session_state["authentication_status"]:
     except:
         profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
 
-    
     tab1, tab2,tab3 = st.tabs(['Character Sheet', 'Edit Character', 'Add Skills'])
 
-
     player = st.session_state["name"]
-
 
     with tab2:
         with st.form('my_form'):
@@ -335,7 +327,6 @@ if st.session_state["authentication_status"]:
         faction = st.session_state['form_faction']
     if uploaded_file is not None:
         profile_image = st.session_state['form_image']
-
 
     with tab3:
         try:
