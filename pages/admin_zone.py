@@ -140,7 +140,7 @@ if st.session_state["authentication_status"]:
                     my_grid.container(border=True).image(profile_image)
                     player_data = pd.DataFrame({
                         'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
-                        'Information': [character_data['character_name'],config['credentials']['usernames'][character_choice]['name'],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Skill Points'].values[0]]
+                        'Information': [character_data['character_name'],character_data['name'],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Skill Points'].values[0]]
                                         })
                     my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
                     my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True)
