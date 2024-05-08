@@ -237,11 +237,6 @@ if st.session_state["authentication_status"]:
             )
             st.plotly_chart(
                 px.bar(path_df, x='Path', y='Players', title='Number of Players by Path').update_layout(
-                    xaxis = dict(
-                        tickmode = 'array',
-                        tickvals = path_list,
-                        ticktext = path_list
-                    ),
                     yaxis = dict(
                             tickmode = 'linear',
                             tick0 = 0,
