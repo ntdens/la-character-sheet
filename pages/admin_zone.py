@@ -315,7 +315,13 @@ if st.session_state["authentication_status"]:
                 faction_attend['Date'] = faction_attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
                 faction_attend = faction_attend.groupby(['Date','Faction']).nunique().reset_index()
                 st.plotly_chart(
-                    px.line(faction_attend, y='Player', x='Date', title='Attendance by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors)
+                    px.line(faction_attend, y='Player', x='Date', title='Attendance by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors).update_layout(
+                        yaxis = dict(
+                            tickmode = 'linear',
+                            dtick = 1,
+                            title = 'Players'
+                        )
+                    )
                 , use_container_width=True)
 
         with tab2:
