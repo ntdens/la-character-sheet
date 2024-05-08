@@ -70,7 +70,7 @@ if st.session_state["authentication_status"]:
         except:
             pass
         try:
-            data_df['Event Date'] = pd.to_datetime(data_df['Event Date'])
+            data_df['Event Date'] = pd.to_datetime(data_df['Event Date'], unit='ms')
         except:
             pass
     except:
