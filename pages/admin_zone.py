@@ -246,7 +246,7 @@ if st.session_state["authentication_status"]:
                     user_events = pd.DataFrame(json.loads(user_data[player]['event_info']))
                     user_events.reset_index(drop=True, inplace=True)
                     user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
-                    st.dataframe(user_events)
+                    
                     try:
                         user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
                     except:
@@ -255,6 +255,7 @@ if st.session_state["authentication_status"]:
                         user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
                     except:
                         pass
+                    st.dataframe(user_events)
                     player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':player, 'Faction':user_df[user_df['Username'] == player]['Faction']}))
                 except:
                     pass
