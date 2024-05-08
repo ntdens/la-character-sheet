@@ -192,7 +192,7 @@ if st.session_state["authentication_status"]:
                     pass
             attend = pd.concat(player_events)
             attend['Date'] = attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
-            attend = attend.groupby('Date').count().reset_index()
+            attend = attend.groupby('Date').nunique().reset_index()
             st.plotly_chart(
                 px.line(attend, x='Date', y='Player', title='Attendance Over Time').update_layout(
                         yaxis = dict(
