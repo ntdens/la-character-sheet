@@ -132,6 +132,7 @@ if st.session_state["authentication_status"]:
             "event_info":data_df.to_json()
         })
         st.success('Events saved to database')
+        st.rerun()
         
 
 elif st.session_state["authentication_status"] is False:
