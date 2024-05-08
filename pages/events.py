@@ -85,7 +85,6 @@ if st.session_state["authentication_status"]:
                 'Skill Points': [1]
             }
         )
-        data_df['Skill Points'] = data_df['Event Type'].replace(event_dict).astype(int) + data_df[['NPC', 'Merchant Overtime']].astype(int).max() + data_df['Bonus Skill Points']
     
     def editor():
         if "df" not in st.session_state:
