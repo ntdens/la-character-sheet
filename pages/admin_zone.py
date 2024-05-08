@@ -212,6 +212,11 @@ if st.session_state["authentication_status"]:
                             tick0 = 0,
                             dtick = 1
                         ),
+                        yaxis = dict(
+                            tickmode = 'array',
+                            tickvals = faction_list,
+                            ticktext = faction_list
+                        ),
                         showlegend = False
                     )
                 )
