@@ -176,6 +176,7 @@ if st.session_state["authentication_status"]:
                         yaxis = dict(
                             tickmode = 'linear',
                             dtick = 1,
+                            title = 'Players'
                         )
                     )
             )
