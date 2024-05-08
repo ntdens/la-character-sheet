@@ -206,7 +206,7 @@ if st.session_state["authentication_status"]:
             if st.session_state['username'] in st.secrets['admins']:
                 faction_df = user_df.groupby('Faction')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 st.plotly_chart(
-                    px.bar(faction_df, y='Faction', x='Players', title='Number of Players by Faction', orientation='h', color_discrete_map=faction_colors).update_layout(
+                    px.bar(faction_df, y='Faction', x='Players', title='Number of Players by Faction', orientation='h', color='Faction', color_discrete_map=faction_colors).update_layout(
                         xaxis = dict(
                             tickmode = 'linear',
                             tick0 = 0,
