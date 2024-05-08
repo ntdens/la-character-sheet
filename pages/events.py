@@ -126,13 +126,12 @@ if st.session_state["authentication_status"]:
     )
     st.info('Skill Points will recalculate on save')
     if st.button('Save Events'):
-        data_df['Skill Points'] = data_df["Event Type"].replace(event_dict).astype(int) + data_df[["NPC","Merchant Overtime"]].astype(int).max(axis=1) + data_df["Bonus Skill Points"]
+        st.session_state['df_editor']['Skill Points'] = st.session_state['df_editor']["Event Type"].replace(event_dict).astype(int) + st.session_state['df_editor'][["NPC","Merchant Overtime"]].astype(int).max(axis=1) + st.session_state['df_editor']["Bonus Skill Points"]
         doc_ref = db.reference("users/").child(st.session_state['username'])
         doc_ref.update({
-            "event_info":data_df.to_json()
+            "event_info":st.session_state['df_editor'].to_json()
         })
         st.success('Events saved to database')
-        st.rerun()
         
 
 elif st.session_state["authentication_status"] is False:
