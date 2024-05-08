@@ -246,7 +246,6 @@ if st.session_state["authentication_status"]:
                     user_events = pd.DataFrame(json.loads(user_data[player]['event_info']))
                     user_events.reset_index(drop=True, inplace=True)
                     user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
-                    
                     try:
                         user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
                     except:
@@ -255,12 +254,10 @@ if st.session_state["authentication_status"]:
                         user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
                     except:
                         pass
-                    st.dataframe(user_events)
                     player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':player, 'Faction':user_df[user_df['Username'] == player]['Faction'].values[0]}))
                 except:
                     pass
             attend = pd.concat(player_events)
-            st.dataframe(attend)
             attend['Date'] = attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
             attend = attend.groupby('Date')['Player'].nunique().reset_index()
             st.plotly_chart(
@@ -293,9 +290,8 @@ if st.session_state["authentication_status"]:
                 faction_attend = pd.concat(player_events)
                 faction_attend['Date'] = faction_attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
                 faction_attend = faction_attend.groupby(['Date','Faction']).nunique().reset_index()
-                st.dataframe(faction_attend)
                 st.plotly_chart(
-                    px.line(faction_attend, y='Player', x='Date', title='Number of Players by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors)
+                    px.line(faction_attend, y='Player', x='Date', title='Attendance by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors)
                 )
 
         with tab2:
