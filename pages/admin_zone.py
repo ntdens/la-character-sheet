@@ -26,6 +26,7 @@ faction_list = [
     "🛡 Eponore",
     "⚜️ Catalpa",
     "🍷 Cedar Hill",
+    "🧚‍♀️ The Court of Ashes",
     "🧛‍♂️ The Dismissed",
     "💀 Geth",
     "❄️ Grimfrost",
@@ -37,8 +38,29 @@ faction_list = [
     "🦁 Kult of Tharros",
     "🐴 Vidarian Khanate",
     "🏹 The Wardens",
-    "🕊️ The White Ravens "
+    "🕊️ The White Ravens"
 ]
+faction_colors = {
+    "🧝 Unaffilated":'burlywood',
+    "🏴 Blackthorne Company":'black',
+    "💰 Guild of the Black Sky":'darkkhaki',
+    "🛡 Eponore":"yellow",
+    "⚜️ Catalpa":"red",
+    "🍷 Cedar Hill":"fuscia",
+    "🧚‍♀️ The Court of Ashes":'purple',
+    "🧛‍♂️ The Dismissed":'firebrick',
+    "💀 Geth":'gray',
+    "❄️ Grimfrost":"deepskyblue",
+    "🌳 The Grove":"green",
+    "🌙 The Irregulars":'navy',
+    "⚖️ The Order":'black',
+    "🎪 Prismatic Troupe":'lime',
+    "⚔️ Sunsteel Company":"darkseagreen",
+    "🦁 Kult of Tharros":"crimson",
+    "🐴 Vidarian Khanate":"maroon",
+    "🏹 The Wardens":"olive",
+    "🕊️ The White Ravens":"gainsboro"
+}
 
 path_list = [
     '🗡 Warrior',
@@ -184,7 +206,7 @@ if st.session_state["authentication_status"]:
             if st.session_state['username'] in st.secrets['admins']:
                 faction_df = user_df.groupby('Faction')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 st.plotly_chart(
-                    px.bar(faction_df, y='Faction', x='Players', title='Number of Players by Faction', orientation='h').update_layout(
+                    px.bar(faction_df, y='Faction', x='Players', title='Number of Players by Faction', orientation='h', color_discrete_map=faction_colors).update_layout(
                         xaxis = dict(
                             tickmode = 'linear',
                             tick0 = 0,

@@ -44,7 +44,7 @@ faction_list = [
     "🦁 Kult of Tharros",
     "🐴 Vidarian Khanate",
     "🏹 The Wardens",
-    "🕊️ The White Ravens "
+    "🕊️ The White Ravens"
 ]
 
 path_list = [
