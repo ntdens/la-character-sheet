@@ -211,7 +211,8 @@ if st.session_state["authentication_status"]:
                             tickmode = 'linear',
                             tick0 = 0,
                             dtick = 1
-                        )
+                        ),
+                        showlegend = False
                     )
                 )
 
