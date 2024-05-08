@@ -123,15 +123,35 @@ if st.session_state["authentication_status"]:
                         tickmode = 'array',
                         tickvals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                         ticktext = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five','Six', 'Seven','Eight', 'Nine', 'Ten']
+                    ),
+                    yaxis = dict(
+                            tickmode = 'linear',
+                            tick0 = 0,
+                            dtick = 1,
+                            title='Points'
                     )
                 )
             )
             st.plotly_chart(
-                px.histogram(user_df, x='Earned Points', nbins=20, title='Points Earned by Players')
-            )
+                px.histogram(user_df, x='Earned Points', nbins=20, title='Points Earned by Players').update_layout(
+                        yaxis = dict(
+                            tickmode = 'linear',
+                            tick0 = 0,
+                            dtick = 1,
+                            title='Points'
+                        )
+                    )
+                )
             st.plotly_chart(
-                px.histogram(user_df, x='Available Points', nbins=20, title='Points Available by Players')
-            )
+                px.histogram(user_df, x='Available Points', nbins=20, title='Points Available by Players').update_layout(
+                        yaxis = dict(
+                            tickmode = 'linear',
+                            tick0 = 0,
+                            dtick = 1,
+                            title='Points'
+                        )
+                    )
+                )
             if st.session_state['username'] in st.secrets['admins']:
                 faction_df = user_df.groupby('Faction')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 st.plotly_chart(
