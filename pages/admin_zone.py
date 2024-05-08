@@ -117,8 +117,6 @@ if st.session_state["authentication_status"]:
             st.write("## Welcome {}, Leader of {}".format(leader_data['Character'].values[0],leader_data['Faction'].values[0]))
             st.dataframe(user_df, hide_index=True)
             tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
-            # tier_list = pd.DataFrame({'Tier':list(range(0,11))})
-            # tier_df = tier_list.merge(tier_df, how='left', on='Tier').fillna(0)
             st.plotly_chart(
                 px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
                     xaxis = dict(
@@ -128,6 +126,18 @@ if st.session_state["authentication_status"]:
                     )
                 )
             )
+            st.plotly_chart(
+                px.histogram(user_df, x='Earned Points', nbins=20, title='Points Earned by Players')
+            )
+            st.plotly_chart(
+                px.histogram(user_df, x='Available Points', nbins=20, title='Points Available by Players')
+            )
+            if st.session_state['username'] in st.secrets['admins']:
+                faction_df = user_df.groupby('Faction')['Username'].count().reset_index().rename(columns={'Username':'Players'})
+                st.plotly_chart(
+                    px.bar(faction_df, y='Faction', x='Players', title='Number of Players by Faction', orientation='h')
+                )
+
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
             character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username']).index(st.session_state['username']))
