@@ -127,6 +127,7 @@ if st.session_state["authentication_status"]:
     st.info('Skill Points will recalculate on save')
     if st.button('Save Events'):
         data_df = st.session_state['df_editor']
+        st.dataframe(data_df)
         data_df['Skill Points'] = data_df["Event Type"].replace(event_dict).astype(int) + data_df[["NPC","Merchant Overtime"]].astype(int).max(axis=1) + data_df["Bonus Skill Points"]
         doc_ref = db.reference("users/").child(st.session_state['username'])
         doc_ref.update({
