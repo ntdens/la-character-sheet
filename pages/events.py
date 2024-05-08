@@ -86,52 +86,47 @@ if st.session_state["authentication_status"]:
             }
         )
     
-    def editor():
-        if "df" not in st.session_state:
-            st.session_state["df"] = data_df
-        st.data_editor(
-            st.session_state["df"],
-            key="df_editor",
-            column_config={
-                "Event Name": st.column_config.TextColumn(
-                    help='Name of event',
-                ),
-                "Event Date": st.column_config.DateColumn(
-                    format="MMMM YYYY"
-                ),
-                "Event Type": st.column_config.SelectboxColumn(
-                    help='Type of Event',
-                    options=[
-                        "☀️ Day Event",
-                        "⛺️ Campout Event",
-                        "🎆 Festival Event",
-                        "👾 Virtual Event",
-                        "🪚 Work Weekend"
-                    ],
-                    width='medium',
-                    default="☀️ Day Event"
-                ),
-                'NPC': st.column_config.CheckboxColumn(default=False),
-                'Merchant Overtime': st.column_config.CheckboxColumn(default=False),
-                'Bonus Skill Points' : st.column_config.NumberColumn(
-                    help='Any additional SP earned on top of NPC and Merchant bonus points',
-                    step=1,
-                    default=0
-                ),
-                "Skill Points":st.column_config.NumberColumn(
-                    default=1,
-                    disabled=True
-                )
-            },
-            num_rows='dynamic',
-            on_change=df_on_change,
-            args=[data_df],
-            height=950,
-            use_container_width=True
-        )
-    st.info('Be patient, give table time to load after each entry')
-    editor()
+    st.data_editor(
+        data_df,
+        key="df_editor",
+        column_config={
+            "Event Name": st.column_config.TextColumn(
+                help='Name of event',
+            ),
+            "Event Date": st.column_config.DateColumn(
+                format="MMMM YYYY"
+            ),
+            "Event Type": st.column_config.SelectboxColumn(
+                help='Type of Event',
+                options=[
+                    "☀️ Day Event",
+                    "⛺️ Campout Event",
+                    "🎆 Festival Event",
+                    "👾 Virtual Event",
+                    "🪚 Work Weekend"
+                ],
+                width='medium',
+                default="☀️ Day Event"
+            ),
+            'NPC': st.column_config.CheckboxColumn(default=False),
+            'Merchant Overtime': st.column_config.CheckboxColumn(default=False),
+            'Bonus Skill Points' : st.column_config.NumberColumn(
+                help='Any additional SP earned on top of NPC and Merchant bonus points',
+                step=1,
+                default=0
+            ),
+            "Skill Points":st.column_config.NumberColumn(
+                default=1,
+                disabled=True
+            )
+        },
+        num_rows='dynamic',
+        height=950,
+        use_container_width=True
+    )
+    st.info('Skill Points will recalculate on save')
     if st.button('Save Events'):
+        data_df['Skill Points'] = data_df["Event Type"].replace(event_dict).astype(int) + data_df[["NPC","Merchant Overtime"]].astype(int).max(axis=1) + data_df["Bonus Skill Points"]
         doc_ref = db.reference("users/").child(st.session_state['username'])
         doc_ref.update({
             "event_info":st.session_state['df'].to_json()
