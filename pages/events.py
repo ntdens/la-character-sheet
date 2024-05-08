@@ -129,10 +129,9 @@ if st.session_state["authentication_status"]:
         data_df['Skill Points'] = data_df["Event Type"].replace(event_dict).astype(int) + data_df[["NPC","Merchant Overtime"]].astype(int).max(axis=1) + data_df["Bonus Skill Points"]
         doc_ref = db.reference("users/").child(st.session_state['username'])
         doc_ref.update({
-            "event_info":st.session_state['df'].to_json()
+            "event_info":data_df.to_json()
         })
         st.success('Events saved to database')
-        st.rerun()
         
 
 elif st.session_state["authentication_status"] is False:
