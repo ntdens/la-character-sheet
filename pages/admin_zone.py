@@ -225,8 +225,8 @@ if st.session_state["authentication_status"]:
                 px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
                     xaxis = dict(
                         tickmode = 'array',
-                        tickvals = path_list,
-                        ticktext = path_list
+                        tickvals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        ticktext = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five','Six', 'Seven','Eight', 'Nine', 'Ten']
                     ),
                     yaxis = dict(
                             tickmode = 'linear',
@@ -239,8 +239,8 @@ if st.session_state["authentication_status"]:
                 px.bar(path_df, x='Path', y='Players', title='Number of Players by Path').update_layout(
                     xaxis = dict(
                         tickmode = 'array',
-                        tickvals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                        ticktext = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five','Six', 'Seven','Eight', 'Nine', 'Ten']
+                        tickvals = path_list,
+                        ticktext = path_list
                     ),
                     yaxis = dict(
                             tickmode = 'linear',
