@@ -1,5 +1,3 @@
-import yaml
-from yaml.loader import SafeLoader
 import json
 import streamlit as st
 import streamlit_authenticator as stauth
@@ -67,11 +65,12 @@ if st.session_state["authentication_status"]:
         user_events = user_data['event_info']
         data_df = pd.DataFrame(json.loads(user_events))
         data_df.reset_index(drop=True, inplace=True)
+        data_df['Event Date'] = pd.to_datetime(data_df['Event Date'], format="%B %Y")
     except:
         data_df = pd.DataFrame(
             {
                 'Event Name' : ['First Event!'],
-                'Event Date' : ['January 2024'],
+                'Event Date' : [date(2024, 1, 1)],
                 'Event Type' : ["☀️ Day Event"],
                 'NPC' : [False],
                 'Merchant Overtime': [False],
@@ -89,6 +88,9 @@ if st.session_state["authentication_status"]:
             column_config={
                 "Event Name": st.column_config.TextColumn(
                     help='Name of event',
+                ),
+                "Event Date": st.column_config.DateColumn(
+                    format="MMMM YYYY"
                 ),
                 "Event Type": st.column_config.SelectboxColumn(
                     help='Type of Event',
