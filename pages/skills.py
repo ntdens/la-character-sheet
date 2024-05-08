@@ -39,8 +39,6 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         return df
 
     df = df.copy()
-
-    df['Spell'] = df.Spell.astype(str)
     df = df.fillna('None')
     modification_container = st.container()
 
@@ -61,18 +59,21 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             # Treat columns with < 10 unique values as categorical
             elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
                 if column == 'Spell':
-                    user_cat_input = right.multiselect(
-                    "Spell?",
-                    df[column].unique(),
-                    default=list(df[column].unique()),
-                )
+                    user_spell_input = right.selectbox(
+                        'Spell?',
+                        [None, 'Yes', 'No'],
+                    )
+                    if user_spell_input == 'Yes':
+                        df = df[df['Spell'] == True]
+                    elif user_spell_input == 'No':
+                        df = df[df['Spell'] == False]
                 else:
                     user_cat_input = right.multiselect(
                         f"{column}",
                         df[column].unique(),
                         default=list(df[column].unique()),
                     )
-                df = df[df[column].isin(user_cat_input)]
+                    df = df[df[column].isin(user_cat_input)]
             elif is_datetime64_any_dtype(df[column]):
                 user_date_input = right.date_input(
                     f"{column}",
