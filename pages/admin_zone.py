@@ -221,8 +221,6 @@ if st.session_state["authentication_status"]:
             character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username']).index(st.session_state['username']))
             try:
                 character_data = user_data[character_choice]
-                user_events = pd.DataFrame(json.loads(character_data['event_info']))
-                user_events.reset_index(drop=True, inplace=True)
                 known = ast.literal_eval(character_data['known'])
                 known_data = df[df['Skill Name'].isin(known)]
                 display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
