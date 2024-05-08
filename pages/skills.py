@@ -41,6 +41,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
     df['Spell'] = df.Spell.astype(str)
+    df = df.fillna('None')
     modification_container = st.container()
 
     with modification_container:
