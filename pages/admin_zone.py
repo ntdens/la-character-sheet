@@ -129,7 +129,7 @@ if st.session_state["authentication_status"]:
                             tick0 = 0,
                             dtick = 1
                     )
-                ).update_traces(marker_color='yellow')
+                ).update_traces(marker_color='rgb(230,171,2)')
             )
             st.plotly_chart(
                 px.histogram(user_df, x='Earned Points', nbins=20, title='Points Earned by Players').update_layout(
