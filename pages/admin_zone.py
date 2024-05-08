@@ -118,7 +118,7 @@ if st.session_state["authentication_status"]:
             st.dataframe(user_df, hide_index=True)
             tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
             st.plotly_chart(
-                px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier', color_discrete_sequence='Dark2').update_layout(
+                px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
                     xaxis = dict(
                         tickmode = 'array',
                         tickvals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -129,7 +129,7 @@ if st.session_state["authentication_status"]:
                             tick0 = 0,
                             dtick = 1
                     )
-                )
+                ).update_traces(marker_color='yellow')
             )
             st.plotly_chart(
                 px.histogram(user_df, x='Earned Points', nbins=20, title='Points Earned by Players').update_layout(
