@@ -134,7 +134,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                     f"Substring or regex in {column}",
                 )
                 if user_text_input:
-                    df = df[df[column].astype(str).str.lower().contains(user_text_input.lower())]
+                    df = df[df[column].astype(str).str.lower().str.contains(user_text_input.lower())]
 
     return df
 
