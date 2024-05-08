@@ -239,7 +239,7 @@ if st.session_state["authentication_status"]:
                         'Information': [character_data['character_name'],character_data['name'],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Available Points'].values[0]]
                                         })
                     my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
-                    my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True)
+                    my_grid.dataframe(display_data, hide_index=True, use_container_width=True)
             except:
                 st.info("Data does not exist for this user")
         with tab3:
