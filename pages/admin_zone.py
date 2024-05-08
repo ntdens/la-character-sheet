@@ -258,6 +258,7 @@ if st.session_state["authentication_status"]:
                 except:
                     pass
             attend = pd.concat(player_events)
+            st.dataframe(attend)
             attend['Date'] = attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
             attend = attend.groupby('Date')['Player'].nunique().reset_index()
             st.plotly_chart(
