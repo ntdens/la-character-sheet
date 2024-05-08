@@ -351,7 +351,7 @@ if st.session_state["authentication_status"]:
                     user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms').apply(lambda x: x.strftime("%B %Y"))
                 except:
                     pass
-                st.dataframe(user_events, hide_index=True, use_container_width=True)
+                st.dataframe(user_events, hide_index=True, use_container_width=True, height=950)
             except:
                 st.info("Data does not exist for this user")
     else:
