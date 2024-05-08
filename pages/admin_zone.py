@@ -178,7 +178,7 @@ if st.session_state["authentication_status"]:
                             dtick = 1,
                             title = 'Players'
                         )
-                    ).update_traces(marker_color='rgb(230,171,2)')
+                    ).update_traces(line_color='rgb(230,171,2)')
             )
             
             if st.session_state['username'] in st.secrets['admins']:
