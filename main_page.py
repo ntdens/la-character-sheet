@@ -338,6 +338,7 @@ if st.session_state["authentication_status"]:
             st.session_state['point_spend'] = 0
         points_available = skill_points - st.session_state['point_spend']
         st.write("### Points Available :",points_available)
+        st.info('Make sure to update your Events for full Tier/Skill Points')
         df = pd.read_excel('Skills_Table.xlsx')
         df['Tier'] = df.Tier.astype(int)
         skill_path = path[2:]
