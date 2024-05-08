@@ -54,10 +54,6 @@ if st.session_state["authentication_status"]:
     if button("Update User Details", key='user_details'):
         try:
             if authenticator.update_user_details(st.session_state["username"]):
-                doc_ref = db.reference("users/").child(st.session_state['username'])
-                doc_ref.update({
-                    "name":st.session_state['name'],
-                })
                 user_auth = db.reference("auth").child('credentials/usernames/{}'.format(st.session_state['username']))
                 user_auth.update(config['credentials']['usernames'][st.session_state['username']])
         except Exception as e:

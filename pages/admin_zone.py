@@ -170,6 +170,7 @@ if st.session_state["authentication_status"]:
         else:
             faction_filter = None
         user_data = db.reference("users/").get()
+        user_auth = db.reference("auth").child('credentials/usernames/').get()
         tab1, tab2,tab3 = st.tabs(['Player List', 'Character View', 'Event View'])
         user_table = []
         for key in user_data.keys():
@@ -186,10 +187,9 @@ if st.session_state["authentication_status"]:
                 skill_points = 0
                 tier = 0
                 avail_points = skill_points
-
             user_table.append({
                 'Username':key,
-                'Player':user_data[key]['name'],
+                'Player':user_auth[key]['name'],
                 'Character':user_data[key]['character_name'],
                 'Faction':user_data[key]['faction'],
                 'Path':user_data[key]['path'],
