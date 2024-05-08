@@ -121,7 +121,7 @@ def available_skills(df, skill_path, tier):
     known_skills.append('None')
     df = df[df['Prerequisite'].fillna('None').isin(known_skills)]
     df = pd.merge(df, known_data, on=list(df.columns), how='outer', indicator=True).query("_merge != 'both'").drop('_merge', axis=1).reset_index(drop=True)
-    if tier == 0 and len(known_skills) == 3:
+    if tier == 0 and len(known_skills) >= 4:
         df = pd.DataFrame(columns=df.columns)
     return df
 
