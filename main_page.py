@@ -308,12 +308,12 @@ if st.session_state["authentication_status"]:
                     "faction":faction_input,
                 })
                 if uploaded_file is not None:
-                    pic_name = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
+                    pic_location = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
                     doc_ref.update({
-                    "pic_name":pic_name
+                    "pic_name":pic_location
                     })
                     bucket = storage.bucket()
-                    blob = bucket.blob(pic_name)
+                    blob = bucket.blob(pic_location)
                     blob.upload_from_filename(pic_name)
                     os.remove(pic_name)
     if 'form_char' in st.session_state:
