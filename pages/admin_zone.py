@@ -289,7 +289,8 @@ if st.session_state["authentication_status"]:
                         yaxis = dict(
                             tickmode = 'linear',
                             dtick = 1,
-                            title = 'Players'
+                            title = 'Players',
+                            rangemode='tozero'
                         )
                     ).update_traces(line_color='rgb(230,171,2)')
             , use_container_width=True)
@@ -319,7 +320,8 @@ if st.session_state["authentication_status"]:
                         yaxis = dict(
                             tickmode = 'linear',
                             dtick = 1,
-                            title = 'Players'
+                            title = 'Players',
+                            rangemode='tozero'
                         )
                     )
                 , use_container_width=True)
