@@ -116,11 +116,10 @@ if st.session_state["authentication_status"]:
             leader_data = user_df[user_df['Username'] == st.session_state['username']]
             st.write("## Welcome {}, Leader of {}".format(leader_data['Character'].values[0],leader_data['Faction'].values[0]))
             st.dataframe(user_df, hide_index=True)
-            chart_grid = grid(3)
             tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
             # tier_list = pd.DataFrame({'Tier':list(range(0,11))})
             # tier_df = tier_list.merge(tier_df, how='left', on='Tier').fillna(0)
-            chart_grid.plotly_chart(
+            st.plotly_chart(
                 px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
                     xaxis = dict(
                         tickmode = 'array',
