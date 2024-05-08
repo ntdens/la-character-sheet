@@ -212,7 +212,7 @@ if st.session_state["authentication_status"]:
                             tick0 = 0,
                             dtick = 1
                         )
-                    )
+                    ).update_traces(marker_color='rgb(230,171,2)')
                 )
 
         with tab2:
