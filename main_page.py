@@ -199,11 +199,18 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                 df = df[df[column].between(*user_num_input)]
             # Treat columns with < 10 unique values as categorical
             elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
-                user_cat_input = right.multiselect(
-                    f"{column}",
+                if column == 'Spell':
+                    user_cat_input = right.multiselect(
+                    "Spell?",
                     df[column].unique(),
                     default=list(df[column].unique()),
                 )
+                else:
+                    user_cat_input = right.multiselect(
+                        f"{column}",
+                        df[column].unique(),
+                        default=list(df[column].unique()),
+                    )
                 df = df[df[column].isin(user_cat_input)]
             elif is_datetime64_any_dtype(df[column]):
                 user_date_input = right.date_input(
