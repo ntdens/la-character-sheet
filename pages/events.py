@@ -86,8 +86,10 @@ if st.session_state["authentication_status"]:
             }
         )
     
+    if "df" not in st.session_state:
+        st.session_state["df"] = data_df
     st.data_editor(
-        data_df,
+        st.session_state["df"],
         key="df_editor",
         column_config={
             "Event Name": st.column_config.TextColumn(
@@ -121,21 +123,18 @@ if st.session_state["authentication_status"]:
             )
         },
         num_rows='dynamic',
+        on_change=df_on_change,
+        args=[data_df],
         height=950,
         use_container_width=True
     )
-    st.info('Skill Points will recalculate on save')
+    st.info('Be patient, give table time to load after each entry')
     if st.button('Save Events'):
-        data_df = st.session_state['df_editor']
-        st.dataframe(data_df)
-        data_df['Skill Points'] = data_df["Event Type"].replace(event_dict).astype(int) + data_df[["NPC","Merchant Overtime"]].astype(int).max(axis=1) + data_df["Bonus Skill Points"]
         doc_ref = db.reference("users/").child(st.session_state['username'])
         doc_ref.update({
-            "event_info":data_df.to_json()
+            "event_info":st.session_state['df'].to_json()
         })
         st.success('Events saved to database')
-        st.rerun()
-        
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
