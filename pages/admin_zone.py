@@ -254,12 +254,12 @@ if st.session_state["authentication_status"]:
                         user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
                     except:
                         pass
-                    player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':player}))
+                    player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':player, 'Faction':user_df[user_df['Username'] == player]['Faction']}))
                 except:
                     pass
             attend = pd.concat(player_events)
             attend['Date'] = attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
-            attend = attend.groupby('Date').nunique().reset_index()
+            attend = attend.groupby('Date')['Player'].nunique().reset_index()
             st.plotly_chart(
                 px.line(attend, x='Date', y='Player', title='Attendance Over Time').update_layout(
                         yaxis = dict(
@@ -286,6 +286,11 @@ if st.session_state["authentication_status"]:
                         ),
                         showlegend = False
                     )
+                )
+                faction_attend = pd.concat(player_events)
+                faction_attend.groupby(['Date','Faction']).nunique().reset_index()
+                st.plotly_chart(
+                    px.line(faction_attend, y='Player', x='Date', title='Number of Players by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors)
                 )
 
         with tab2:
