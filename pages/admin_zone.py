@@ -256,7 +256,7 @@ if st.session_state["authentication_status"]:
                     except:
                         pass
                     st.dataframe(user_events)
-                    player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':player, 'Faction':user_df[user_df['Username'] == player]['Faction']}))
+                    player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':player, 'Faction':user_df[user_df['Username'] == player]['Faction'].values[0]}))
                 except:
                     pass
             attend = pd.concat(player_events)
