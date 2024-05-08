@@ -151,6 +151,35 @@ if st.session_state["authentication_status"]:
                         )
                     )
                 )
+            player_events = []
+            for player in user_df['Username']:
+                try:
+                    user_events = pd.DataFrame(json.loads(user_data[player]['event_info']))
+                    user_events.reset_index(drop=True, inplace=True)
+                    user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
+                    try:
+                        user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
+                    except:
+                        pass
+                    try:
+                        user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
+                    except:
+                        pass
+                    player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':player}))
+                except:
+                    pass
+            attend = pd.concat(player_events)
+            attend['Date'] = attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
+            attend = attend.groupby('Date').count().reset_index()
+            st.plotly_chart(
+                px.line(attend, x='Date', y='Player', title='Attendance Over Time').update_layout(
+                        yaxis = dict(
+                            tickmode = 'linear',
+                            dtick = 1,
+                        )
+                    )
+            )
+            
             if st.session_state['username'] in st.secrets['admins']:
                 faction_df = user_df.groupby('Faction')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 st.plotly_chart(
