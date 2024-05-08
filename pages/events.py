@@ -82,6 +82,7 @@ if st.session_state["authentication_status"]:
                 'NPC' : [False],
                 'Merchant Overtime': [False],
                 'Bonus Skill Points' : [0],
+                'Skill Points': [1]
             }
         )
         data_df['Skill Points'] = data_df['Event Type'].replace(event_dict).astype(int) + data_df[['NPC', 'Merchant Overtime']].astype(int).max() + data_df['Bonus Skill Points']
