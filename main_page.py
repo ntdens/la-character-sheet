@@ -296,7 +296,7 @@ if st.session_state["authentication_status"]:
             uploaded_file = st.file_uploader('Upload Profile Picture', type=['png','gif','jpg','jpeg'], key='form_image')
             if uploaded_file is not None:
                 form_image = uploaded_file.getvalue()
-                pic_name = '{}/profile_image.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
+                pic_name = '{}.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
                 image = Image.open(io.BytesIO(form_image))
                 image.save(pic_name)
             submitted = st.form_submit_button('Save Edits')
@@ -308,6 +308,7 @@ if st.session_state["authentication_status"]:
                     "faction":faction_input,
                 })
                 if uploaded_file is not None:
+                    pic_name = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
                     doc_ref.update({
                     "pic_name":pic_name
                     })
