@@ -62,7 +62,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                 if column == 'Spell':
                     user_spell_input = right.selectbox(
                         'Spell?',
-                        [None, 'Yes', 'No'],
+                        ['', 'Yes', 'No'],
                     )
                     if user_spell_input == 'Yes':
                         df = df[df['Spell'] == 'True']
