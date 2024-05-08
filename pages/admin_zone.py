@@ -251,11 +251,11 @@ if st.session_state["authentication_status"]:
                 user_events = pd.DataFrame(json.loads(character_data['event_info']))
                 user_events.reset_index(drop=True, inplace=True)
                 try:
-                    user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
+                    user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y").apply(lambda x: x.strftime("%B %Y"))
                 except:
                     pass
                 try:
-                    user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
+                    user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms').apply(lambda x: x.strftime("%B %Y"))
                 except:
                     pass
                 st.dataframe(user_events, hide_index=True, use_container_width=True)
