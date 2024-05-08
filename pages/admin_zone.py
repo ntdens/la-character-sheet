@@ -289,6 +289,7 @@ if st.session_state["authentication_status"]:
                 )
                 faction_attend = pd.concat(player_events)
                 faction_attend.groupby(['Date','Faction']).nunique().reset_index()
+                st.dataframe(faction_attend)
                 st.plotly_chart(
                     px.line(faction_attend, y='Player', x='Date', title='Number of Players by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors)
                 )
