@@ -246,6 +246,7 @@ if st.session_state["authentication_status"]:
                     user_events = pd.DataFrame(json.loads(user_data[player]['event_info']))
                     user_events.reset_index(drop=True, inplace=True)
                     user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
+                    st.dataframe(user_events)
                     try:
                         user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
                     except:
