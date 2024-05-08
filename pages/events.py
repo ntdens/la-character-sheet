@@ -132,6 +132,8 @@ if st.session_state["authentication_status"]:
             "event_info":st.session_state['df'].to_json()
         })
         st.success('Events saved to database')
+        st.rerun()
+        
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
