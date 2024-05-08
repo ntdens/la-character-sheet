@@ -65,7 +65,14 @@ if st.session_state["authentication_status"]:
         user_events = user_data['event_info']
         data_df = pd.DataFrame(json.loads(user_events))
         data_df.reset_index(drop=True, inplace=True)
-        data_df['Event Date'] = pd.to_datetime(data_df['Event Date'], format="%B %Y")
+        try:
+            data_df['Event Date'] = pd.to_datetime(data_df['Event Date'], format="%B %Y")
+        except:
+            pass
+        try:
+            data_df['Event Date'] = pd.to_datetime(data_df['Event Date'])
+        except:
+            pass
     except:
         data_df = pd.DataFrame(
             {
