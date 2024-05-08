@@ -51,7 +51,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                 _min = df[column].min()
                 _max = df[column].max()
                 user_num_input = right.slider(
-                    f"Values for {column}",
+                    f"{column}",
                     min_value=_min,
                     max_value=_max,
                     value=(_min, _max),
@@ -61,14 +61,14 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             # Treat columns with < 10 unique values as categorical
             elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
                 user_cat_input = right.multiselect(
-                    f"Values for {column}",
+                    f"{column}",
                     df[column].unique(),
                     default=list(df[column].unique()),
                 )
                 df = df[df[column].isin(user_cat_input)]
             elif is_datetime64_any_dtype(df[column]):
                 user_date_input = right.date_input(
-                    f"Values for {column}",
+                    f"{column}",
                     value=(
                         df[column].min(),
                         df[column].max(),
@@ -80,7 +80,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                     df = df.loc[df[column].between(start_date, end_date)]
             else:
                 user_text_input = right.text_input(
-                    f"Substring or regex in {column}",
+                    f"Search in {column}",
                 )
                 if user_text_input:
                     df = df[df[column].astype(str).str.lower().str.contains(user_text_input.lower())]

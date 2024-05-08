@@ -33,12 +33,9 @@ authenticator = stauth.Authenticate(
 
 #new user registration
 try:
+    st.info('Use Player Name for Name')
     email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False)
     if email_of_registered_user:
-        doc_ref = db.reference("users/").child(username_of_registered_user)
-        doc_ref.update({
-            "name":name_of_registered_user,
-        })
         user_auth = db.reference("auth").child(f'credentials/usernames/{username_of_registered_user}')
         user_auth.update(config['credentials']['usernames'][username_of_registered_user])
         st.success('User registered successfully')
