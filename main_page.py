@@ -178,6 +178,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
         return df
 
     df = df.copy()
+    df['Spell'] = df['Spell'].astype(str)
     df = df.fillna('None')
     modification_container = st.container()
 
@@ -203,9 +204,9 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                         [None, 'Yes', 'No'],
                     )
                     if user_spell_input == 'Yes':
-                        df = df[df['Spell'] == True]
+                        df = df[df['Spell'] == 'True']
                     elif user_spell_input == 'No':
-                        df = df[df['Spell'] == False]
+                        df = df[df['Spell'] == 'False']
                 else:
                     user_cat_input = right.multiselect(
                         f"{column}",
