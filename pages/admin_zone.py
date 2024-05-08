@@ -219,30 +219,30 @@ if st.session_state["authentication_status"]:
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
             character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username']).index(st.session_state['username']))
+            # try:
+            character_data = user_data[character_choice]
+            st.dataframe(character_data)
+            known = ast.literal_eval(character_data['known'])
+            known_data = df[df['Skill Name'].isin(known)]
+            display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
             try:
-                character_data = user_data[character_choice]
-                st.dataframe(character_data)
-                known = ast.literal_eval(character_data['known'])
-                known_data = df[df['Skill Name'].isin(known)]
-                display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
-                try:
-                    image_location = character_data['pic_name']
-                    bucket = storage.bucket()
-                    blob = bucket.blob(image_location)
-                    profile_image = blob.download_as_bytes()
-                except:
-                    profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
-                with st.container(border=True):
-                    my_grid = grid([4,6],1)
-                    my_grid.container(border=True).image(profile_image)
-                    player_data = pd.DataFrame({
-                        'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
-                        'Information': [character_data['character_name'],character_data['name'],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Skill Points'].values[0]]
-                                        })
-                    my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
-                    my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True)
+                image_location = character_data['pic_name']
+                bucket = storage.bucket()
+                blob = bucket.blob(image_location)
+                profile_image = blob.download_as_bytes()
             except:
-                st.info("Data does not exist for this user")
+                profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
+            with st.container(border=True):
+                my_grid = grid([4,6],1)
+                my_grid.container(border=True).image(profile_image)
+                player_data = pd.DataFrame({
+                    'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
+                    'Information': [character_data['character_name'],character_data['name'],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Skill Points'].values[0]]
+                                    })
+                my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
+                my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True)
+            # except:
+            #     st.info("Data does not exist for this user")
         with tab3:
             character_choice = st.selectbox('Select User:', user_df['Username'], key='event_user', index=list(user_df['Username']).index(st.session_state['username']))
             try:
