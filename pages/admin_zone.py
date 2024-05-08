@@ -66,6 +66,16 @@ faction_colors = {
     "🕊️ The White Ravens":"gainsboro"
 }
 
+add_the = [
+    "🧝 Unaffilated",
+    "🏴 Blackthorne Company",
+    "💰 Guild of the Black Sky",
+    "🎪 Prismatic Troupe",
+    "⚔️ Sunsteel Company",
+    "🦁 Kult of Tharros",
+    "🐴 Vidarian Khanate",   
+]
+
 path_list = [
     '🗡 Warrior',
     '🪤 Rogue',
@@ -202,7 +212,11 @@ if st.session_state["authentication_status"]:
             user_df = user_df[user_df['Faction'] == faction_filter]
         with tab1:
             leader_data = user_df[user_df['Username'] == st.session_state['username']]
-            st.write("## Welcome {}, Leader of {}".format(leader_data['Character'].values[0],leader_data['Faction'].values[0]))
+            if leader_data['Faction'].values[0] in add_the:
+                add_the_string = 'the '
+            else:
+                add_the_string = ''
+            st.write("## Welcome {}, Leader of {}{}".format(leader_data['Character'].values[0], add_the_string, leader_data['Faction'].values[0]))
             user_df = filter_dataframe(user_df)
             st.dataframe(user_df, hide_index=True)
             tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
