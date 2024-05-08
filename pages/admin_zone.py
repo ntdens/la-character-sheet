@@ -139,7 +139,7 @@ if st.session_state["authentication_status"]:
                             dtick = 1,
                             title='Players'
                         )
-                    )
+                    ).update_traces(marker_color='rgb(230,171,2)')
                 )
             st.plotly_chart(
                 px.histogram(user_df, x='Available Points', nbins=20, title='Points Available by Players').update_layout(
@@ -149,7 +149,7 @@ if st.session_state["authentication_status"]:
                             dtick = 1,
                             title='Players'
                         )
-                    )
+                    ).update_traces(marker_color='rgb(230,171,2)')
                 )
             player_events = []
             for player in user_df['Username']:
@@ -178,7 +178,7 @@ if st.session_state["authentication_status"]:
                             dtick = 1,
                             title = 'Players'
                         )
-                    )
+                    ).update_traces(marker_color='rgb(230,171,2)')
             )
             
             if st.session_state['username'] in st.secrets['admins']:
