@@ -117,11 +117,17 @@ if st.session_state["authentication_status"]:
             st.write("## Welcome {}, Leader of {}".format(leader_data['Character'].values[0],leader_data['Faction'].values[0]))
             st.dataframe(user_df, hide_index=True)
             chart_grid = grid(3)
-            tier_df = user_df.groupby('Tier').count()['Username']
-            tier_list = pd.DataFrame({'Tier':list(range(0,11))})
-            tier_df = tier_list.merge(tier_df, how='left', on='Tier').fillna(0).rename(columns={'Username':'Players'})
+            tier_df = user_df.groupby('Tier').count()['Username'].rename(columns={'Username':'Players'})
+            # tier_list = pd.DataFrame({'Tier':list(range(0,11))})
+            # tier_df = tier_list.merge(tier_df, how='left', on='Tier').fillna(0)
             chart_grid.plotly_chart(
-                px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier')
+                px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
+                    xaxis = dict(
+                        tickmode = 'array',
+                        tickvals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                        ticktext = ['Zero', 'One', 'Two' 'Three', 'Four', 'Five','Six', 'Seven','Eight', 'Nine', 'Ten']
+                    )
+                )
             )
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
