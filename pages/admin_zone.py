@@ -226,7 +226,10 @@ if st.session_state["authentication_status"]:
             character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username']).index(st.session_state['username']))
             try:
                 character_data = user_data[character_choice]
-                known = ast.literal_eval(character_data['known'])
+                try:
+                    known = ast.literal_eval(character_data['known'])
+                except:
+                    known = []
                 known_data = df[df['Skill Name'].isin(known)]
                 display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
                 try:
