@@ -203,7 +203,8 @@ if st.session_state["authentication_status"]:
         with tab1:
             leader_data = user_df[user_df['Username'] == st.session_state['username']]
             st.write("## Welcome {}, Leader of {}".format(leader_data['Character'].values[0],leader_data['Faction'].values[0]))
-            st.dataframe(filter_dataframe(user_df), hide_index=True)
+            user_df = filter_dataframe(user_df)
+            st.dataframe(user_df, hide_index=True)
             tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
             st.plotly_chart(
                 px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
