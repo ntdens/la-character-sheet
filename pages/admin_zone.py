@@ -250,6 +250,14 @@ if st.session_state["authentication_status"]:
                 character_data = user_data[character_choice]
                 user_events = pd.DataFrame(json.loads(character_data['event_info']))
                 user_events.reset_index(drop=True, inplace=True)
+                try:
+                    user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
+                except:
+                    pass
+                try:
+                    user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
+                except:
+                    pass
                 st.dataframe(user_events, hide_index=True, use_container_width=True)
             except:
                 st.info("Data does not exist for this user")
