@@ -288,6 +288,7 @@ if st.session_state["authentication_status"]:
                     )
                 )
                 faction_attend = pd.concat(player_events)
+                faction_attend['Date'] = faction_attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
                 faction_attend = faction_attend.groupby(['Date','Faction']).nunique().reset_index()
                 st.dataframe(faction_attend)
                 st.plotly_chart(
