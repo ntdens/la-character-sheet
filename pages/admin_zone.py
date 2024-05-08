@@ -218,7 +218,7 @@ if st.session_state["authentication_status"]:
                 add_the_string = ''
             st.write("## Welcome {}, Leader of {}{}".format(leader_data['Character'].values[0], add_the_string, leader_data['Faction'].values[0]))
             user_df = filter_dataframe(user_df)
-            st.dataframe(user_df, hide_index=True)
+            st.dataframe(user_df, hide_index=True, use_container_width=True)
             tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
             path_df = user_df.groupby('Path')['Username'].count().reset_index().rename(columns={'Username':'Players'})
             st.plotly_chart(
@@ -234,7 +234,7 @@ if st.session_state["authentication_status"]:
                             dtick = 1
                     )
                 ).update_traces(marker_color='rgb(230,171,2)')
-            )
+            , use_container_width=True)
             st.plotly_chart(
                 px.bar(path_df, x='Path', y='Players', title='Number of Players by Path').update_layout(
                     yaxis = dict(
@@ -243,7 +243,7 @@ if st.session_state["authentication_status"]:
                             dtick = 1
                     )
                 ).update_traces(marker_color='rgb(230,171,2)')
-            )
+            , use_container_width=True)
             st.plotly_chart(
                 px.histogram(user_df, x='Earned Points', nbins=20, title='Points Earned by Players').update_layout(
                         yaxis = dict(
@@ -253,7 +253,7 @@ if st.session_state["authentication_status"]:
                             title='Players'
                         )
                     ).update_traces(marker_color='rgb(230,171,2)')
-                )
+                , use_container_width=True)
             st.plotly_chart(
                 px.histogram(user_df, x='Available Points', nbins=20, title='Points Available by Players').update_layout(
                         yaxis = dict(
@@ -263,7 +263,7 @@ if st.session_state["authentication_status"]:
                             title='Players'
                         )
                     ).update_traces(marker_color='rgb(230,171,2)')
-                )
+                , use_container_width=True)
             player_events = []
             for player in user_df['Username']:
                 try:
@@ -292,7 +292,7 @@ if st.session_state["authentication_status"]:
                             title = 'Players'
                         )
                     ).update_traces(line_color='rgb(230,171,2)')
-            )
+            , use_container_width=True)
             
             if st.session_state['username'] in st.secrets['admins']:
                 faction_df = user_df.groupby('Faction')['Username'].count().reset_index().rename(columns={'Username':'Players'})
@@ -310,13 +310,13 @@ if st.session_state["authentication_status"]:
                         ),
                         showlegend = False
                     )
-                )
+                , use_container_width=True)
                 faction_attend = pd.concat(player_events)
                 faction_attend['Date'] = faction_attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
                 faction_attend = faction_attend.groupby(['Date','Faction']).nunique().reset_index()
                 st.plotly_chart(
                     px.line(faction_attend, y='Player', x='Date', title='Attendance by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors)
-                )
+                , use_container_width=True)
 
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
