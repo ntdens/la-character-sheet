@@ -279,7 +279,6 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
 
 
     Title = "LARP Adventures Character Sheet"
-    pageinfo = "platypus example"
     def myFirstPage(canvas, doc):
         canvas.saveState()
         canvas.drawImage('OLD_PAPER_TEXTURE.jpg',0,0)
