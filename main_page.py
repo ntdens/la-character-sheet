@@ -1,7 +1,6 @@
 import json
 import streamlit as st
 import streamlit_authenticator as stauth
-from streamlit_extras.grid import grid
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 import pandas as pd
 from pandas.api.types import (
@@ -16,6 +15,19 @@ import PIL.Image as Image
 import os
 import ast
 import plotly.graph_objects as go
+from reportlab.platypus import *
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, portrait
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+import numpy as np
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch, cm
+import emoji
+import requests
+from PIL import Image as ImageCheck
+from unicodedata import normalize
 
 add_page_title(layout='wide')
 
@@ -234,6 +246,131 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
+def replace_with_emoji_pdf(text, size):
+    """
+    Reportlab's Paragraph doesn't accept normal html <image> tag's attributes
+    like 'class', 'alt'. Its a little hack to remove those attrbs
+    """
+
+    for e in emoji.analyze(text):
+        e_icon = e.chars
+        try:
+            emoji_code = "-".join(f"{ord(c):x}" for c in e_icon)
+            url = f"https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/{emoji_code}.png"
+            im = ImageCheck.open(requests.get(url, stream=True).raw)
+            text = text.replace(e_icon, '<img height={} width={} src="{}"/>'.format(size, size, url))
+        except:
+            emoji_code = [f"{ord(c):x}" for c in e_icon][0]
+            url = f"https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/{emoji_code}.png"
+            im = ImageCheck.open(requests.get(url, stream=True).raw)
+            text = text.replace(e_icon, '<img height={} width={} src="{}"/>'.format(size, size, url))
+    return normalize('NFKD', text).encode('ascii','ignore')
+
+def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataFrame(), user_events = pd.DataFrame()):
+    PAGE_WIDTH, PAGE_HEIGHT= letter
+    styles = getSampleStyleSheet()
+
+    PAGESIZE = portrait(letter)
+
+    font_file = 'SedanSC-Regular.ttf'
+    sedan_font = TTFont('SedanSC', font_file)
+    pdfmetrics.registerFont(sedan_font)
+
+
+    Title = "LARP Adventures Character Sheet"
+    pageinfo = "platypus example"
+    def myFirstPage(canvas, doc):
+        canvas.saveState()
+        canvas.drawImage('OLD_PAPER_TEXTURE.jpg',0,0)
+        canvas.drawImage('la_logo.png', doc.leftMargin, doc.height + doc.bottomMargin + doc.topMargin - 4*cm, 3*cm, 3*cm, mask='auto')
+        canvas.setFont('SedanSC',16)
+        canvas.drawCentredString(PAGE_WIDTH/2.0, PAGE_HEIGHT-doc.topMargin, Title)
+        canvas.setFont('SedanSC',9)
+        canvas.drawString(inch, 0.75 * inch, "Page %d" % (doc.page))
+        canvas.restoreState()
+
+    def myLaterPages(canvas, doc):
+        canvas.saveState()
+        canvas.drawImage('OLD_PAPER_TEXTURE.jpg',0,0)
+        canvas.setFont('SedanSC',9)
+        canvas.drawString(inch, 0.75 * inch, "Page %d" % (doc.page))
+        canvas.restoreState()
+
+
+
+    character_info_style = TableStyle(
+        [
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+        ]
+    )
+
+    skill_info_style = TableStyle(
+        [
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+        ]
+    )
+
+
+    styles["Title"].fontName = 'SedanSC'
+    styles["Title"].fontSize = 10
+    styles["Title"].alignment = TA_LEFT
+
+    break_style = ParagraphStyle('breakstyle',
+        fontSize=14,
+        fontName='SedanSC',
+        alignment = TA_CENTER
+    )
+
+    def table_gen(table_data, headers=False, tstyle=character_info_style):
+        table_data = table_data.map(lambda x:replace_with_emoji_pdf(x, styles['Title'].fontSize) if isinstance(x, str) else str(x))
+        if headers:
+            t1 = Table([[Paragraph(col, style=styles['Title']) for col in table_data.columns]] + np.array(table_data.map(lambda x:Paragraph(x, style=styles['Title']))).tolist(), style=tstyle, repeatRows=1)
+        else:
+            t1 = Table(np.array(table_data.map(lambda x:Paragraph(x, style=styles['Title']))).tolist(), style=tstyle, repeatRows=1)
+        return t1
+    t1 = table_gen(player_data)
+    doc = SimpleDocTemplate("table.pdf", pagesize=letter)
+
+    table_style = TableStyle(
+        [
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ('SPAN', (0, 0), (0, -1)),
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'CENTER')
+        ]
+    )
+    profile = Image(profile_image,width=4*inch,height=4*inch,kind='proportional')
+    logo = Image(logo_image,width=4*inch,height=2*inch,kind='proportional')
+
+    data_table = [
+        [profile, t1], 
+        ['', logo],
+    ]
+    final_table = Table(data_table, style=table_style)
+    if not display_data.empty:
+        t2 = table_gen(display_data, headers=True, tstyle=skill_info_style)
+    if not user_events.empty:
+        t3 = table_gen(user_events, headers=True, tstyle=skill_info_style)
+
+    doc = SimpleDocTemplate("character_sheet.pdf", pagesize=PAGESIZE)
+    Story = [Spacer(1,1*inch)]
+    style = styles["Normal"]
+    Story.append(final_table)
+    if not display_data.empty:
+        Story.append(Spacer(1,1*inch))
+        Story.append(Paragraph('<u>Skills</u>', style=break_style))
+        Story.append(Spacer(1,.5*inch))
+        Story.append(t2)
+    if not user_events.empty:
+        Story.append(Spacer(1,1*inch))
+        Story.append(Paragraph('<u>Events</u>', style=break_style))
+        Story.append(Spacer(1,.5*inch))
+        Story.append(t3)
+    doc.build(Story, onFirstPage=myFirstPage, onLaterPages=myLaterPages)
+
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
     creds = credentials.Certificate(key_dict)
@@ -382,15 +519,121 @@ if st.session_state["authentication_status"]:
         display_data = display_data.fillna('')
         points_available = skill_points - st.session_state['point_spend']
         with st.container(border=True):
-            my_grid = grid([4,6],1)
-            my_grid.container(border=True).image(profile_image)
-            player_data = pd.DataFrame({
-                'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
-                'Information': [character_name,player,path,faction,tier,points_available]
-                                })
-            my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
-            my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True, height=500)
-
+            col1, col2 = st.columns([6,4])
+            with col1:
+                st.container(border=True).image(profile_image)
+            with col2:
+                player_data = pd.DataFrame({
+                    'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
+                    'Information': [character_name,player,path,faction,tier,points_available]
+                                    })
+                st.dataframe(player_data, hide_index=True, use_container_width=True)
+                bucket = storage.bucket()
+                if faction != "🧝 Unaffilated" or "🤖 NPC":
+                    blob = bucket.blob("faction_logos/{}.jpg".format(faction))
+                    logo = blob.download_as_bytes()
+                    st.image(logo)
+                else:
+                    blob = bucket.blob("faction_logos/la_logo.jpg".format(faction))
+                    logo = blob.download_as_bytes()
+                    st.image(logo)
+                if st.button('Generate Player Sheet', use_container_width=True):
+                    user_data = db.reference("users/").child(st.session_state['username']).get()
+                    image_location = user_data['pic_name']
+                    bucket = storage.bucket()
+                    blob = bucket.blob(image_location)
+                    blob.download_to_filename(user_data['pic_name'].split('/')[1])
+                    profile_image = user_data['pic_name'].split('/')[1]
+                    if faction != "🧝 Unaffilated" or "🤖 NPC":
+                        blob = bucket.blob("faction_logos/{}.jpg".format(faction))
+                        blob.download_to_filename(faction + '.jpg')
+                        logo_image = faction + '.jpg'
+                    else:
+                        blob = bucket.blob("faction_logos/la_logo.jpg".format(faction))
+                        blob.download_to_filename('la_logo.jpg')
+                        logo_image = 'la_logo.jpg'
+                    generate_pdf(player_data, profile_image, logo_image)
+                    blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                    blob.upload_from_filename('character_sheet.pdf')
+                    os.remove('character_sheet.pdf')
+                    os.remove(profile_image)
+                    os.remove(logo_image)
+                    blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                    pdf_data = blob.download_as_bytes()
+                    st.download_button(label="Download Character Sheet",
+                        data=pdf_data,
+                        file_name="{}.pdf".format(character_name),
+                        mime='application/octet-stream'
+                    )
+                if st.button('Generate Player Sheet w/ Skills', use_container_width=True):
+                    user_data = db.reference("users/").child(st.session_state['username']).get()
+                    image_location = user_data['pic_name']
+                    bucket = storage.bucket()
+                    blob = bucket.blob(image_location)
+                    blob.download_to_filename(user_data['pic_name'].split('/')[1])
+                    profile_image = user_data['pic_name'].split('/')[1]
+                    if faction != "🧝 Unaffilated" or "🤖 NPC":
+                        blob = bucket.blob("faction_logos/{}.jpg".format(faction))
+                        blob.download_to_filename(faction + '.jpg')
+                        logo_image = faction + '.jpg'
+                    else:
+                        blob = bucket.blob("faction_logos/la_logo.jpg".format(faction))
+                        blob.download_to_filename('la_logo.jpg')
+                        logo_image = 'la_logo.jpg'
+                    
+                    generate_pdf(player_data, profile_image, logo_image, display_data[['Skill Name', 'Limitations', 'Phys Rep']])
+                    blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                    blob.upload_from_filename('character_sheet.pdf')
+                    os.remove('character_sheet.pdf')
+                    os.remove(profile_image)
+                    os.remove(logo_image)
+                    blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                    pdf_data = blob.download_as_bytes()
+                    st.download_button(label="Download Character Sheet",
+                        data=pdf_data,
+                        file_name="{}.pdf".format(character_name),
+                        mime='application/octet-stream'
+                    )
+                if st.button('Generate Player Sheet w/ Skills and Events', use_container_width=True):
+                    user_data = db.reference("users/").child(st.session_state['username']).get()
+                    image_location = user_data['pic_name']
+                    bucket = storage.bucket()
+                    blob = bucket.blob(image_location)
+                    blob.download_to_filename(user_data['pic_name'].split('/')[1])
+                    profile_image = user_data['pic_name'].split('/')[1]
+                    if faction != "🧝 Unaffilated" or "🤖 NPC":
+                        blob = bucket.blob("faction_logos/{}.jpg".format(faction))
+                        blob.download_to_filename(faction + '.jpg')
+                        logo_image = faction + '.jpg'
+                    else:
+                        blob = bucket.blob("faction_logos/la_logo.jpg".format(faction))
+                        blob.download_to_filename('la_logo.jpg')
+                        logo_image = 'la_logo.jpg'
+                    user_events = pd.DataFrame(json.loads(user_events))
+                    user_events.reset_index(drop=True, inplace=True)
+                    try:
+                        user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y").apply(lambda x:x.strftime("%B %Y"))
+                    except:
+                        pass
+                    try:
+                        user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms').apply(lambda x:x.strftime("%B %Y"))
+                    except:
+                        pass
+                    user_events[['Bonus Skill Points', 'Skill Points']] = user_events[['Bonus Skill Points', 'Skill Points']].astype(int)
+                    generate_pdf(player_data, profile_image, logo_image, display_data[['Skill Name', 'Limitations', 'Phys Rep']], user_events)
+                    blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                    blob.upload_from_filename('character_sheet.pdf')
+                    os.remove('character_sheet.pdf')
+                    os.remove(profile_image)
+                    os.remove(logo_image)
+                    blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                    pdf_data = blob.download_as_bytes()
+                    st.download_button(label="Download Character Sheet",
+                        data=pdf_data,
+                        file_name="{}.pdf".format(character_name),
+                        mime='application/octet-stream'
+                    )
+            st.dataframe(display_data.astype(str), hide_index=True, use_container_width=True, height=500)
 
 
 elif st.session_state["authentication_status"] is False:

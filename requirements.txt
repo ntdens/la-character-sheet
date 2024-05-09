@@ -6,3 +6,5 @@ firebase_admin
 pandas
 openpyxl
 plotly
+reportlab
+emoji
