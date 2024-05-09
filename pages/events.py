@@ -85,13 +85,10 @@ if st.session_state["authentication_status"]:
                 'Skill Points': [1]
             }
         )
-    
-    if "df" not in st.session_state:
-        st.session_state["df"] = data_df
     st.info('Skill Points will be updated upon save')
     with st.form('event_data'):
         event_df = st.data_editor(
-        st.session_state["df"],
+        data_df,
         key="df_editor",
         column_config={
             "Event Name": st.column_config.TextColumn(
