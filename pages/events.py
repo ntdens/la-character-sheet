@@ -130,13 +130,15 @@ if st.session_state["authentication_status"]:
             use_container_width=True
         )
     st.info('Be patient, give table time to load after each entry')
-    editor()
-    if st.button('Save Events'):
-        doc_ref = db.reference("users/").child(st.session_state['username'])
-        doc_ref.update({
-            "event_info":st.session_state['df'].to_json()
-        })
-        st.success('Events saved to database')
+    with st.form('event_data'):
+        editor()
+        submit_events = st.form_submit_button('Save Events')
+        if submit_events:
+            doc_ref = db.reference("users/").child(st.session_state['username'])
+            doc_ref.update({
+                "event_info":st.session_state['df'].to_json()
+            })
+            st.success('Events saved to database')
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
