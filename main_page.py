@@ -1,5 +1,3 @@
-import yaml
-from yaml.loader import SafeLoader
 import json
 import streamlit as st
 import streamlit_authenticator as stauth
@@ -16,8 +14,8 @@ from math import floor, sqrt
 import io
 import PIL.Image as Image
 import os
-import numpy as np
 import ast
+import plotly.graph_objects as go
 
 add_page_title(layout='wide')
 
@@ -27,7 +25,7 @@ hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Man
 
 faction_list = [
     "🧝 Unaffilated",
-    "🏴 Blackthorne Company",
+    # "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
     "⚜️ Catalpa",
     "🍷 Cedar Hill",
@@ -44,7 +42,8 @@ faction_list = [
     "🦁 Kult of Tharros",
     "🐴 Vidarian Khanate",
     "🏹 The Wardens",
-    "🕊️ The White Ravens"
+    "🕊️ The White Ravens",
+    "🤖 NPC"
 ]
 
 path_list = [
@@ -391,6 +390,15 @@ if st.session_state["authentication_status"]:
                                 })
             my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
             my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True, height=500)
+            fig = go.Figure(data=[go.Table(
+                header=dict(values=list(display_data.columns),
+                            fill_color='paleturquoise',
+                            align='left'),
+                cells=dict(values=[display_data['Skill Name'], display_data['Description'], display_data['Limitations'], display_data['Phys Rep']],
+                        fill_color='lavender',
+                        align='left'))
+            ])
+            st.plotly_chart(fig)
 
 
 elif st.session_state["authentication_status"] is False:

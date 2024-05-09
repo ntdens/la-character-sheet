@@ -25,7 +25,7 @@ hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Man
 
 faction_list = [
     "🧝 Unaffilated",
-    "🏴 Blackthorne Company",
+    # "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
     "🛡 Eponore",
     "⚜️ Catalpa",
@@ -46,7 +46,7 @@ faction_list = [
 ]
 faction_colors = {
     "🧝 Unaffilated":'burlywood',
-    "🏴 Blackthorne Company":'black',
+    # "🏴 Blackthorne Company":'black',
     "💰 Guild of the Black Sky":'darkkhaki',
     "🛡 Eponore":"yellow",
     "⚜️ Catalpa":"red",
@@ -68,7 +68,7 @@ faction_colors = {
 
 add_the = [
     "🧝 Unaffilated",
-    "🏴 Blackthorne Company",
+    # "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
     "🎪 Prismatic Troupe",
     "⚔️ Sunsteel Company",
@@ -208,6 +208,7 @@ if st.session_state["authentication_status"]:
                 "Available Points":avail_points
             })
         user_df = pd.DataFrame(user_table)
+        user_df = user_df[user_df['Faction'] != "🤖 NPC"]
         if faction_filter != None:
             user_df = user_df[user_df['Faction'] == faction_filter]
         with tab1:
