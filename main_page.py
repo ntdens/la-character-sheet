@@ -390,15 +390,7 @@ if st.session_state["authentication_status"]:
                                 })
             my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
             my_grid.dataframe(display_data.astype(str), hide_index=True, use_container_width=True, height=500)
-            fig = go.Figure(data=[go.Table(
-                header=dict(values=list(display_data.columns),
-                            fill_color='paleturquoise',
-                            align='left'),
-                cells=dict(values=[display_data['Skill Name'], display_data['Description'], display_data['Limitations'], display_data['Phys Rep']],
-                        fill_color='lavender',
-                        align='left'))
-            ])
-            st.plotly_chart(fig)
+
 
 
 elif st.session_state["authentication_status"] is False:
