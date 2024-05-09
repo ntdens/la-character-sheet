@@ -322,10 +322,13 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
         alignment = TA_CENTER
     )
 
-    def table_gen(table_data, headers=False, tstyle=character_info_style):
+    def table_gen(table_data, headers=False, tstyle=character_info_style, skill_table=False):
         table_data = table_data.map(lambda x:replace_with_emoji_pdf(x, styles['Title'].fontSize) if isinstance(x, str) else str(x))
         if headers:
-            t1 = Table([[Paragraph(col, style=styles['Title']) for col in table_data.columns]] + np.array(table_data.map(lambda x:Paragraph(x, style=styles['Title']))).tolist(), style=tstyle, repeatRows=1)
+            if skill_table:
+                t1 = Table([[Paragraph(col, style=styles['Title']) for col in table_data.columns]] + np.array(table_data.map(lambda x:Paragraph(x, style=styles['Title']))).tolist(), style=tstyle, repeatRows=1, colWidths=(None,5*inch))
+            else:
+                t1 = Table([[Paragraph(col, style=styles['Title']) for col in table_data.columns]] + np.array(table_data.map(lambda x:Paragraph(x, style=styles['Title']))).tolist(), style=tstyle, repeatRows=1)
         else:
             t1 = Table(np.array(table_data.map(lambda x:Paragraph(x, style=styles['Title']))).tolist(), style=tstyle, repeatRows=1)
         return t1
@@ -350,7 +353,7 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
     ]
     final_table = Table(data_table, style=table_style)
     if not display_data.empty:
-        t2 = table_gen(display_data, headers=True, tstyle=skill_info_style)
+        t2 = table_gen(display_data, headers=True, tstyle=skill_info_style, skill_table=True)
     if not user_events.empty:
         t3 = table_gen(user_events, headers=True, tstyle=skill_info_style)
 
@@ -596,7 +599,7 @@ if st.session_state["authentication_status"]:
                             blob.download_to_filename('la_logo.jpg')
                             logo_image = 'la_logo.jpg'
                         
-                        generate_pdf(player_data, profile_image, logo_image, display_data[['Skill Name', 'Limitations', 'Phys Rep']])
+                        generate_pdf(player_data, profile_image, logo_image, display_data[['Skill Name', 'Description']])
                         blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                         blob.upload_from_filename('character_sheet.pdf')
                         os.remove('character_sheet.pdf')
@@ -644,7 +647,7 @@ if st.session_state["authentication_status"]:
                         except:
                             pass
                         user_events[['Bonus Skill Points', 'Skill Points']] = user_events[['Bonus Skill Points', 'Skill Points']].astype(int)
-                        generate_pdf(player_data, profile_image, logo_image, display_data[['Skill Name', 'Limitations', 'Phys Rep']], user_events)
+                        generate_pdf(player_data, profile_image, logo_image, display_data[['Skill Name', 'Description']], user_events)
                         blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                         blob.upload_from_filename('character_sheet.pdf')
                         os.remove('character_sheet.pdf')
