@@ -565,7 +565,8 @@ if st.session_state["authentication_status"]:
                             data=pdf_data,
                             file_name="{}.pdf".format(character_name),
                             mime='application/octet-stream',
-                            use_container_width=True
+                            use_container_width=True,
+                            type='primary'
                         )
                 if st.button('Generate Player Sheet w/ Skills', use_container_width=True):
                     with st.spinner('Generating PDF'):
@@ -596,7 +597,8 @@ if st.session_state["authentication_status"]:
                             data=pdf_data,
                             file_name="{}.pdf".format(character_name),
                             mime='application/octet-stream',
-                            use_container_width=True
+                            use_container_width=True,
+                            type='primary'
                         )
                 if st.button('Generate Player Sheet w/ Skills and Events', use_container_width=True):
                     with st.spinner('Generating PDF'):
@@ -637,7 +639,8 @@ if st.session_state["authentication_status"]:
                             data=pdf_data,
                             file_name="{}.pdf".format(character_name),
                             mime='application/octet-stream',
-                            use_container_width=True
+                            use_container_width=True,
+                            type='primary'
                         )
             st.dataframe(display_data.astype(str), hide_index=True, use_container_width=True, height=500)
 
