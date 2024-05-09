@@ -536,7 +536,7 @@ if st.session_state["authentication_status"]:
                     blob = bucket.blob("faction_logos/la_logo.jpg".format(faction))
                     logo = blob.download_as_bytes()
                     st.image(logo)
-                if st.button('Generate Player Sheet', use_container_width=True):
+                if st.button('Generate Character Sheet PDF', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         user_data = db.reference("users/").child(st.session_state['username']).get()
                         image_location = user_data['pic_name']
@@ -567,7 +567,7 @@ if st.session_state["authentication_status"]:
                             use_container_width=True,
                             type='primary'
                         )
-                if st.button('Generate Player Sheet w/ Skills', use_container_width=True):
+                if st.button('Generate Character Sheet PDF w/ Skills', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         user_data = db.reference("users/").child(st.session_state['username']).get()
                         image_location = user_data['pic_name']
@@ -599,7 +599,7 @@ if st.session_state["authentication_status"]:
                             use_container_width=True,
                             type='primary'
                         )
-                if st.button('Generate Player Sheet w/ Skills and Events', use_container_width=True):
+                if st.button('Generate Character Sheet PDF w/ Skills and Events', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         user_data = db.reference("users/").child(st.session_state['username']).get()
                         image_location = user_data['pic_name']
