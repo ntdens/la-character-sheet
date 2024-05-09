@@ -88,7 +88,7 @@ if st.session_state["authentication_status"]:
     
     if "df" not in st.session_state:
         st.session_state["df"] = data_df
-    st.info('Be patient, give table time to load after each entry')
+    st.info('Skill Points will be updated upon save')
     with st.form('event_data'):
         event_df = st.data_editor(
         st.session_state["df"],
@@ -136,6 +136,7 @@ if st.session_state["authentication_status"]:
             "event_info":event_df.to_json()
         })
         st.success('Events saved to database')
+        st.rerun()
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
