@@ -533,23 +533,29 @@ if st.session_state["authentication_status"]:
                     logo = blob.download_as_bytes()
                     st.image(logo)
                 else:
-                    blob = bucket.blob("faction_logos/la_logo.jpg".format(faction))
+                    blob = bucket.blob("faction_logos/la_logo.jpg")
                     logo = blob.download_as_bytes()
                     st.image(logo)
                 if st.button('Generate Character Sheet PDF', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         user_data = db.reference("users/").child(st.session_state['username']).get()
-                        image_location = user_data['pic_name']
-                        bucket = storage.bucket()
-                        blob = bucket.blob(image_location)
-                        blob.download_to_filename(user_data['pic_name'].split('/')[1])
-                        profile_image = user_data['pic_name'].split('/')[1]
+                        try:
+                            image_location = user_data['pic_name']
+                            bucket = storage.bucket()
+                            blob = bucket.blob(image_location)
+                            blob.download_to_filename(user_data['pic_name'].split('/')[1])
+                            profile_image = user_data['pic_name'].split('/')[1]
+                        except:
+                            bucket = storage.bucket()
+                            blob = bucket.blob("faction_logos/la_logo.jpg")
+                            blob.download_to_filename('logo.jpg')
+                            profile_image = 'logo.jpg'
                         if faction != "🧝 Unaffilated" or "🤖 NPC":
                             blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                             blob.download_to_filename(faction + '.jpg')
                             logo_image = faction + '.jpg'
                         else:
-                            blob = bucket.blob("faction_logos/la_logo.jpg".format(faction))
+                            blob = bucket.blob("faction_logos/la_logo.jpg")
                             blob.download_to_filename('la_logo.jpg')
                             logo_image = 'la_logo.jpg'
                         generate_pdf(player_data, profile_image, logo_image)
@@ -570,11 +576,17 @@ if st.session_state["authentication_status"]:
                 if st.button('Generate Character Sheet PDF w/ Skills', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         user_data = db.reference("users/").child(st.session_state['username']).get()
-                        image_location = user_data['pic_name']
-                        bucket = storage.bucket()
-                        blob = bucket.blob(image_location)
-                        blob.download_to_filename(user_data['pic_name'].split('/')[1])
-                        profile_image = user_data['pic_name'].split('/')[1]
+                        try:
+                            image_location = user_data['pic_name']
+                            bucket = storage.bucket()
+                            blob = bucket.blob(image_location)
+                            blob.download_to_filename(user_data['pic_name'].split('/')[1])
+                            profile_image = user_data['pic_name'].split('/')[1]
+                        except:
+                            bucket = storage.bucket()
+                            blob = bucket.blob("faction_logos/la_logo.jpg")
+                            blob.download_to_filename('logo.jpg')
+                            profile_image = 'logo.jpg'
                         if faction != "🧝 Unaffilated" or "🤖 NPC":
                             blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                             blob.download_to_filename(faction + '.jpg')
@@ -602,11 +614,17 @@ if st.session_state["authentication_status"]:
                 if st.button('Generate Character Sheet PDF w/ Skills and Events', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         user_data = db.reference("users/").child(st.session_state['username']).get()
-                        image_location = user_data['pic_name']
-                        bucket = storage.bucket()
-                        blob = bucket.blob(image_location)
-                        blob.download_to_filename(user_data['pic_name'].split('/')[1])
-                        profile_image = user_data['pic_name'].split('/')[1]
+                        try:
+                            image_location = user_data['pic_name']
+                            bucket = storage.bucket()
+                            blob = bucket.blob(image_location)
+                            blob.download_to_filename(user_data['pic_name'].split('/')[1])
+                            profile_image = user_data['pic_name'].split('/')[1]
+                        except:
+                            bucket = storage.bucket()
+                            blob = bucket.blob("faction_logos/la_logo.jpg")
+                            blob.download_to_filename('logo.jpg')
+                            profile_image = 'logo.jpg'
                         if faction != "🧝 Unaffilated" or "🤖 NPC":
                             blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                             blob.download_to_filename(faction + '.jpg')
