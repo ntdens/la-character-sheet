@@ -531,7 +531,7 @@ if st.session_state["authentication_status"]:
                                     })
                 st.dataframe(player_data, hide_index=True, use_container_width=True)
                 bucket = storage.bucket()
-                if faction != "🧝 Unaffilated" or "🤖 NPC":
+                if faction != "🧝 Unaffilated" or "🤖 NPC" or None:
                     blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                     logo = blob.download_as_bytes()
                     st.image(logo)
