@@ -251,8 +251,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                 )
                 if user_text_input:
                     df = df[df[column].astype(str).str.lower().str.contains(user_text_input.lower())]
-
-    return df
+        return df
 
 
 def replace_with_emoji_pdf(text, size):
@@ -518,7 +517,10 @@ if st.session_state["authentication_status"]:
         display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep']].drop_duplicates(subset=['Skill Name']).copy()
         st.dataframe(display_data, hide_index=True, use_container_width=True)
         "## Available Skills"
-        st.dataframe(filter_dataframe(df), hide_index=True, use_container_width=True)
+        try:
+            st.dataframe(filter_dataframe(df), hide_index=True, use_container_width=True)
+        except:
+            st.warning("You've filtered too far. Try again")
 
 
     with tab1:
