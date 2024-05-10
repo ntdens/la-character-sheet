@@ -50,7 +50,7 @@ faction_colors = {
     "💰 Guild of the Black Sky":'darkkhaki',
     "🛡 Eponore":"yellow",
     "⚜️ Catalpa":"red",
-    "🍷 Cedar Hill":"fuscia",
+    "🍷 Cedar Hill":"fuchsia",
     "🧚‍♀️ The Court of Ashes":'purple',
     "🧛‍♂️ The Dismissed":'firebrick',
     "💀 Geth":'gray',
