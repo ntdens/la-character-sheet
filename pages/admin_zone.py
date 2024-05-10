@@ -286,7 +286,9 @@ if st.session_state["authentication_status"]:
                     pass
             attend = pd.concat(player_events)
             attend['Date'] = attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
-            attend = attend.groupby('Date')['Player'].nunique().reset_index()
+            attend = attend.groupby('Date')['Player'].nunique()
+            idx = pd.date_range(attend.index.min(), attend.index.max(), freq='1MS')
+            attend = attend.reindex(idx, fill_value=0).reset_index().rename(columns={'index':'Date'})
             st.plotly_chart(
                 px.line(attend, x='Date', y='Player', title='Attendance Over Time').update_layout(
                         yaxis = dict(
@@ -317,7 +319,15 @@ if st.session_state["authentication_status"]:
                 , use_container_width=True)
                 faction_attend = pd.concat(player_events)
                 faction_attend['Date'] = faction_attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
-                faction_attend = faction_attend.groupby(['Date','Faction']).nunique().reset_index()
+                faction_attend = faction_attend.groupby(['Faction','Date']).nunique().reset_index()
+                filled_dates = []
+                for f in faction_attend['Faction'].unique():
+                    fadf = faction_attend[faction_attend['Faction'] == f].set_index('Date')
+                    idx = pd.date_range(fadf.index.min(), fadf.index.max(), freq='1MS')
+                    fadf = fadf.reindex(idx, fill_value=0).reset_index().rename(columns={'index':'Date'})
+                    fadf['Faction'] = f
+                    filled_dates.append(fadf)
+                faction_attend = pd.concat(filled_dates)
                 st.plotly_chart(
                     px.line(faction_attend, y='Player', x='Date', title='Attendance by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors).update_layout(
                         yaxis = dict(
