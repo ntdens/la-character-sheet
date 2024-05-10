@@ -496,6 +496,9 @@ if st.session_state["authentication_status"]:
                         bucket = storage.bucket()
                         blob = bucket.blob(pic_location)
                         blob.upload_from_filename(pic_name)
+                        for b in bucket.list_blobs(prefix=st.session_state['username']):
+                            if b.name not in all_pics:
+                                b.delete()
                         os.remove(pic_name)
                 st.rerun()
     if 'form_char' in st.session_state:
