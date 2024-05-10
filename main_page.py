@@ -478,28 +478,18 @@ if st.session_state["authentication_status"]:
                     origial_character = db.reference("users/").child(st.session_state['username']).get()
                     if char_select == origial_character['character_name']:
                         pic_location = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
-                        doc_ref.update({
-                        "pic_name":pic_location
-                        })
-                        bucket = storage.bucket()
-                        blob = bucket.blob(pic_location)
-                        blob.upload_from_filename(pic_name)
-                        for b in bucket.list_blobs(prefix=st.session_state['username']):
-                            if b.name not in all_pics:
-                                b.delete()
-                        os.remove(pic_name)
                     else:
                         pic_location = '{}/{}.{}'.format(st.session_state['username'],char_select,uploaded_file.name.split('.')[1])
-                        doc_ref.update({
-                        "pic_name":pic_location
-                        })
-                        bucket = storage.bucket()
-                        blob = bucket.blob(pic_location)
-                        blob.upload_from_filename(pic_name)
-                        for b in bucket.list_blobs(prefix=st.session_state['username']):
-                            if b.name not in all_pics:
-                                b.delete()
-                        os.remove(pic_name)
+                    doc_ref.update({
+                    "pic_name":pic_location
+                    })
+                    bucket = storage.bucket()
+                    blob = bucket.blob(pic_location)
+                    blob.upload_from_filename(pic_name)
+                    for b in bucket.list_blobs(prefix=st.session_state['username']):
+                        if b.name not in all_pics:
+                            b.delete()
+                    os.remove(pic_name)
                 st.rerun()
     if 'form_char' in st.session_state:
         character_name = st.session_state['form_char']
