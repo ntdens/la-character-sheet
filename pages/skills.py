@@ -122,7 +122,10 @@ if st.session_state["authentication_status"]:
     df = pd.read_excel('Skills_Table.xlsx')
     df['Tier'] = df.Tier.astype(int)
     st.info('Double click a cell to read full contents')
-    st.dataframe(filter_dataframe(df), hide_index=True, height=950, use_container_width=True)
+    try:
+        st.dataframe(filter_dataframe(df), hide_index=True, height=950, use_container_width=True)
+    except:
+        st.warning("You've filtered too far. Try again")
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
