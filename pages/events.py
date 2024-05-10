@@ -62,6 +62,12 @@ authenticator.login()
 if st.session_state["authentication_status"]:
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
+        char_path = st.session_state['username']
+        if 'characters' in user_data.keys():
+            char_select = st.selectbox('Pick Character', options=[user_data['character_name']] + list(user_data['characters']))
+            if char_select != user_data['character_name']:
+                user_data = user_data['characters'][char_select]
+                char_path = "{}/characters/{}".format(st.session_state['username'], char_select)
         user_events = user_data['event_info']
         data_df = pd.DataFrame(json.loads(user_events))
         data_df.reset_index(drop=True, inplace=True)
@@ -128,7 +134,7 @@ if st.session_state["authentication_status"]:
         submit_events = st.form_submit_button('Save Events')
     if submit_events:
         event_df['Skill Points'] = event_df["Event Type"].replace(event_dict).astype(int) + event_df[["NPC","Merchant Overtime"]].astype(int).max(axis=1) + event_df["Bonus Skill Points"]
-        doc_ref = db.reference("users/").child(st.session_state['username'])
+        doc_ref = db.reference("users/").child(char_path)
         doc_ref.update({
             "event_info":event_df.to_json()
         })

@@ -2,6 +2,7 @@ streamlit
 streamlit_authenticator
 st_pages
 streamlit_extras
+streamlit_modal
 firebase_admin
 pandas
 openpyxl

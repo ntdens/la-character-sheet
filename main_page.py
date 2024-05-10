@@ -75,17 +75,15 @@ skill_paths = [
 def get_tier(events):
     return floor((sqrt(8*events)-1)/2)
 
-def available_skills(df, skill_path, tier):
+def available_skills(df, skill_path, tier, user_data):
     df = df.copy()
     try:
-        user_data = db.reference("users/").child(st.session_state['username']).get()
         st.session_state['point_spend'] = int(user_data['point_spend'])
     except:
         st.session_state['point_spend'] = 0
     if "available" not in st.session_state:
         st.session_state['available'] = skill_points - st.session_state['point_spend']
     try:
-        user_data = db.reference("users/").child(st.session_state['username']).get()
         st.session_state['known'] = ast.literal_eval(user_data['known'])
     except:
         st.session_state["known"] = []
@@ -144,10 +142,10 @@ def available_skills(df, skill_path, tier):
         df = pd.DataFrame(columns=df.columns)
     return df
 
-def skill_gain(df, skill_path, tier):
+def skill_gain(df, skill_path, tier, char_path, user_data):
     df = df.copy()
     df1 = df.copy()
-    df = available_skills(df, skill_path, tier)
+    df = available_skills(df, skill_path, tier, user_data)
     new_skill = st.selectbox('Pick New Skill', list(df['Skill Name'].unique()))
     if st.button('Gain Skill'):
         gain_df = df[df['Skill Name'] == new_skill].copy()
@@ -157,12 +155,12 @@ def skill_gain(df, skill_path, tier):
         st.session_state['available'] = skill_points - st.session_state['point_spend']
         known_list = st.session_state['known']
         known_list.append(skill_df['Skill Name'].values[0])
-        doc_ref = db.reference("users/").child(st.session_state['username'])
+        doc_ref = db.reference("users/").child(char_path)
         doc_ref.update({
             "known":str(st.session_state['known']),
             "point_spend":str(st.session_state['point_spend']),
         })
-        df = available_skills(df, skill_path, tier)
+        df = available_skills(df, skill_path, tier, user_data)
         st.rerun()
     remove_skill = st.selectbox('Pick Skill To Remove', st.session_state['known'])
     if st.button("Remove Skill"):
@@ -173,7 +171,7 @@ def skill_gain(df, skill_path, tier):
         st.session_state['available'] = skill_points - st.session_state['point_spend']
         known_list = st.session_state['known']
         known_list.remove(skill_df['Skill Name'].values[0])
-        doc_ref = db.reference("users/").child(st.session_state['username'])
+        doc_ref = db.reference("users/").child(char_path)
         doc_ref.update({
             "known":str(st.session_state['known']),
             "point_spend":str(st.session_state['point_spend']),
@@ -398,36 +396,46 @@ authenticator.login()
 if st.session_state["authentication_status"]:
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
-        user_events = user_data['event_info']
-        data_df = pd.DataFrame(json.loads(user_events))
-        data_df.reset_index(drop=True, inplace=True)
-        skill_points = int(data_df["Skill Points"].sum())
-        tier = get_tier(len(data_df[data_df['Event Type'] != "🪚 Work Weekend"]))
+        char_path = st.session_state['username']
+        if 'characters' in user_data.keys():
+            char_select = st.selectbox('Pick Character', options=[user_data['character_name']] + list(user_data['characters']))
+            if char_select != user_data['character_name']:
+                user_data = user_data['characters'][char_select]
+                char_path = "{}/characters/{}".format(st.session_state['username'], char_select)
+        try:
+            user_events = user_data['event_info']
+            data_df = pd.DataFrame(json.loads(user_events))
+            data_df.reset_index(drop=True, inplace=True)
+            skill_points = int(data_df["Skill Points"].sum())
+            tier = get_tier(len(data_df[data_df['Event Type'] != "🪚 Work Weekend"]))
+        except:
+            skill_points = 0
+            tier = 0
+        try:
+            character_name = user_data['character_name']
+        except:
+            character_name = ""
+        try:
+            path = user_data['path']
+        except:
+            path = '🗡 Warrior'
+        try:
+            faction = user_data['faction']
+        except:
+            faction = "🧝 Unaffilated"
+        try:
+            image_location = user_data['pic_name']
+            bucket = storage.bucket()
+            blob = bucket.blob(image_location)
+            profile_image = blob.download_as_bytes()
+        except:
+            profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
     except:
         skill_points = 0
         tier = 0
-    try:
-        user_data = db.reference("users/").child(st.session_state['username']).get()
-        character_name = user_data['character_name']
-    except:
         character_name = ""
-    try:
-        user_data = db.reference("users/").child(st.session_state['username']).get()
-        path = user_data['path']
-    except:
         path = '🗡 Warrior'
-    try:
-        user_data = db.reference("users/").child(st.session_state['username']).get()
-        faction = user_data['faction']
-    except:
         faction = "🧝 Unaffilated"
-    try:
-        user_data = db.reference("users/").child(st.session_state['username']).get()
-        image_location = user_data['pic_name']
-        bucket = storage.bucket()
-        blob = bucket.blob(image_location)
-        profile_image = blob.download_as_bytes()
-    except:
         profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
 
     tab1, tab2,tab3 = st.tabs(['Character Sheet', 'Edit Character', 'Add Skills'])
@@ -447,36 +455,42 @@ if st.session_state["authentication_status"]:
                 image.save(pic_name)
             submitted = st.form_submit_button('Save Edits')
             if submitted:
-                doc_ref = db.reference("users/").child(st.session_state['username'])
+                doc_ref = db.reference("users/").child(char_path)
                 doc_ref.update({
                     "character_name":character_name_input,
                     "path":path_input,
                     "faction":faction_input,
                 })
                 if uploaded_file is not None:
-                    pic_location = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
-                    doc_ref.update({
-                    "pic_name":pic_location
-                    })
-                    bucket = storage.bucket()
-                    blob = bucket.blob(pic_location)
-                    blob.upload_from_filename(pic_name)
-                    for b in bucket.list_blobs(prefix=st.session_state['username']):
-                        if b.name != pic_location:
-                            b.delete()
-                    os.remove(pic_name)
+                    origial_character = db.reference("users/").child(st.session_state['username']).get()
+                    if char_select == origial_character['character_name']:
+                        pic_location = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
+                        doc_ref.update({
+                        "pic_name":pic_location
+                        })
+                        bucket = storage.bucket()
+                        blob = bucket.blob(pic_location)
+                        blob.upload_from_filename(pic_name)
+                        os.remove(pic_name)
+                    else:
+                        pic_location = '{}/{}.{}'.format(st.session_state['username'],char_select,uploaded_file.name.split('.')[1])
+                        doc_ref.update({
+                        "pic_name":pic_location
+                        })
+                        bucket = storage.bucket()
+                        blob = bucket.blob(pic_location)
+                        blob.upload_from_filename(pic_name)
+                        os.remove(pic_name)
+                st.rerun()
     if 'form_char' in st.session_state:
         character_name = st.session_state['form_char']
     if 'form_path' in st.session_state:
         path = st.session_state['form_path']
     if 'form_faction' in st.session_state:
         faction = st.session_state['form_faction']
-    if uploaded_file is not None:
-        profile_image = st.session_state['form_image']
 
     with tab3:
         try:
-            user_data = db.reference("users/").child(st.session_state['username']).get()
             st.session_state['point_spend'] = int(user_data['point_spend'])
         except:
             st.session_state['point_spend'] = 0
@@ -499,7 +513,7 @@ if st.session_state["authentication_status"]:
             else:
                 point_cost.append(row['Tier'])
         df['Point Cost'] = point_cost
-        df = skill_gain(df, skill_path, tier)
+        df = skill_gain(df, skill_path, tier, char_path, user_data)
         "## Known Skills"
         df1 = pd.read_excel('Skills_Table.xlsx')
         known = st.session_state['known']
@@ -547,7 +561,7 @@ if st.session_state["authentication_status"]:
                 if st.button('Generate Character Sheet PDF', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         try:
-                            user_data = db.reference("users/").child(st.session_state['username']).get()
+                            user_data = db.reference("users/").child(char_path).get()
                             try:
                                 image_location = user_data['pic_name']
                                 bucket = storage.bucket()
@@ -559,7 +573,7 @@ if st.session_state["authentication_status"]:
                                 blob = bucket.blob("faction_logos/la_logo.jpg")
                                 blob.download_to_filename('logo.jpg')
                                 profile_image = 'logo.jpg'
-                            if faction != "🧝 Unaffilated" or "🤖 NPC":
+                            if faction not in ["🧝 Unaffilated","🤖 NPC"]:
                                 blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                                 blob.download_to_filename(faction + '.jpg')
                                 logo_image = faction + '.jpg'

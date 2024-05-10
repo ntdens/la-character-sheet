@@ -107,46 +107,47 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     with modification_container:
         for column in df.columns:
-            left, right = st.columns((1, 20))
-            if is_numeric_dtype(df[column]):
-                _min = df[column].min()
-                _max = df[column].max()
-                if _min != _max:
-                    if not df.empty:
-                        user_num_input = right.slider(
-                            f"{column}",
-                            min_value=_min,
-                            max_value=_max,
-                            value=(_min, _max),
-                            step=1,
-                        )
-                        df = df[df[column].between(*user_num_input, inclusive='both')]
-            # Treat columns with < 10 unique values as categorical
-            elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
-                user_cat_input = right.multiselect(
-                    f"{column}",
-                    df[column].unique(),
-                    default=list(df[column].unique()),
-                )
-                df = df[df[column].isin(user_cat_input)]
-            elif is_datetime64_any_dtype(df[column]):
-                user_date_input = right.date_input(
-                    f"{column}",
-                    value=(
-                        df[column].min(),
-                        df[column].max(),
-                    ),
-                )
-                if len(user_date_input) == 2:
-                    user_date_input = tuple(map(pd.to_datetime, user_date_input))
-                    start_date, end_date = user_date_input
-                    df = df.loc[df[column].between(start_date, end_date)]
-            else:
-                user_text_input = right.text_input(
-                    f"Search in {column}",
-                )
-                if user_text_input:
-                    df = df[df[column].astype(str).str.lower().str.contains(user_text_input.lower())]
+            if column != "Event Info":
+                left, right = st.columns((1, 20))
+                if is_numeric_dtype(df[column]):
+                    _min = df[column].min()
+                    _max = df[column].max()
+                    if _min != _max:
+                        if not df.empty:
+                            user_num_input = right.slider(
+                                f"{column}",
+                                min_value=_min,
+                                max_value=_max,
+                                value=(_min, _max),
+                                step=1,
+                            )
+                            df = df[df[column].between(*user_num_input, inclusive='both')]
+                # Treat columns with < 10 unique values as categorical
+                elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
+                    user_cat_input = right.multiselect(
+                        f"{column}",
+                        df[column].unique(),
+                        default=list(df[column].unique()),
+                    )
+                    df = df[df[column].isin(user_cat_input)]
+                elif is_datetime64_any_dtype(df[column]):
+                    user_date_input = right.date_input(
+                        f"{column}",
+                        value=(
+                            df[column].min(),
+                            df[column].max(),
+                        ),
+                    )
+                    if len(user_date_input) == 2:
+                        user_date_input = tuple(map(pd.to_datetime, user_date_input))
+                        start_date, end_date = user_date_input
+                        df = df.loc[df[column].between(start_date, end_date)]
+                else:
+                    user_text_input = right.text_input(
+                        f"Search in {column}",
+                    )
+                    if user_text_input:
+                        df = df[df[column].astype(str).str.lower().str.contains(user_text_input.lower())]
 
     return df
 
@@ -195,10 +196,12 @@ if st.session_state["authentication_status"]:
                     avail_points = int(user_events["Skill Points"].sum()) - int(user_data[key]['point_spend'])
                 except:
                     avail_points = skill_points
+                event_info = user_data[key]['event_info']
             except:
                 skill_points = 0
                 tier = 0
                 avail_points = skill_points
+                event_info = "{}"
             user_table.append({
                 'Username':key,
                 'Player':user_auth[key]['name'],
@@ -207,8 +210,38 @@ if st.session_state["authentication_status"]:
                 'Path':user_data[key]['path'],
                 'Tier':tier,
                 'Earned Points':skill_points,
-                "Available Points":avail_points
+                "Available Points":avail_points,
+                'Event Info':event_info
             })
+            if 'characters' in user_data[key]:
+                for c in user_data[key]['characters']:
+                    c_info = user_data[key]['characters'][c]
+                    try:
+                        user_events = pd.DataFrame(json.loads(c_info['event_info']))
+                        user_events.reset_index(drop=True, inplace=True)
+                        tier = get_tier(len(user_events[user_events['Event Type'] != "🪚 Work Weekend"]))
+                        skill_points = int(user_events["Skill Points"].sum())
+                        try:
+                            avail_points = int(user_events["Skill Points"].sum()) - int(c_info['point_spend'])
+                        except:
+                            avail_points = skill_points
+                        event_info = user_data[key]['event_info']
+                    except:
+                        skill_points = 0
+                        tier = 0
+                        avail_points = skill_points
+                        event_info = "{}"
+                    user_table.append({
+                        'Username':key,
+                        'Player':user_auth[key]['name'],
+                        'Character':c_info['character_name'],
+                        'Faction':c_info['faction'],
+                        'Path':c_info['path'],
+                        'Tier':tier,
+                        'Earned Points':skill_points,
+                        "Available Points":avail_points,
+                        'Event Info': event_info
+                    })
         user_df = pd.DataFrame(user_table)
         user_df = user_df[user_df['Faction'] != "🤖 NPC"]
         if faction_filter != None:
@@ -221,7 +254,7 @@ if st.session_state["authentication_status"]:
                 add_the_string = ''
             st.write("## Welcome {}, Leader of {}{}".format(leader_data['Character'].values[0], add_the_string, leader_data['Faction'].values[0]))
             user_df = filter_dataframe(user_df)
-            st.dataframe(user_df, hide_index=True, use_container_width=True)
+            st.dataframe(user_df.drop(columns=['Event Info']), hide_index=True, use_container_width=True)
             tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
             path_df = user_df.groupby('Path')['Username'].count().reset_index().rename(columns={'Username':'Players'})
             st.plotly_chart(
@@ -268,10 +301,9 @@ if st.session_state["authentication_status"]:
                     ).update_traces(marker_color='rgb(230,171,2)')
                 , use_container_width=True)
             player_events = []
-            for player in user_df['Username']:
+            for c in list(user_df['Character']):
                 try:
-                    user_events = pd.DataFrame(json.loads(user_data[player]['event_info']))
-                    user_events.reset_index(drop=True, inplace=True)
+                    user_events = pd.DataFrame(json.loads(user_df[user_df['Character'] == c]['Event Info'].values[0]))
                     user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
                     try:
                         user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
@@ -281,7 +313,7 @@ if st.session_state["authentication_status"]:
                         user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
                     except:
                         pass
-                    player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':player, 'Faction':user_df[user_df['Username'] == player]['Faction'].values[0]}))
+                    player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':c, 'Faction':user_df[user_df['Character'] == c]['Faction'].values[0]}))
                 except:
                     pass
             attend = pd.concat(player_events)
@@ -341,48 +373,59 @@ if st.session_state["authentication_status"]:
 
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
-            character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username']).index(st.session_state['username']))
+            character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username'].unique()).index(st.session_state['username']))
+            # try:
+            character_data = user_data[character_choice]
+            char_name = character_data['character_name']
+            if 'characters' in character_data.keys():
+                char_select = st.selectbox('Pick Character', options=[character_data['character_name']] + list(character_data['characters']), key='sheet_char')
+                if char_select != character_data['character_name']:
+                    character_data = character_data['characters'][char_select]
+                    char_path = "{}/characters/{}".format(st.session_state['username'], char_select)
+                    char_name = character_data['character_name']
             try:
-                character_data = user_data[character_choice]
-                try:
-                    known = ast.literal_eval(character_data['known'])
-                except:
-                    known = []
-                known_data = df[df['Skill Name'].isin(known)]
-                display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
-                try:
-                    image_location = character_data['pic_name']
-                    bucket = storage.bucket()
-                    blob = bucket.blob(image_location)
-                    profile_image = blob.download_as_bytes()
-                except:
-                    profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
-                with st.container(border=True):
-                    col1, col2 = st.columns([6,4])
-                    with col1:
-                        st.container(border=True).image(profile_image)
-                    with col2:
-                        player_data = pd.DataFrame({
-                            'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
-                            'Information': [character_data['character_name'],user_df[user_df['Username'] == character_choice]['Player'].values[0],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Available Points'].values[0]]
-                                            })
-                        st.dataframe(player_data, hide_index=True, use_container_width=True)
-                        bucket = storage.bucket()
-                        if character_data['faction'] != "🧝 Unaffilated" or "🤖 NPC":
-                            blob = bucket.blob("faction_logos/{}.jpg".format(character_data['faction']))
-                            logo = blob.download_as_bytes()
-                            st.image(logo)
-                        else:
-                            blob = bucket.blob("faction_logos/la_logo.jpg")
-                            logo = blob.download_as_bytes()
-                            st.image(logo)
-                    st.dataframe(display_data, hide_index=True, use_container_width=True)
+                known = ast.literal_eval(character_data['known'])
             except:
-                st.info("Data does not exist for this user")
+                known = []
+            known_data = df[df['Skill Name'].isin(known)]
+            display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
+            try:
+                image_location = character_data['pic_name']
+                bucket = storage.bucket()
+                blob = bucket.blob(image_location)
+                profile_image = blob.download_as_bytes()
+            except:
+                profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
+            with st.container(border=True):
+                col1, col2 = st.columns([6,4])
+                with col1:
+                    st.container(border=True).image(profile_image)
+                with col2:
+                    player_data = pd.DataFrame({
+                        'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
+                        'Information': [character_data['character_name'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Player'].values[0],character_data['path'],character_data['faction'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Tier'].values[0],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Available Points'].values[0]]
+                                        })
+                    st.dataframe(player_data, hide_index=True, use_container_width=True)
+                    bucket = storage.bucket()
+                    if character_data['faction'] != "🧝 Unaffilated" or "🤖 NPC":
+                        blob = bucket.blob("faction_logos/{}.jpg".format(character_data['faction']))
+                        logo = blob.download_as_bytes()
+                        st.image(logo)
+                    else:
+                        blob = bucket.blob("faction_logos/la_logo.jpg")
+                        logo = blob.download_as_bytes()
+                        st.image(logo)
+                st.dataframe(display_data, hide_index=True, use_container_width=True)
+            # except:
+            #     st.info("Data does not exist for this user")
         with tab3:
-            character_choice = st.selectbox('Select User:', user_df['Username'], key='event_user', index=list(user_df['Username']).index(st.session_state['username']))
+            character_choice = st.selectbox('Select User:', user_df['Username'].unique(), key='event_user', index=list(user_df['Username']).index(st.session_state['username']))
             try:
                 character_data = user_data[character_choice]
+                if 'characters' in character_data.keys():
+                    char_select = st.selectbox('Pick Character', options=[character_data['character_name']] + list(character_data['characters']), key='event_char')
+                    if char_select != character_data['character_name']:
+                        character_data = character_data['characters'][char_select]
                 user_events = pd.DataFrame(json.loads(character_data['event_info']))
                 user_events.reset_index(drop=True, inplace=True)
                 try:

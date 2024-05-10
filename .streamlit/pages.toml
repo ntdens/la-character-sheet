@@ -14,6 +14,11 @@ name = "Skills"
 icon = "📖"
 
 [[pages]]
+path = "pages/bonus_character.py"
+name = "Additional Characters"
+icon = "👥"
+
+[[pages]]
 path = "pages/user_profile.py"
 name = "Profile"
 icon = "🪪"
