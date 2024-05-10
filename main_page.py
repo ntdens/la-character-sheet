@@ -435,6 +435,7 @@ if st.session_state["authentication_status"]:
             faction = "🧝 Unaffilated"
         try:
             image_location = user_data['pic_name']
+            st.write(image_location)
             all_pics.append(image_location)
             bucket = storage.bucket()
             blob = bucket.blob(image_location)
