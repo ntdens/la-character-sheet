@@ -435,12 +435,10 @@ if st.session_state["authentication_status"]:
             faction = "🧝 Unaffilated"
         try:
             image_location = user_data['pic_name']
-            st.write(image_location)
             all_pics.append(image_location)
             bucket = storage.bucket()
             blob = bucket.blob(image_location)
             profile_image = blob.download_as_bytes()
-            st.image(profile_image)
         except:
             profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
     except:
@@ -482,6 +480,7 @@ if st.session_state["authentication_status"]:
                         pic_location = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
                     else:
                         pic_location = '{}/{}.{}'.format(st.session_state['username'],char_select,uploaded_file.name.split('.')[1])
+                    all_pics.append(pic_location)
                     doc_ref.update({
                     "pic_name":pic_location
                     })
@@ -492,8 +491,6 @@ if st.session_state["authentication_status"]:
                         if b.name not in all_pics:
                             b.delete()
                     os.remove(pic_name)
-                st.rerun()
-    if 'form_char' in st.session_state:
         character_name = st.session_state['form_char']
     if 'form_path' in st.session_state:
         path = st.session_state['form_path']
@@ -548,6 +545,12 @@ if st.session_state["authentication_status"]:
         with st.container(border=True):
             col1, col2 = st.columns([6,4])
             with col1:
+                try:
+                    bucket = storage.bucket()
+                    blob = bucket.blob(pic_location)
+                    profile_image = blob.download_as_bytes()
+                except:
+                    pass
                 st.container(border=True).image(profile_image)
             with col2:
                 player_data = pd.DataFrame({
