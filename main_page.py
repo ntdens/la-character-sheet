@@ -62,7 +62,7 @@ path_list = [
     '🗡 Warrior',
     '🪤 Rogue',
     '🩸 Healer',
-    '🔮 Wizard'
+    '🔮 Mage'
 ]
 
 skill_paths = [
@@ -123,7 +123,6 @@ def available_skills(df, skill_path, tier):
         df = df[df['Point Cost'] <= current_path]
     else:
         df = df[(df['Path'] == skill_path) & (df['Tier'] == 0)]
-    
     df = df[df['Point Cost'] <= st.session_state['available']]
     df = df[df['Skill Name'] != 'Cross-Training']
     if 'Read/Write Arcana' not in list(known_data['Skill Name']):
