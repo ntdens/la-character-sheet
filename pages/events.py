@@ -133,13 +133,16 @@ if st.session_state["authentication_status"]:
         )
         submit_events = st.form_submit_button('Save Events')
     if submit_events:
-        event_df['Skill Points'] = event_df["Event Type"].replace(event_dict).astype(int) + event_df[["NPC","Merchant Overtime"]].astype(int).max(axis=1) + event_df["Bonus Skill Points"]
-        doc_ref = db.reference("users/").child(char_path)
-        doc_ref.update({
-            "event_info":event_df.to_json()
-        })
-        st.success('Events saved to database')
-        st.rerun()
+        if event_df['Event Date'].isnull().any():
+            st.warning('Please fill in all dates')
+        else:
+            event_df['Skill Points'] = event_df["Event Type"].replace(event_dict).astype(int) + event_df[["NPC","Merchant Overtime"]].astype(int).max(axis=1) + event_df["Bonus Skill Points"]
+            doc_ref = db.reference("users/").child(char_path)
+            doc_ref.update({
+                "event_info":event_df.to_json()
+            })
+            st.success('Events saved to database')
+            st.rerun()
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
