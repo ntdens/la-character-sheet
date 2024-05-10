@@ -128,9 +128,18 @@ def available_skills(df, skill_path, tier):
     if 'Read/Write Arcana' not in list(known_data['Skill Name']):
         df = df[df['Spell'] == False]
     known_skills = list(known_data['Skill Name'].unique())
+    filter_known = []
+    for _, row in df.iterrows():
+        if row['Skill Name'] in known_skills:
+            filter_known.append(True)
+        else:
+            filter_known.append(False)
+    df['Known'] = filter_known
+    df = df[df['Known'] == False]
     known_skills.append('None')
     df = df[df['Prerequisite'].fillna('None').isin(known_skills)]
-    df = pd.merge(df, known_data, on=list(df.columns), how='outer', indicator=True).query("_merge != 'both'").drop('_merge', axis=1).reset_index(drop=True)
+    df = df.drop(columns=['Known'])
+    # df = pd.merge(df, known_data, on=list(df.columns), how='outer', indicator=True).query("_merge != 'both'").drop('_merge', axis=1).reset_index(drop=True)
     if tier == 0 and len(known_skills) >= 4:
         df = pd.DataFrame(columns=df.columns)
     return df
