@@ -42,7 +42,7 @@ try:
         sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
         receiver_email = email_of_forgotten_password  # Enter receiver address
         password = st.secrets['email_password']
-        body = "Your temporary password is {}.".format(new_random_password)
+        body = "Your new password is {}.".format(new_random_password)
         msg = MIMEText(body)
         msg['Subject'] = 'LARP Character Sheet Forgotten Username'
         msg['From'] = "larpadventerurescharactersheet@gmail.com"
