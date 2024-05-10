@@ -396,8 +396,18 @@ authenticator.login()
 if st.session_state["authentication_status"]:
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
+        all_pics = []
+        try:
+            all_pics.append(user_data['pic_name'])
+        except:
+            pass
         char_path = st.session_state['username']
         if 'characters' in user_data.keys():
+            for c in user_data['characters']:
+                try:
+                    all_pics.append(user_data['characters'][c]['pic_name'])
+                except:
+                    pass
             char_select = st.selectbox('Pick Character', options=[user_data['character_name']] + list(user_data['characters']))
             if char_select != user_data['character_name']:
                 user_data = user_data['characters'][char_select]
@@ -425,6 +435,7 @@ if st.session_state["authentication_status"]:
             faction = "🧝 Unaffilated"
         try:
             image_location = user_data['pic_name']
+            all_pics.append(image_location)
             bucket = storage.bucket()
             blob = bucket.blob(image_location)
             profile_image = blob.download_as_bytes()
@@ -439,6 +450,8 @@ if st.session_state["authentication_status"]:
         profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
 
     tab1, tab2,tab3 = st.tabs(['Character Sheet', 'Edit Character', 'Add Skills'])
+
+    
 
     player = st.session_state["name"]
 
@@ -471,6 +484,9 @@ if st.session_state["authentication_status"]:
                         bucket = storage.bucket()
                         blob = bucket.blob(pic_location)
                         blob.upload_from_filename(pic_name)
+                        for b in bucket.list_blobs(prefix=st.session_state['username']):
+                            if b.name not in all_pics:
+                                b.delete()
                         os.remove(pic_name)
                     else:
                         pic_location = '{}/{}.{}'.format(st.session_state['username'],char_select,uploaded_file.name.split('.')[1])
