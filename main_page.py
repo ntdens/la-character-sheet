@@ -440,6 +440,7 @@ if st.session_state["authentication_status"]:
             bucket = storage.bucket()
             blob = bucket.blob(image_location)
             profile_image = blob.download_as_bytes()
+            st.image(profile_image)
         except:
             profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
     except:
