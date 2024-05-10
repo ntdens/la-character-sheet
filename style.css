@@ -10,6 +10,7 @@ html, body, p, [class*="css"] {
     font-family: "Sedan SC", serif;
 }
 
+
 .stApp {
     background-image: url("https://img.freepik.com/free-vector/aged-paper-texture-background-design_60389-81.jpg?w=1380&t=st=1714937911~exp=1714938511~hmac=e5c2d72831cb1f752c195b998d808182a6875ec522b799237b92cc7aec30ee8a");
     background-size: cover;
@@ -35,3 +36,39 @@ html, body, p, [class*="css"] {
     ::-webkit-scrollbar-thumb:hover {
     background: #555;
     }
+
+[data-testid="stHeader"] {
+    background-color: rgba(0,0,0,0);
+}
+
+[data-testid="stSidebar"] {
+    background-image: url("https://i0.wp.com/www.fantasticmaps.com/wp-content/uploads/2020/04/PirateMapLines.jpg?resize=1024%2C791");
+    background-size: cover;
+}
+
+/* .st-emotion-cache-1r4qj8v { ! buttons and deploy menu
+    color: blue;
+} */
+
+.st-emotion-cache-1629p8f span {
+    /* color: red; */
+    font-family: "Sedan SC", serif;
+    font-weight: "bold";
+}
+
+.st-emotion-cache-pkbazv {
+    font-family: "Sedan SC", serif;
+    color:black;
+    font-weight: "bold";
+    text-shadow: 0px 0px 30px white,0px 0px 30px white,0px 0px 30px white,0px 0px 10px white,0px 0px 10px white;
+    /* -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: black; */
+}
+
+.st-emotion-cache-17lntkn {
+    font-family: "Sedan SC", serif;
+    color:black;
+    text-shadow: 0px 0px 30px white,0px 0px 30px white,0px 0px 30px white,0px 0px 10px white,0px 0px 10px white;
+    /* -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: black; */
+}

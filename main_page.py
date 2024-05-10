@@ -381,6 +381,7 @@ with open( "style.css" ) as css:
 
 config = db.reference("auth").get()
 
+
 #login widget
 authenticator = stauth.Authenticate(
     config['credentials'],
