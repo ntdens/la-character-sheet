@@ -531,14 +531,19 @@ if st.session_state["authentication_status"]:
                                     })
                 st.dataframe(player_data, hide_index=True, use_container_width=True)
                 bucket = storage.bucket()
-                if faction != "🧝 Unaffilated" or "🤖 NPC" or None:
-                    blob = bucket.blob("faction_logos/{}.jpg".format(faction))
-                    logo = blob.download_as_bytes()
-                    st.image(logo)
-                else:
-                    blob = bucket.blob("faction_logos/la_logo.jpg")
-                    logo = blob.download_as_bytes()
-                    st.image(logo)
+                try:
+                    if faction != "🧝 Unaffilated" or "🤖 NPC":
+                        blob = bucket.blob("faction_logos/{}.jpg".format(faction))
+                        logo = blob.download_as_bytes()
+                        st.image(logo)
+                    else:
+                        blob = bucket.blob("faction_logos/la_logo.jpg")
+                        logo = blob.download_as_bytes()
+                        st.image(logo)
+                except:
+                        blob = bucket.blob("faction_logos/la_logo.jpg")
+                        logo = blob.download_as_bytes()
+                        st.image(logo)
                 if st.button('Generate Character Sheet PDF', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         user_data = db.reference("users/").child(st.session_state['username']).get()
