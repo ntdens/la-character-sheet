@@ -301,9 +301,9 @@ if st.session_state["authentication_status"]:
                     ).update_traces(marker_color='rgb(230,171,2)')
                 , use_container_width=True)
             player_events = []
-            for c in list(user_df['Character']):
+            for _, row in user_df.iterrows():
                 try:
-                    user_events = pd.DataFrame(json.loads(user_df[user_df['Character'] == c]['Event Info'].values[0]))
+                    user_events = pd.DataFrame(json.loads(row['Event Info'].values[0]))
                     user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
                     try:
                         user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
