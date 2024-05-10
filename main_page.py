@@ -214,7 +214,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                     value=(_min, _max),
                     step=1,
                 )
-                df = df[df[column].between(*user_num_input)]
+                df = df[df[column].between(*user_num_input, inclusive='both')]
             # Treat columns with < 10 unique values as categorical
             elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
                 if column == 'Spell':
@@ -233,18 +233,18 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                         default=list(df[column].unique()),
                     )
                     df = df[df[column].isin(user_cat_input)]
-            elif is_datetime64_any_dtype(df[column]):
-                user_date_input = right.date_input(
-                    f"{column}",
-                    value=(
-                        df[column].min(),
-                        df[column].max(),
-                    ),
-                )
-                if len(user_date_input) == 2:
-                    user_date_input = tuple(map(pd.to_datetime, user_date_input))
-                    start_date, end_date = user_date_input
-                    df = df.loc[df[column].between(start_date, end_date)]
+            # elif is_datetime64_any_dtype(df[column]):
+            #     user_date_input = right.date_input(
+            #         f"{column}",
+            #         value=(
+            #             df[column].min(),
+            #             df[column].max(),
+            #         ),
+            #     )
+                # if len(user_date_input) == 2:
+                #     user_date_input = tuple(map(pd.to_datetime, user_date_input))
+                #     start_date, end_date = user_date_input
+                #     df = df.loc[df[column].between(start_date, end_date)]
             else:
                 user_text_input = right.text_input(
                     f"Search in {column}",
