@@ -346,14 +346,25 @@ if st.session_state["authentication_status"]:
                 except:
                     profile_image = "https://static.wixstatic.com/media/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png/v1/crop/x_0,y_3,w_800,h_795/fill/w_160,h_153,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/e524a6_cb4ccb346db54d2d9b00dbaee7610a97~mv2.png"
                 with st.container(border=True):
-                    my_grid = grid([4,6],1)
-                    my_grid.container(border=True).image(profile_image)
-                    player_data = pd.DataFrame({
-                        'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
-                        'Information': [character_data['character_name'],character_data['name'],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Available Points'].values[0]]
-                                        })
-                    my_grid.dataframe(player_data, hide_index=True, use_container_width=True)
-                    my_grid.dataframe(display_data, hide_index=True, use_container_width=True)
+                    col1, col2 = st.columns([6,4])
+                    with col1:
+                        st.container(border=True).image(profile_image)
+                    with col2:
+                        player_data = pd.DataFrame({
+                            'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
+                            'Information': [character_data['character_name'],character_data['name'],character_data['path'],character_data['faction'],user_df[user_df['Username'] == character_choice]['Tier'].values[0],user_df[user_df['Username'] == character_choice]['Available Points'].values[0]]
+                                            })
+                        st.dataframe(player_data, hide_index=True, use_container_width=True)
+                        bucket = storage.bucket()
+                        if character_data['faction'] != "🧝 Unaffilated" or "🤖 NPC":
+                            blob = bucket.blob("faction_logos/{}.jpg".format(character_data['faction']))
+                            logo = blob.download_as_bytes()
+                            st.image(logo)
+                        else:
+                            blob = bucket.blob("faction_logos/la_logo.jpg")
+                            logo = blob.download_as_bytes()
+                            st.image(logo)
+                    st.dataframe(display_data, hide_index=True, use_container_width=True)
             except:
                 st.info("Data does not exist for this user")
         with tab3:
