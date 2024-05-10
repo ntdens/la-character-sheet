@@ -225,7 +225,7 @@ if st.session_state["authentication_status"]:
                             avail_points = int(user_events["Skill Points"].sum()) - int(c_info['point_spend'])
                         except:
                             avail_points = skill_points
-                        event_info = user_data[key]['event_info']
+                        event_info = c_info['event_info']
                     except:
                         skill_points = 0
                         tier = 0
@@ -303,17 +303,18 @@ if st.session_state["authentication_status"]:
             player_events = []
             for _, row in user_df.iterrows():
                 try:
-                    user_events = pd.DataFrame(json.loads(row['Event Info'].values[0]))
-                    user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
-                    try:
-                        user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
-                    except:
-                        pass
-                    try:
-                        user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
-                    except:
-                        pass
-                    player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':row['Username'].value, 'Faction':row['Faction'].value}))
+                    user_events = pd.DataFrame(json.loads(row['Event Info']))
+                    if not user_events.empty:
+                        user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
+                        try:
+                            user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
+                        except:
+                            pass
+                        try:
+                            user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
+                        except:
+                            pass
+                        player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':row['Username'], 'Faction':row['Faction']}))
                 except:
                     pass
             attend = pd.concat(player_events)
