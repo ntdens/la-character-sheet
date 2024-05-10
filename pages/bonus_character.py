@@ -150,6 +150,10 @@ if st.session_state["authentication_status"]:
                 with popup.container():
                     st.write('Are you sure you want to delete {}?'.format(char_to_delete))
                     if st.button('Yes, Delete', type='primary'):
+                        bucket = storage.bucket()
+                        for b in bucket.list_blobs(prefix=st.session_state['username']):
+                            if char_to_delete in  b.name:
+                                b.delete()
                         db.reference("users/").child("{}/characters/{}".format(st.session_state['username'],char_to_delete)).delete()
                         popup.close()
                         st.rerun()
