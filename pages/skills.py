@@ -49,13 +49,16 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             if is_numeric_dtype(df[column]):
                 _min = df[column].min()
                 _max = df[column].max()
-                user_num_input = right.slider(
-                    f"{column}",
-                    min_value=_min,
-                    max_value=_max,
-                    value=(_min, _max),
-                    step=1,
-                )
+                if _min != _max:
+                    if not df.empty:
+                        user_num_input = right.slider(
+                            f"{column}",
+                            min_value=_min,
+                            max_value=_max,
+                            value=(_min, _max),
+                            step=1,
+                        )
+                        df = df[df[column].between(*user_num_input, inclusive='both')]
                 df = df[df[column].between(*user_num_input)]
             # Treat columns with < 10 unique values as categorical
             elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
