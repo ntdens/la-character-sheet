@@ -357,7 +357,7 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
     if not user_events.empty:
         t3 = table_gen(user_events, headers=True, tstyle=skill_info_style)
 
-    doc = SimpleDocTemplate("character_sheet.pdf", pagesize=PAGESIZE)
+    doc = SimpleDocTemplate("character_sheet.pdf", pagesize=PAGESIZE, title='LARP Adventures Character sheet')
     Story = [Spacer(1,1*inch)]
     style = styles["Normal"]
     Story.append(final_table)
