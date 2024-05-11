@@ -268,7 +268,9 @@ if st.session_state["authentication_status"]:
                             tickmode = 'linear',
                             tick0 = 0,
                             dtick = 1
-                    )
+                    ),
+                    plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                    paper_bgcolor= 'rgba(0, 0, 0, 0)'
                 ).update_traces(marker_color='rgb(230,171,2)')
             , use_container_width=True)
             st.plotly_chart(
@@ -277,7 +279,9 @@ if st.session_state["authentication_status"]:
                             tickmode = 'linear',
                             tick0 = 0,
                             dtick = 1
-                    )
+                    ),
+                    plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                    paper_bgcolor= 'rgba(0, 0, 0, 0)'
                 ).update_traces(marker_color='rgb(230,171,2)')
             , use_container_width=True)
             st.plotly_chart(
@@ -287,7 +291,9 @@ if st.session_state["authentication_status"]:
                             tick0 = 0,
                             dtick = 1,
                             title='Players'
-                        )
+                        ),
+                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
                     ).update_traces(marker_color='rgb(230,171,2)')
                 , use_container_width=True)
             st.plotly_chart(
@@ -297,7 +303,9 @@ if st.session_state["authentication_status"]:
                             tick0 = 0,
                             dtick = 1,
                             title='Players'
-                        )
+                        ),
+                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
                     ).update_traces(marker_color='rgb(230,171,2)')
                 , use_container_width=True)
             player_events = []
@@ -329,7 +337,9 @@ if st.session_state["authentication_status"]:
                             dtick = 1,
                             title = 'Players',
                             rangemode='tozero'
-                        )
+                        ),
+                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
                     ).update_traces(line_color='rgb(230,171,2)')
             , use_container_width=True)
             
@@ -347,7 +357,9 @@ if st.session_state["authentication_status"]:
                             tickvals = faction_list,
                             ticktext = faction_list
                         ),
-                        showlegend = False
+                        showlegend = False,
+                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
                     )
                 , use_container_width=True)
                 faction_attend = pd.concat(player_events)
@@ -368,7 +380,9 @@ if st.session_state["authentication_status"]:
                             dtick = 1,
                             title = 'Players',
                             rangemode='tozero'
-                        )
+                        ),
+                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
                     )
                 , use_container_width=True)
 
