@@ -202,17 +202,20 @@ if st.session_state["authentication_status"]:
                 tier = 0
                 avail_points = skill_points
                 event_info = "{}"
-            user_table.append({
-                'Username':key,
-                'Player':user_auth[key]['name'],
-                'Character':user_data[key]['character_name'],
-                'Faction':user_data[key]['faction'],
-                'Path':user_data[key]['path'],
-                'Tier':tier,
-                'Earned Points':skill_points,
-                "Available Points":avail_points,
-                'Event Info':event_info
-            })
+            try:
+                user_table.append({
+                    'Username':key,
+                    'Player':user_auth[key]['name'],
+                    'Character':user_data[key]['character_name'],
+                    'Faction':user_data[key]['faction'],
+                    'Path':user_data[key]['path'],
+                    'Tier':tier,
+                    'Earned Points':skill_points,
+                    "Available Points":avail_points,
+                    'Event Info':event_info
+                })
+            except:
+                pass
             if 'characters' in user_data[key]:
                 for c in user_data[key]['characters']:
                     c_info = user_data[key]['characters'][c]
