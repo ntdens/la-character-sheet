@@ -4,31 +4,13 @@ import streamlit_authenticator as stauth
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 from streamlit_modal import Modal
 import pandas as pd
-from pandas.api.types import (
-    is_datetime64_any_dtype,
-    is_numeric_dtype,
-)
 import firebase_admin
 from firebase_admin import credentials, db, storage
 from math import floor, sqrt
 import io
-import PIL.Image as Image
 import os
-import ast
-import plotly.graph_objects as go
-from reportlab.platypus import *
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter, portrait
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-import numpy as np
-from reportlab.lib.enums import TA_LEFT, TA_CENTER
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch, cm
-import emoji
-import requests
 from PIL import Image as ImageCheck
-from unicodedata import normalize
+import re
 
 add_page_title(layout='wide')
 
@@ -152,7 +134,8 @@ if st.session_state["authentication_status"]:
                     if st.button('Yes, Delete', type='primary'):
                         bucket = storage.bucket()
                         for b in bucket.list_blobs(prefix=st.session_state['username']):
-                            if char_to_delete in  b.name:
+                            all_pics = re.compile(fr"^{char_to_delete}\.[a-zA-Z]{{3,4}}$")
+                            if all_pics.match(b.name):
                                 b.delete()
                         db.reference("users/").child("{}/characters/{}".format(st.session_state['username'],char_to_delete)).delete()
                         popup.close()
