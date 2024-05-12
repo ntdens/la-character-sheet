@@ -23,6 +23,18 @@ if not firebase_admin._apps:
         'storageBucket':'la-character-sheets.appspot.com'
     })
 
+with open( "style.css" ) as css:
+    st.markdown( f'<style>{css.read()}</style>', unsafe_allow_html= True)
+
+st.sidebar.title("About")
+st.sidebar.markdown(
+    """
+    **This app is maintained by Nate Densmore (Kython). Please reach out to him if you have 
+    any questions or concerns. This app is a volunteer passion project, not an official product 
+    of LARP Adventures.**
+"""
+)
+
 #login widget
 authenticator = stauth.Authenticate(
     config['credentials'],
@@ -33,7 +45,7 @@ authenticator = stauth.Authenticate(
 
 #new user registration
 try:
-    st.info('Use Player Name for Name')
+    st.info('Use real name for Name field, used to track player across characters')
     email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False)
     if email_of_registered_user:
         user_auth = db.reference("auth").child(f'credentials/usernames/{username_of_registered_user}')

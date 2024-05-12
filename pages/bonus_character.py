@@ -71,6 +71,15 @@ with open( "style.css" ) as css:
 
 config = db.reference("auth").get()
 
+st.sidebar.title("About")
+st.sidebar.markdown(
+    """
+    **This app is maintained by Nate Densmore (Kython). Please reach out to him if you have 
+    any questions or concerns. This app is a volunteer passion project, not an offical product 
+    of LARP Adventures.**
+"""
+)
+
 #login widget
 authenticator = stauth.Authenticate(
     config['credentials'],
@@ -79,74 +88,70 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days']
 )
 
+
 #authenticate login
 authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
-    
-    tab1, tab2 = st.tabs(['Additional Characters', 'Add New Character'])
-
     user_data = db.reference("users/").child(st.session_state['username']).get()
-
-    with tab1:
-        if 'characters' in user_data.keys():
-            popup = Modal('Warning', key='confirm-intent')
-            character_data = user_data['characters']
-            character_list = []
-            for c in character_data.keys():
-                c_data = character_data[c]
-                path = c_data['path']
-                faction = c_data['faction']
-                current_name = c_data['character_name']
-                try:
-                    user_events = c_data['event_info']
-                    data_df = pd.DataFrame(json.loads(user_events))
-                    data_df.reset_index(drop=True, inplace=True)
-                    skill_points = int(data_df["Skill Points"].sum())
-                    tier = get_tier(len(data_df[data_df['Event Type'] != "🪚 Work Weekend"]))
-                except:
-                    skill_points = 0
-                    tier = 0
-                try:
-                    avail_points = int(user_events["Skill Points"].sum()) - int(c['point_spend'])
-                except:
-                    avail_points = skill_points
-                try:
-                    image_location = c_data['pic_name']
+    if 'characters' in user_data.keys():
+        popup = Modal('Warning', key='confirm-intent')
+        character_data = user_data['characters']
+        character_list = []
+        for c in character_data.keys():
+            c_data = character_data[c]
+            path = c_data['path']
+            faction = c_data['faction']
+            current_name = c_data['character_name']
+            try:
+                user_events = c_data['event_info']
+                data_df = pd.DataFrame(json.loads(user_events))
+                data_df.reset_index(drop=True, inplace=True)
+                skill_points = int(data_df["Skill Points"].sum())
+                tier = get_tier(len(data_df[data_df['Event Type'] != "🪚 Work Weekend"]))
+            except:
+                skill_points = 0
+                tier = 0
+            try:
+                avail_points = int(user_events["Skill Points"].sum()) - int(c['point_spend'])
+            except:
+                avail_points = skill_points
+            try:
+                image_location = c_data['pic_name']
+                bucket = storage.bucket()
+                blob = bucket.blob(image_location)
+                profile_image = blob.download_as_bytes()
+            except:
+                profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
+            character_list.append({'Character':c,'Current Name':current_name, 'Path':path,'Faction':faction, 'Tier':tier, 'Skill Points':avail_points})
+        char_df = pd.DataFrame(character_list)
+        char_name_list = list(char_df['Character']) 
+        st.dataframe(char_df, hide_index=True, use_container_width=True)
+        st.write('### Delete Additional Character')
+        with st.form('del_char'):
+            char_to_delete = st.selectbox('Character', char_df['Character'])
+            if st.form_submit_button('Delete Character', type='primary'):
+                popup.open()
+        if popup.is_open():
+            with popup.container():
+                st.write('Are you sure you want to delete {}?'.format(char_to_delete))
+                if st.button('Yes, Delete', type='primary'):
                     bucket = storage.bucket()
-                    blob = bucket.blob(image_location)
-                    profile_image = blob.download_as_bytes()
-                except:
-                    profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
-                character_list.append({'Character':c,'Current Name':current_name, 'Path':path,'Faction':faction, 'Tier':tier, 'Skill Points':avail_points})
-            char_df = pd.DataFrame(character_list)
-            char_name_list = list(char_df['Character']) 
-            st.dataframe(char_df, hide_index=True, use_container_width=True)
-            st.write('### Delete Additional Character')
-            with st.form('del_char'):
-                char_to_delete = st.selectbox('Character', char_df['Character'])
-                if st.form_submit_button('Delete Character', type='primary'):
-                    popup.open()
-            if popup.is_open():
-                with popup.container():
-                    st.write('Are you sure you want to delete {}?'.format(char_to_delete))
-                    if st.button('Yes, Delete', type='primary'):
-                        bucket = storage.bucket()
-                        for b in bucket.list_blobs(prefix=st.session_state['username']):
-                            all_pics = re.compile(fr"^{char_to_delete}\.[a-zA-Z]{{3,4}}$")
-                            if all_pics.match(b.name):
-                                b.delete()
-                        db.reference("users/").child("{}/characters/{}".format(st.session_state['username'],char_to_delete)).delete()
-                        popup.close()
-                        st.rerun()
-                    if st.button("I've Changed My Mind"):
-                        popup.close()
-        else:
-            st.warning('No additional characters found')
-            char_name_list = []
+                    for b in bucket.list_blobs(prefix=st.session_state['username']):
+                        all_pics = re.compile(fr"^{char_to_delete}\.[a-zA-Z]{{3,4}}$")
+                        if all_pics.match(b.name):
+                            b.delete()
+                    db.reference("users/").child("{}/characters/{}".format(st.session_state['username'],char_to_delete)).delete()
+                    popup.close()
+                    st.rerun()
+                if st.button("I've Changed My Mind"):
+                    popup.close()
+    else:
+        st.warning('No additional characters found')
+        char_name_list = []
 
-    with tab2:
+    with st.expander('Add New Character'):
         with st.form('my_form'):
             character_name_input = st.text_input('Character Name', key='form_char', value='')
             path_input = st.selectbox('Path', path_list, key='form_path')

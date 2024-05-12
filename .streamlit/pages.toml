@@ -19,6 +19,11 @@ name = "Additional Characters"
 icon = "👥"
 
 [[pages]]
+path = "pages/user_guide.py"
+name = "User Guide"
+icon = "❓"
+
+[[pages]]
 path = "pages/user_profile.py"
 name = "Profile"
 icon = "🪪"

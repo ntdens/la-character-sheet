@@ -34,3 +34,15 @@ credentials:
       logged_in: false
       name: Nate Densmore
       password: $2b$12$ZHdynQyq8MUpUG0U5rxrm.k8sy6WMkpiy4lyKUOlh4g6IjasAnwuW
+    orion:
+      email: Fontisian@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Orion
+      password: $2b$12$JfQlvMWf2G/KzACw93SHu.dp9bCcBbff.2979Y05wEM.hvy7VEZg6
+    toland:
+      email: toland@blacksky.wiki
+      failed_login_attempts: 0
+      logged_in: false
+      name: Toland
+      password: $2b$12$93DUOYX40VsNib9PbB6Y6O/sGpzD78FUshdXbuEUpEMAD/6hMYrJG

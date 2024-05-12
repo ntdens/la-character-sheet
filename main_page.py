@@ -147,37 +147,43 @@ def skill_gain(df, skill_path, tier, char_path, user_data):
     df1 = df.copy()
     df = available_skills(df, skill_path, tier, user_data)
     new_skill = st.selectbox('Pick New Skill', list(df['Skill Name'].unique()))
-    if st.button('Gain Skill'):
-        gain_df = df[df['Skill Name'] == new_skill].copy()
-        idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
-        skill_df = gain_df.loc[idxmin]
-        st.session_state['point_spend'] = st.session_state['point_spend'] + skill_df['Point Cost'].values[0]
-        st.session_state['available'] = skill_points - st.session_state['point_spend']
-        known_list = st.session_state['known']
-        known_list.append(skill_df['Skill Name'].values[0])
-        doc_ref = db.reference("users/").child(char_path)
-        doc_ref.update({
-            "known":str(st.session_state['known']),
-            "point_spend":str(st.session_state['point_spend']),
-        })
-        df = available_skills(df, skill_path, tier, user_data)
-        st.rerun()
+    if df.empty:
+        gain_button = st.button('Gain Skill', disabled=True)
+    else:
+        if st.button('Gain Skill'):
+            gain_df = df[df['Skill Name'] == new_skill].copy()
+            idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
+            skill_df = gain_df.loc[idxmin]
+            st.session_state['point_spend'] = st.session_state['point_spend'] + skill_df['Point Cost'].values[0]
+            st.session_state['available'] = skill_points - st.session_state['point_spend']
+            known_list = st.session_state['known']
+            known_list.append(skill_df['Skill Name'].values[0])
+            doc_ref = db.reference("users/").child(char_path)
+            doc_ref.update({
+                "known":str(st.session_state['known']),
+                "point_spend":str(st.session_state['point_spend']),
+            })
+            df = available_skills(df, skill_path, tier, user_data)
+            st.rerun()
     remove_skill = st.selectbox('Pick Skill To Remove', st.session_state['known'])
-    if st.button("Remove Skill"):
-        gain_df = df1[df1['Skill Name'] == remove_skill].copy()
-        idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
-        skill_df = gain_df.loc[idxmin]
-        st.session_state['point_spend'] = st.session_state['point_spend'] - skill_df['Point Cost'].values[0]
-        st.session_state['available'] = skill_points - st.session_state['point_spend']
-        known_list = st.session_state['known']
-        known_list.remove(skill_df['Skill Name'].values[0])
-        doc_ref = db.reference("users/").child(char_path)
-        doc_ref.update({
-            "known":str(st.session_state['known']),
-            "point_spend":str(st.session_state['point_spend']),
-        })
-        st.rerun()
-    return df
+    if len(st.session_state['known']) == 0:
+        remove_button = st.button('Remove Skill', disabled=True)
+    else:
+        if st.button("Remove Skill"):
+            gain_df = df1[df1['Skill Name'] == remove_skill].copy()
+            idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
+            skill_df = gain_df.loc[idxmin]
+            st.session_state['point_spend'] = st.session_state['point_spend'] - skill_df['Point Cost'].values[0]
+            st.session_state['available'] = skill_points - st.session_state['point_spend']
+            known_list = st.session_state['known']
+            known_list.remove(skill_df['Skill Name'].values[0])
+            doc_ref = db.reference("users/").child(char_path)
+            doc_ref.update({
+                "known":str(st.session_state['known']),
+                "point_spend":str(st.session_state['point_spend']),
+            })
+            st.rerun()
+        return df
 
 def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -381,6 +387,14 @@ with open( "style.css" ) as css:
 
 config = db.reference("auth").get()
 
+st.sidebar.title("About")
+st.sidebar.markdown(
+    """
+    **This app is maintained by Nate Densmore (Kython). Please reach out to him if you have 
+    any questions or concerns. This app is a volunteer passion project, not an official product 
+    of LARP Adventures.**
+"""
+)
 
 #login widget
 authenticator = stauth.Authenticate(
@@ -558,7 +572,9 @@ if st.session_state["authentication_status"]:
                     'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
                     'Information': [character_name,player,path,faction,tier,points_available]
                                     })
-                st.dataframe(player_data, hide_index=True, use_container_width=True)
+                for index, row in player_data.iterrows():
+                    st.subheader(f'{row.Category} {row.Information}', divider='orange')
+                # st.dataframe(player_data, hide_index=True, use_container_width=True)
                 bucket = storage.bucket()
                 try:
                     if faction != "🧝 Unaffilated" or "🤖 NPC":
@@ -705,7 +721,8 @@ if st.session_state["authentication_status"]:
                             )
                         except:
                             st.warning('Not enough data to generate')
-            st.dataframe(display_data.astype(str), hide_index=True, use_container_width=True, height=500)
+            st.markdown("<u><h2 style='text-align: center;'>Known Skills</h2></u>", unsafe_allow_html=True)
+            st.dataframe(display_data.astype(str), hide_index=True, use_container_width=True, height=800)
 
 
 elif st.session_state["authentication_status"] is False:
