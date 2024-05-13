@@ -70,17 +70,6 @@ if st.session_state["authentication_status"]:
         'Admin Zone'
         ]
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(list_of_tabs)
-    query = st.query_params.to_dict()
-    if "tab" in query.keys():
-        index_tab = list_of_tabs.index(query["tab"])
-        ## Click on that tab
-        js = f"""
-        <script>
-            var tab = window.parent.document.getElementById('tabs-bui3-tab-{index_tab}');
-            tab.click();
-        </script>
-        """
-        st.components.v1.html(js)
     with tab1:
         st.header('Getting Started', divider='orange')
         st.subheader('Welcome!')
