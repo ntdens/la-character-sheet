@@ -31,7 +31,7 @@ with open( "style.css" ) as css:
 config = db.reference("auth").get()
 
 def link_create(page):
-    return f'<a href="{APP_PATH}/{page.replace(" ","%20")}" target="_self">{page}</a>'
+    return f'[{page}]({APP_PATH}/{page.replace(" ","%20")})'
 
 def material_icon(icon_name):
     return f'<i class="material-icons">{icon_name}</i>'
@@ -112,7 +112,7 @@ if st.session_state["authentication_status"]:
         st.markdown(
             f'''
                 One of the first things to do is record what events you have been to. You can do this over in the
-                [Events]({APP_PATH}/Events) section of the app. If you are a new player, simply record the name, date and type of
+                {link_create('Events')} section of the app. If you are a new player, simply record the name, date and type of
                 event you are going to/just came back from, and hit the Save Events button. If you are a more seasoned player, 
                 add all the events you have been to. This is important for calculating your Tier and Skill Point total.
             '''
@@ -120,7 +120,7 @@ if st.session_state["authentication_status"]:
         st.subheader('Creating Your Character')
         st.markdown(
             f'''
-                Once your events are all recorded, it's time to head over to the <a href="{APP_PATH}" target="_self">Character Sheet</a>
+                Once your events are all recorded, it's time to head over to the [Character Sheet]({APP_PATH})
                 page. This page is divided into three tabs. The first tab holds your completed character sheet. The second tab is where you
                 actually create and edit your character. It is here you should go next. Enter your character name, path, faction, and even 
                 upload a picture if you wish!
@@ -195,19 +195,145 @@ if st.session_state["authentication_status"]:
         ,unsafe_allow_html=True)
     with tab3:
         st.header('Events', divider='orange')
+        st.subheader('How It Works')
+        st.markdown(
+            f'''
+                This is the page to keep track of all of the events you have been to. You can add the Event Name, Event Date, Event Type, 
+                mark off whether you were an NPC or did merchant overtime, and mark any additional skill points earned (i.e. Trollmas donation 
+                or incliment weather survivor). Once you have added all your information and hit save, the app will calculate the number of skill
+                points earned and update the table. This data is used to determine Skill Points and Tier for your character.
+            '''
+        ,unsafe_allow_html=True)
+        st.subheader('Types of Events')
+        st.markdown(
+            f'''
+                There are currently five different event types being tracked:
+                * **☀️ Day Event**: These are normal one day events and worth one skill point.
+                * **⛺️ Campout Event**: These are Friday-Sunday events and are worth two skill points.
+                * **🎆 Festival Event**: These are Thursday-Sunday events and are worth three skill points.
+                * **👾 Virtual Event**: These are counted the same as day events.
+                * **🪚 Work Weekend**: These are for working up in Oakenshield outside of an event. You get one skill point but no Tier progress.
+            '''
+        ,unsafe_allow_html=True)
         st.subheader('Adding a New Event')
         st.markdown(
             f'''
-                To add a new event, simply click on the next empty row and start typing
+                To add a new event, simply click on the next empty row and start typing in the details. You should see a {material_icon("add")} 
+                icon appear on hover. You can also hit the {material_icon("add")} on the upper right corner of the table to add a new row. 
+                When adding events it is important to add in the date of the event. While the date will keep track of the specific day in the
+                background, any day is fine if you only care about month/year. Once you are done adding your event(s), hit the Save Events button
+                in the lower left to save the table to the database.
             '''
         ,unsafe_allow_html=True)
-    # st.markdown(
-    #     f'''
-    #         Go to the <a href="{APP_PATH}/User%20Guide#adding-events" target="_self">User Guide</a> 
-    #         Go to the [User Guide]({APP_PATH}/User%20Guide#using-your-character-sheet) 
-    #     '''
-    # ,unsafe_allow_html=True)
-    # st.info(f"Check out the [events]({APP_PATH}/Events) page")
+        st.subheader('Removing Events')
+        st.markdown(
+            f'''
+                To remove events from the table, first click to the far left of the row you want to delete. You should see a 
+                {material_icon("check_box_outline_blank")} on hover, which turns into a {material_icon("check_box")} on click. Once you have
+                selected all the rows you want to get rid of, hit the {material_icon("delete")} button in the upper right (should be the far left icon 
+                of the group). Once that is done, hit the Save Events button to save your changes to the database.
+            '''
+        ,unsafe_allow_html=True)
+        st.subheader('Other Functions')
+        st.markdown(
+            f'''
+                As with the rest of the tables in this app, you can search the table by hitting the {material_icon("search")} button in 
+                the upper right hand corner. You can also download the table as a csv by hitting the {material_icon("download")} button 
+                in the same location.
+            '''
+        ,unsafe_allow_html=True)
+    with tab4:
+        st.header('Skills', divider='orange')
+        st.subheader('How It Works')
+        st.markdown(
+            f'''
+                This page has every skill available to players in LARP Adventures. By checking the Add filters box at the top you can filter 
+                down to what skills you are interested in. The table works the same way as other tables in the application. You can double 
+                click on any cell to expand its contents. You can search the table by hitting the {material_icon("search")} button in 
+                the upper right hand corner, and you can download the table as a csv by hitting the {material_icon("download")} button 
+                in the same location.
+            '''
+        ,unsafe_allow_html=True)
+    with tab5:
+        st.header('Additional Characters', divider='orange')
+        st.subheader('How It Works')
+        st.markdown(
+            f'''
+                Here is where you can build more characters besides for just your main character. This is useful if you want to build 
+                out an NPC character, or if you play multiple characters. Once you add a new character, you will get new dropdowns on the 
+                [Character Sheet]({APP_PATH}) and {link_create('Events')} pages. Use those to select which character you want to build out 
+                at the time.
+            '''
+        ,unsafe_allow_html=True)
+        st.subheader('Adding a Character')
+        st.markdown(
+            f'''
+                To add a character, simply open the Add New Character expander and fill out the relevant information. If creating an NPC 
+                select "🤖 NPC" underneath the Faction selection. Whatever name you choose here will be the character's key in the database, 
+                so it has to be different from your other character's names, and will be what you pick on the dropdown selectors. Even if you 
+                change the name of the character on the [Character Sheet]({APP_PATH}) page, the dropdown choice will remain whatever you originally 
+                chose for the character. Once you are done filling out the form and hit save, your new character will be generated.
+            '''
+        ,unsafe_allow_html=True)
+        st.subheader('Removing a Character')
+        st.markdown(
+            f'''
+                To remove a character, select them from the dropdown under Delete Additional Character. Once you hit delete, a pop-up will appear 
+                confirming your intent to delete. Once you confirm a second time, the character is deleted from the database.
+            '''
+        ,unsafe_allow_html=True)
+    with tab6:
+        st.header('Profile', divider='orange')
+        st.subheader("Overview")
+        st.markdown(
+            f'''
+                The profile page is a simple summary of your user infomation. It shows you your registered username, name, and email. Here you 
+                can updated your name and email, as well as change your password.
+            '''
+        ,unsafe_allow_html=True)
+        st.subheader("Changing Your Password")
+        st.markdown(
+            f'''
+                To change your password, simply click the reset password button. You will get a formprompting you to enter your old password, 
+                a new password, and to repeat that new password to confirm. Once you hit reset, if everything is filled out properly, your new password 
+                will be set.
+            '''
+        ,unsafe_allow_html=True)
+        st.subheader("Updating Your Details")
+        st.markdown(
+            f'''
+                To change your name or email, click on the Update User Details button and fill out the form. Once you hit update your profile 
+                will be updated. You are not able to update your username at this time.
+            '''
+        ,unsafe_allow_html=True)
+    with tab7:
+        st.header('Admin Zone', divider='orange')
+        st.subheader("What Is It?")
+        st.markdown(
+            f'''
+                The Admin Zone is to provide an overview of the realm's character sheets to Organizers and Faction Leaders. It can show metrics 
+                such as tier and path breakdowns, and give the ability to view (not modify) other character sheets.
+            '''
+        ,unsafe_allow_html=True)
+        st.subheader("What Is Admin Access?")
+        st.markdown(
+            f'''
+                Admin Access is reserved for the Organizers and the app's developers. It gives an overview of metrics across everyone's character 
+                sheets, and the ability to pull up full character sheets and event attendance. If you're an organzier and want to apply for Admin 
+                access, fill out the form and you will be added as soon as possible.
+            '''
+        ,unsafe_allow_html=True)
+        st.subheader("What Is Faction Leader Access?")
+        st.markdown(
+            f'''
+                Faction Leader Access is to help enable Faction Leaders to have an overview on the state of their own faction. They will get a smaller 
+                set of metrics covering only people in their faction. They can also pull up character sheets of members in their faction, but only with 
+                the basic information attached such as name, tier and path. :red[**They will *not* be able to see what skills you have learned.**] This is to ensure 
+                players have some sort of privacy around thier character and the ability to have fun secrets. If you want to know someone's skills, reach 
+                out to the directly. To apply for Faction Leader Access, fill out the form and you will be added as soon as possible.
+            '''
+        ,unsafe_allow_html=True)
+
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
     st.page_link("pages/register_user.py", label='Register New User', icon="📝")

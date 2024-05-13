@@ -11,6 +11,7 @@ import io
 import os
 from PIL import Image as ImageCheck
 import re
+from sheet_helpers import APP_PATH
 
 add_page_title(layout='wide')
 
@@ -94,6 +95,7 @@ authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
+    st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Additional%20Characters) for more info.", icon=":material/help:")
     user_data = db.reference("users/").child(st.session_state['username']).get()
     if 'characters' in user_data.keys():
         popup = Modal('Warning', key='confirm-intent')
@@ -148,9 +150,10 @@ if st.session_state["authentication_status"]:
                 if st.button("I've Changed My Mind"):
                     popup.close()
     else:
-        st.warning('No additional characters found')
+        st.warning('No additional characters found', icon=":material/no_accounts:")
         char_name_list = []
 
+    st.write('### Create Additional Character')
     with st.expander('Add New Character'):
         with st.form('my_form'):
             character_name_input = st.text_input('Character Name', key='form_char', value='')
@@ -162,7 +165,7 @@ if st.session_state["authentication_status"]:
                 pic_name = '{}.{}'.format(character_name_input,uploaded_file.name.split('.')[1])
                 image = ImageCheck.open(io.BytesIO(form_image))
                 image.save(pic_name)
-            submitted = st.form_submit_button('Save Edits')
+            submitted = st.form_submit_button('Generate Character')
             if submitted:
                 if character_name_input == '':
                     st.error('Please enter an unique character name')

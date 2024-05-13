@@ -6,6 +6,7 @@ from st_pages import show_pages_from_config, add_page_title, hide_pages
 from datetime import date
 import firebase_admin
 from firebase_admin import credentials, db
+from sheet_helpers import APP_PATH
 
 add_page_title(layout='wide')
 
@@ -69,6 +70,7 @@ authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
+    st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Events) for more info. Skill Points column only updates once events are saved.", icon=":material/help:")
     try:
         user_data = db.reference("users/").child(st.session_state['username']).get()
         char_path = st.session_state['username']
@@ -100,7 +102,6 @@ if st.session_state["authentication_status"]:
                 'Skill Points': [1]
             }
         )
-    st.info('Skill Points will be updated upon save')
     with st.form('event_data'):
         event_df = st.data_editor(
         data_df,

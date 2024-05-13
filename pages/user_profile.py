@@ -8,6 +8,7 @@ from streamlit_extras.stateful_button import button
 import firebase_admin
 from firebase_admin import credentials, db
 import json
+from sheet_helpers import APP_PATH
 
 add_page_title()
 
@@ -49,6 +50,7 @@ authenticator = stauth.Authenticate(
 authenticator.login()
 #authenticate users
 if st.session_state["authentication_status"]:
+    st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Profile) for more info.", icon=":material/help:")
     doc_ref = db.reference("users/").child(st.session_state['username']).get()
     user_auth = db.reference("auth").child('credentials/usernames/{}'.format(st.session_state['username'])).get()
     user_email = user_auth['email']

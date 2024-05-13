@@ -5,7 +5,7 @@ from st_pages import show_pages_from_config, add_page_title, hide_pages
 import firebase_admin
 from firebase_admin import credentials, db
 import json
-from sheet_helpers import filter_dataframe
+from sheet_helpers import filter_dataframe, APP_PATH
 
 add_page_title(layout='wide')
 
@@ -50,7 +50,7 @@ authenticator.login()
 if st.session_state["authentication_status"]:
     df = pd.read_excel('Skills_Table.xlsx')
     df['Tier'] = df.Tier.astype(int)
-    st.info('Double click a cell to read full contents')
+    st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Skills) for more info.", icon=":material/help:")
     try:
         st.dataframe(filter_dataframe(df), hide_index=True, height=950, use_container_width=True)
     except:

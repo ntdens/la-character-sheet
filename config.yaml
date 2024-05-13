@@ -1,7 +1,7 @@
 cookie:
-  expiry_days: 30
-  key: some_signature_key
-  name: some_cookie_name
+  expiry_days: 90
+  key: larp_character_sheet
+  name: la_character_sheet_login
 credentials:
   usernames:
     adidner:
@@ -40,6 +40,12 @@ credentials:
       logged_in: false
       name: Orion
       password: $2b$12$JfQlvMWf2G/KzACw93SHu.dp9bCcBbff.2979Y05wEM.hvy7VEZg6
+    test:
+      email: ntdensmore@yahoo.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: test
+      password: $2b$12$ZAso4n/ccJC9POfHSB.Pl.qMUD7CpvLHKKEE8sLFUayJhKvCWw9V.
     toland:
       email: toland@blacksky.wiki
       failed_login_attempts: 0

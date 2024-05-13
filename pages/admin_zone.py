@@ -16,6 +16,7 @@ from pandas.api.types import (
     is_datetime64_any_dtype,
     is_numeric_dtype,
 )
+from sheet_helpers import APP_PATH
 
 add_page_title(layout='wide')
 
@@ -186,6 +187,7 @@ authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
+    st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Admin%20Zone) for more info.", icon=":material/help:")
     if st.session_state['username'] in (st.secrets['admins'] + list(st.secrets['faction_leaders'])):
         if st.session_state['username'] in list(st.secrets['faction_leaders']):
             faction_filter = st.secrets['faction_leaders'][st.session_state['username']]
@@ -267,190 +269,197 @@ if st.session_state["authentication_status"]:
             st.write("## Welcome {}, Leader of {}{}".format(leader_data['Character'].values[0], add_the_string, leader_data['Faction'].values[0]))
             user_df = filter_dataframe(user_df)
             st.dataframe(user_df.drop(columns=['Event Info']), hide_index=True, use_container_width=True)
-            tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
-            path_df = user_df.groupby('Path')['Username'].count().reset_index().rename(columns={'Username':'Players'})
-            st.plotly_chart(
-                px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
-                    xaxis = dict(
-                        tickmode = 'array',
-                        tickvals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                        ticktext = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five','Six', 'Seven','Eight', 'Nine', 'Ten']
-                    ),
-                    yaxis = dict(
-                            tickmode = 'linear',
-                            tick0 = 0,
-                            dtick = 1
-                    ),
-                    plot_bgcolor = 'rgba(0, 0, 0, 0)',
-                    paper_bgcolor= 'rgba(0, 0, 0, 0)'
-                ).update_traces(marker_color='rgb(230,171,2)')
-            , use_container_width=True)
-            st.plotly_chart(
-                px.bar(path_df, x='Path', y='Players', title='Number of Players by Path').update_layout(
-                    yaxis = dict(
-                            tickmode = 'linear',
-                            tick0 = 0,
-                            dtick = 1
-                    ),
-                    plot_bgcolor = 'rgba(0, 0, 0, 0)',
-                    paper_bgcolor= 'rgba(0, 0, 0, 0)'
-                ).update_traces(marker_color='rgb(230,171,2)')
-            , use_container_width=True)
-            st.plotly_chart(
-                px.histogram(user_df, x='Earned Points', nbins=20, title='Points Earned by Players').update_layout(
-                        yaxis = dict(
-                            tickmode = 'linear',
-                            tick0 = 0,
-                            dtick = 1,
-                            title='Players'
-                        ),
-                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
-                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
-                    ).update_traces(marker_color='rgb(230,171,2)')
-                , use_container_width=True)
-            st.plotly_chart(
-                px.histogram(user_df, x='Available Points', nbins=20, title='Points Available by Players').update_layout(
-                        yaxis = dict(
-                            tickmode = 'linear',
-                            tick0 = 0,
-                            dtick = 1,
-                            title='Players'
-                        ),
-                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
-                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
-                    ).update_traces(marker_color='rgb(230,171,2)')
-                , use_container_width=True)
-            player_events = []
-            for _, row in user_df.iterrows():
-                try:
-                    user_events = pd.DataFrame(json.loads(row['Event Info']))
-                    if not user_events.empty:
-                        user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
-                        try:
-                            user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
-                        except:
-                            pass
-                        try:
-                            user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
-                        except:
-                            pass
-                        player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':row['Username'], 'Faction':row['Faction']}))
-                except:
-                    pass
-            attend = pd.concat(player_events)
-            attend['Date'] = attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
-            attend = attend.groupby('Date')['Player'].nunique()
-            idx = pd.date_range(attend.index.min(), attend.index.max(), freq='1MS')
-            attend = attend.reindex(idx, fill_value=0).reset_index().rename(columns={'index':'Date'})
-            st.plotly_chart(
-                px.line(attend, x='Date', y='Player', title='Attendance Over Time').update_layout(
-                        yaxis = dict(
-                            tickmode = 'linear',
-                            dtick = 1,
-                            title = 'Players',
-                            rangemode='tozero'
-                        ),
-                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
-                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
-                    ).update_traces(line_color='rgb(230,171,2)')
-            , use_container_width=True)
-            
-            if st.session_state['username'] in st.secrets['admins']:
-                faction_df = user_df.groupby('Faction')['Username'].count().reset_index().rename(columns={'Username':'Players'})
+            if not user_df.empty:
+                tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
+                path_df = user_df.groupby('Path')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 st.plotly_chart(
-                    px.bar(faction_df, y='Faction', x='Players', title='Number of Players by Faction', orientation='h', color='Faction', color_discrete_map=faction_colors).update_layout(
+                    px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
                         xaxis = dict(
-                            tickmode = 'linear',
-                            tick0 = 0,
-                            dtick = 1
-                        ),
-                        yaxis = dict(
                             tickmode = 'array',
-                            tickvals = faction_list,
-                            ticktext = faction_list
+                            tickvals = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                            ticktext = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five','Six', 'Seven','Eight', 'Nine', 'Ten']
                         ),
-                        showlegend = False,
-                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
-                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
-                    )
-                , use_container_width=True)
-                faction_attend = pd.concat(player_events)
-                faction_attend['Date'] = faction_attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
-                faction_attend = faction_attend.groupby(['Faction','Date']).nunique().reset_index()
-                filled_dates = []
-                for f in faction_attend['Faction'].unique():
-                    fadf = faction_attend[faction_attend['Faction'] == f].set_index('Date')
-                    idx = pd.date_range(fadf.index.min(), fadf.index.max(), freq='1MS')
-                    fadf = fadf.reindex(idx, fill_value=0).reset_index().rename(columns={'index':'Date'})
-                    fadf['Faction'] = f
-                    filled_dates.append(fadf)
-                faction_attend = pd.concat(filled_dates)
-                st.plotly_chart(
-                    px.line(faction_attend, y='Player', x='Date', title='Attendance by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors).update_layout(
                         yaxis = dict(
-                            tickmode = 'linear',
-                            dtick = 1,
-                            title = 'Players',
-                            rangemode='tozero'
+                                tickmode = 'linear',
+                                tick0 = 0,
+                                dtick = 1
                         ),
                         plot_bgcolor = 'rgba(0, 0, 0, 0)',
                         paper_bgcolor= 'rgba(0, 0, 0, 0)'
-                    )
+                    ).update_traces(marker_color='rgb(230,171,2)')
                 , use_container_width=True)
+                st.plotly_chart(
+                    px.bar(path_df, x='Path', y='Players', title='Number of Players by Path').update_layout(
+                        yaxis = dict(
+                                tickmode = 'linear',
+                                tick0 = 0,
+                                dtick = 1
+                        ),
+                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
+                    ).update_traces(marker_color='rgb(230,171,2)')
+                , use_container_width=True)
+                st.plotly_chart(
+                    px.histogram(user_df, x='Earned Points', nbins=20, title='Points Earned by Players').update_layout(
+                            yaxis = dict(
+                                tickmode = 'linear',
+                                tick0 = 0,
+                                dtick = 1,
+                                title='Players'
+                            ),
+                            plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                            paper_bgcolor= 'rgba(0, 0, 0, 0)'
+                        ).update_traces(marker_color='rgb(230,171,2)')
+                    , use_container_width=True)
+                st.plotly_chart(
+                    px.histogram(user_df, x='Available Points', nbins=20, title='Points Available by Players').update_layout(
+                            yaxis = dict(
+                                tickmode = 'linear',
+                                tick0 = 0,
+                                dtick = 1,
+                                title='Players'
+                            ),
+                            plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                            paper_bgcolor= 'rgba(0, 0, 0, 0)'
+                        ).update_traces(marker_color='rgb(230,171,2)')
+                    , use_container_width=True)
+                player_events = []
+                for _, row in user_df.iterrows():
+                    try:
+                        user_events = pd.DataFrame(json.loads(row['Event Info']))
+                        if not user_events.empty:
+                            user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
+                            try:
+                                user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
+                            except:
+                                pass
+                            try:
+                                user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms')
+                            except:
+                                pass
+                            player_events.append(pd.DataFrame({'Date':list(user_events['Event Date']),'Player':row['Username'], 'Faction':row['Faction']}))
+                    except:
+                        pass
+                attend = pd.concat(player_events)
+                attend['Date'] = attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
+                attend = attend.groupby('Date')['Player'].nunique()
+                idx = pd.date_range(attend.index.min(), attend.index.max(), freq='1MS')
+                attend = attend.reindex(idx, fill_value=0).reset_index().rename(columns={'index':'Date'})
+                st.plotly_chart(
+                    px.line(attend, x='Date', y='Player', title='Attendance Over Time').update_layout(
+                            yaxis = dict(
+                                tickmode = 'linear',
+                                dtick = 1,
+                                title = 'Players',
+                                rangemode='tozero'
+                            ),
+                            plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                            paper_bgcolor= 'rgba(0, 0, 0, 0)'
+                        ).update_traces(line_color='rgb(230,171,2)')
+                , use_container_width=True)
+                
+                if st.session_state['username'] in st.secrets['admins']:
+                    faction_df = user_df.groupby('Faction')['Username'].count().reset_index().rename(columns={'Username':'Players'})
+                    st.plotly_chart(
+                        px.bar(faction_df, y='Faction', x='Players', title='Number of Players by Faction', orientation='h', color='Faction', color_discrete_map=faction_colors).update_layout(
+                            xaxis = dict(
+                                tickmode = 'linear',
+                                tick0 = 0,
+                                dtick = 1
+                            ),
+                            yaxis = dict(
+                                tickmode = 'array',
+                                tickvals = faction_list,
+                                ticktext = faction_list
+                            ),
+                            showlegend = False,
+                            plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                            paper_bgcolor= 'rgba(0, 0, 0, 0)'
+                        )
+                    , use_container_width=True)
+                    faction_attend = pd.concat(player_events)
+                    faction_attend['Date'] = faction_attend.Date - pd.offsets.MonthEnd(0) - pd.offsets.MonthBegin(1)
+                    faction_attend = faction_attend.groupby(['Faction','Date']).nunique().reset_index()
+                    filled_dates = []
+                    for f in faction_attend['Faction'].unique():
+                        fadf = faction_attend[faction_attend['Faction'] == f].set_index('Date')
+                        idx = pd.date_range(fadf.index.min(), fadf.index.max(), freq='1MS')
+                        fadf = fadf.reindex(idx, fill_value=0).reset_index().rename(columns={'index':'Date'})
+                        fadf['Faction'] = f
+                        filled_dates.append(fadf)
+                    faction_attend = pd.concat(filled_dates)
+                    st.plotly_chart(
+                        px.line(faction_attend, y='Player', x='Date', title='Attendance by Faction', line_group='Faction', color='Faction', color_discrete_map=faction_colors).update_layout(
+                            yaxis = dict(
+                                tickmode = 'linear',
+                                dtick = 1,
+                                title = 'Players',
+                                rangemode='tozero'
+                            ),
+                            plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                            paper_bgcolor= 'rgba(0, 0, 0, 0)'
+                        )
+                    , use_container_width=True)
 
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
-            character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username'].unique()).index(st.session_state['username']))
-            # try:
-            character_data = user_data[character_choice]
-            char_name = character_data['character_name']
-            if 'characters' in character_data.keys():
-                char_select = st.selectbox('Pick Character', options=[character_data['character_name']] + list(character_data['characters']), key='sheet_char')
-                if char_select != character_data['character_name']:
-                    character_data = character_data['characters'][char_select]
-                    char_path = "{}/characters/{}".format(st.session_state['username'], char_select)
-                    char_name = character_data['character_name']
             try:
-                known = ast.literal_eval(character_data['known'])
+                character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username'].unique()).index(st.session_state['username']))
             except:
-                known = []
-            known_data = df[df['Skill Name'].isin(known)]
-            display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
+                character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user')
             try:
-                image_location = character_data['pic_name']
-                bucket = storage.bucket()
-                blob = bucket.blob(image_location)
-                profile_image = blob.download_as_bytes()
-            except:
-                profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
-            with st.container(border=True):
-                col1, col2 = st.columns([6,4])
-                with col1:
-                    st.container(border=True).image(profile_image)
-                with col2:
-                    player_data = pd.DataFrame({
-                        'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
-                        'Information': [character_data['character_name'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Player'].values[0],character_data['path'],character_data['faction'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Tier'].values[0],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Available Points'].values[0]]
-                                        })
-                    for index, row in player_data.iterrows():
-                        st.subheader(f'{row.Category} {row.Information}', divider='orange')
-                    # st.dataframe(player_data, hide_index=True, use_container_width=True)
+                character_data = user_data[character_choice]
+                char_name = character_data['character_name']
+                if 'characters' in character_data.keys():
+                    char_select = st.selectbox('Pick Character', options=[character_data['character_name']] + list(character_data['characters']), key='sheet_char')
+                    if char_select != character_data['character_name']:
+                        character_data = character_data['characters'][char_select]
+                        char_path = "{}/characters/{}".format(st.session_state['username'], char_select)
+                        char_name = character_data['character_name']
+                try:
+                    known = ast.literal_eval(character_data['known'])
+                except:
+                    known = []
+                known_data = df[df['Skill Name'].isin(known)]
+                display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
+                try:
+                    image_location = character_data['pic_name']
                     bucket = storage.bucket()
-                    if character_data['faction'] != "🧝 Unaffilated" or "🤖 NPC":
-                        blob = bucket.blob("faction_logos/{}.jpg".format(character_data['faction']))
-                        logo = blob.download_as_bytes()
-                        st.image(logo)
-                    else:
-                        blob = bucket.blob("faction_logos/la_logo.jpg")
-                        logo = blob.download_as_bytes()
-                        st.image(logo)
-                if st.session_state['username'] in st.secrets['admins']:
-                    st.markdown("<u><h2 style='text-align: center;'>Known Skills</h2></u>", unsafe_allow_html=True)
-                    st.dataframe(display_data, hide_index=True, use_container_width=True)
-            # except:
-            #     st.info("Data does not exist for this user")
+                    blob = bucket.blob(image_location)
+                    profile_image = blob.download_as_bytes()
+                except:
+                    profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
+                with st.container(border=True):
+                    col1, col2 = st.columns([6,4])
+                    with col1:
+                        st.container(border=True).image(profile_image)
+                    with col2:
+                        player_data = pd.DataFrame({
+                            'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
+                            'Information': [character_data['character_name'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Player'].values[0],character_data['path'],character_data['faction'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Tier'].values[0],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Available Points'].values[0]]
+                                            })
+                        for index, row in player_data.iterrows():
+                            st.subheader(f'{row.Category} {row.Information}', divider='orange')
+                        # st.dataframe(player_data, hide_index=True, use_container_width=True)
+                        bucket = storage.bucket()
+                        if character_data['faction'] != "🧝 Unaffilated" or "🤖 NPC":
+                            blob = bucket.blob("faction_logos/{}.jpg".format(character_data['faction']))
+                            logo = blob.download_as_bytes()
+                            st.image(logo)
+                        else:
+                            blob = bucket.blob("faction_logos/la_logo.jpg")
+                            logo = blob.download_as_bytes()
+                            st.image(logo)
+                    if st.session_state['username'] in st.secrets['admins']:
+                        st.markdown("<u><h2 style='text-align: center;'>Known Skills</h2></u>", unsafe_allow_html=True)
+                        st.dataframe(display_data, hide_index=True, use_container_width=True)
+            except:
+                st.info("Data does not exist for this user")
         with tab3:
-            character_choice = st.selectbox('Select User:', user_df['Username'].unique(), key='event_user', index=list(user_df['Username']).index(st.session_state['username']))
+            try:
+                character_choice = st.selectbox('Select User:', user_df['Username'].unique(), key='event_user', index=list(user_df['Username']).index(st.session_state['username']))
+            except:
+                character_choice = st.selectbox('Select User:', user_df['Username'], key='event_user')
             try:
                 character_data = user_data[character_choice]
                 if 'characters' in character_data.keys():
@@ -471,7 +480,7 @@ if st.session_state["authentication_status"]:
             except:
                 st.info("Data does not exist for this user")
     else:
-        st.warning('Not an admin. Access denied. Whomp whomp.')
+        st.error('Not an admin. Access denied. Whomp whomp.',icon=':material/sentiment_sad:')
         st.write("### Request Admin Access")
         with st.form('admin_access'):
             name_input = st.text_input('Name', value=st.session_state['name'], key='admin_name')
