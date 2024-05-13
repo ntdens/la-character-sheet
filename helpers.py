@@ -3,7 +3,7 @@ from pandas.api.types import is_numeric_dtype
 import streamlit as st
 
 
-APP_PATH = 'http://localhost:8501'
+APP_PATH = 'https://larp-adventures-character-sheet.streamlit.app/'
 
 def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
