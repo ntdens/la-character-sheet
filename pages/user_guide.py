@@ -30,8 +30,6 @@ with open( "style.css" ) as css:
 
 config = db.reference("auth").get()
 
-APP_PATH = 'http://localhost:8501'
-
 def link_create(page):
     return f'<a href="{APP_PATH}/{page.replace(" ","%20")}" target="_self">{page}</a>'
 
