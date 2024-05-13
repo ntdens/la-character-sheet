@@ -24,7 +24,7 @@ import emoji
 import requests
 from PIL import Image as ImageCheck
 from unicodedata import normalize
-from helpers import APP_PATH, filter_dataframe
+from sheet_helpers import APP_PATH, filter_dataframe
 
 add_page_title(layout='wide')
 

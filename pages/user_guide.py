@@ -7,7 +7,7 @@ import pandas as pd
 import firebase_admin
 from firebase_admin import credentials, db, storage
 from math import floor, sqrt
-from helpers import APP_PATH
+from sheet_helpers import APP_PATH
 
 
 add_page_title(layout='wide')
