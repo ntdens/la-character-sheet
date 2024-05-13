@@ -101,3 +101,8 @@ p, [class*="css"] {
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
 }
+
+.st-bd {
+    font-family: "Sedan SC", serif;
+    color:black;
+}

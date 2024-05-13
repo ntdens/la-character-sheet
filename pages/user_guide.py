@@ -8,6 +8,7 @@ import firebase_admin
 from firebase_admin import credentials, db, storage
 from math import floor, sqrt
 from sheet_helpers import APP_PATH
+import uuid
 
 
 add_page_title(layout='wide')
@@ -29,11 +30,38 @@ with open( "style.css" ) as css:
 
 config = db.reference("auth").get()
 
+APP_PATH = 'http://localhost:8501'
+
 def link_create(page):
-    return f'<a href="{APP_PATH}{page.replace(" ","%20")}" target="_self">{page}</a>'
+    return f'<a href="{APP_PATH}/{page.replace(" ","%20")}" target="_self">{page}</a>'
 
 def material_icon(icon_name):
     return f'<i class="material-icons">{icon_name}</i>'
+
+# Generic function to inject js_code
+def inject_native_js_code(source: str) -> None:
+    div_id = uuid.uuid4()
+
+    st.components.v1.html(
+        f"""
+    <div style="display:none" id="{div_id}">
+        <script>
+            {source}
+        </script>
+    </div>
+    """,
+        width=0,
+        height=0,
+    )
+
+def js_click_component(component_id: str):
+
+    source = f"""
+            var tab = window.parent.document.querySelector('[id*={component_id}]');
+            tab.click();
+        """
+
+    inject_native_js_code(source)
 
 #login widget
 authenticator = stauth.Authenticate(
@@ -68,6 +96,9 @@ if st.session_state["authentication_status"]:
         'Admin Zone'
         ]
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(list_of_tabs)
+    query = st.query_params.to_dict()
+    if "tab" in query.keys():
+        js_click_component(f"tab-{list_of_tabs.index(query['tab'])}")
     with tab1:
         st.header('Getting Started', divider='orange')
         st.subheader('Welcome!')
@@ -83,7 +114,7 @@ if st.session_state["authentication_status"]:
         st.markdown(
             f'''
                 One of the first things to do is record what events you have been to. You can do this over in the
-                {link_create('Events')} section of the app. If you are a new player, simply record the name, date and type of
+                [Events]({APP_PATH}/Events) section of the app. If you are a new player, simply record the name, date and type of
                 event you are going to/just came back from, and hit the Save Events button. If you are a more seasoned player, 
                 add all the events you have been to. This is important for calculating your Tier and Skill Point total.
             '''
@@ -163,7 +194,15 @@ if st.session_state["authentication_status"]:
                 Both the Pick New Skill and Pick Skill To Remove dropdowns are searchable. There is also a table of skills you have available to you
                  at the bottom of the page you can filter and explore.
             '''
-        ,unsafe_allow_html=True)   
+        ,unsafe_allow_html=True)
+    with tab3:
+        st.header('Events', divider='orange')
+        st.subheader('Adding a New Event')
+        st.markdown(
+            f'''
+                To add a new event, simply click on the next empty row and start typing
+            '''
+        ,unsafe_allow_html=True)
     # st.markdown(
     #     f'''
     #         Go to the <a href="{APP_PATH}/User%20Guide#adding-events" target="_self">User Guide</a> 

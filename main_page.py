@@ -400,6 +400,8 @@ if st.session_state["authentication_status"]:
         path = '🗡 Warrior'
         faction = "🧝 Unaffilated"
         profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
+
+    st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Character%20Sheet) for more info", icon=":material/help:")
     
     tab1, tab2,tab3 = st.tabs(['Character Sheet', 'Edit Character', 'Add Skills'])
 
