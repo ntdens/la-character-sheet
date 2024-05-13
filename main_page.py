@@ -408,6 +408,7 @@ if st.session_state["authentication_status"]:
     player = st.session_state["name"]
 
     with tab2:
+        st.error('Warning: Changing your Path will reset all of your Skills', icon=":material/reset_wrench:")
         with st.form('my_form'):
             character_name_input = st.text_input('Character Name', value=character_name, key='form_char')
             path_input = st.selectbox('Path', path_list, index=path_list.index(path), key='form_path')
