@@ -215,13 +215,17 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
     sedan_font = TTFont('SedanSC', font_file)
     pdfmetrics.registerFont(sedan_font)
 
+    font_file = 'The_Wild_Breath_of_Zelda.otf'
+    zelda_font = TTFont('Zelda', font_file)
+    pdfmetrics.registerFont(zelda_font)
+
 
     Title = "LARP Adventures Character Sheet"
     def myFirstPage(canvas, doc):
         canvas.saveState()
         canvas.drawImage('OLD_PAPER_TEXTURE.jpg',0,0)
         canvas.drawImage('la_logo.png', doc.leftMargin, doc.height + doc.bottomMargin + doc.topMargin - 4*cm, 3*cm, 3*cm, mask='auto')
-        canvas.setFont('SedanSC',16)
+        canvas.setFont('Zelda',16)
         canvas.drawCentredString(PAGE_WIDTH/2.0, PAGE_HEIGHT-doc.topMargin, Title)
         canvas.setFont('SedanSC',9)
         canvas.drawString(inch, 0.75 * inch, "Page %d" % (doc.page))
@@ -256,7 +260,7 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
 
     break_style = ParagraphStyle('breakstyle',
         fontSize=14,
-        fontName='SedanSC',
+        fontName='Zelda',
         alignment = TA_CENTER
     )
 
