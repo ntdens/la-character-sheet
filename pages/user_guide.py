@@ -30,7 +30,7 @@ with open( "style.css" ) as css:
 config = db.reference("auth").get()
 
 def link_create(page):
-    return f'<a href="{APP_PATH}/{page.replace(" ","%20")}" target="_self">{page}</a>'
+    return f'<a href="{APP_PATH}{page.replace(" ","%20")}" target="_self">{page}</a>'
 
 def material_icon(icon_name):
     return f'<i class="material-icons">{icon_name}</i>'
