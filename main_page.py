@@ -3,10 +3,6 @@ import streamlit as st
 import streamlit_authenticator as stauth
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 import pandas as pd
-from pandas.api.types import (
-    is_datetime64_any_dtype,
-    is_numeric_dtype,
-)
 import firebase_admin
 from firebase_admin import credentials, db, storage
 from math import floor, sqrt
@@ -28,6 +24,7 @@ import emoji
 import requests
 from PIL import Image as ImageCheck
 from unicodedata import normalize
+from helpers import APP_PATH, filter_dataframe
 
 add_page_title(layout='wide')
 
@@ -185,67 +182,7 @@ def skill_gain(df, skill_path, tier, char_path, user_data):
             st.rerun()
         return df
 
-def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Adds a UI on top of a dataframe to let viewers filter columns
 
-    Args:
-        df (pd.DataFrame): Original dataframe
-
-    Returns:
-        pd.DataFrame: Filtered dataframe
-    """
-    modify = st.checkbox("Add filters")
-
-    if not modify:
-        return df
-
-    df = df.copy()
-    df['Spell'] = df['Spell'].astype(str)
-    df = df.fillna('None')
-    modification_container = st.container()
-
-    with modification_container:
-        for column in df.columns:
-            left, right = st.columns((1, 20))
-            if is_numeric_dtype(df[column]):
-                _min = df[column].min()
-                _max = df[column].max()
-                if _min != _max:
-                    if not df.empty:
-                        user_num_input = right.slider(
-                            f"{column}",
-                            min_value=_min,
-                            max_value=_max,
-                            value=(_min, _max),
-                            step=1,
-                        )
-                        df = df[df[column].between(*user_num_input, inclusive='both')]
-            # Treat columns with < 10 unique values as categorical
-            elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
-                if column == 'Spell':
-                    user_spell_input = right.selectbox(
-                        'Spell?',
-                        ['', 'Yes', 'No'],
-                    )
-                    if user_spell_input == 'Yes':
-                        df = df[df['Spell'] == 'True']
-                    elif user_spell_input == 'No':
-                        df = df[df['Spell'] == 'False']
-                else:
-                    user_cat_input = right.multiselect(
-                        f"{column}",
-                        df[column].unique(),
-                        default=list(df[column].unique()),
-                    )
-                    df = df[df[column].isin(user_cat_input)]
-            else:
-                user_text_input = right.text_input(
-                    f"Search in {column}",
-                )
-                if user_text_input:
-                    df = df[df[column].astype(str).str.lower().str.contains(user_text_input.lower())]
-        return df
 
 
 def replace_with_emoji_pdf(text, size):
@@ -464,9 +401,9 @@ if st.session_state["authentication_status"]:
         faction = "🧝 Unaffilated"
         profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
 
-    tab1, tab2,tab3 = st.tabs(['Character Sheet', 'Edit Character', 'Add Skills'])
-
+    st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Character%20Sheet) for more info", icon=":material/help:")
     
+    tab1, tab2,tab3 = st.tabs(['Character Sheet', 'Edit Character', 'Add Skills'])
 
     player = st.session_state["name"]
 
@@ -484,6 +421,9 @@ if st.session_state["authentication_status"]:
             submitted = st.form_submit_button('Save Edits')
             if submitted:
                 doc_ref = db.reference("users/").child(char_path)
+                if path != path_input:
+                    db.reference("users/").child(f"{char_path}/known").delete()
+                    db.reference("users/").child(f"{char_path}/point_spend").delete()
                 doc_ref.update({
                     "character_name":character_name_input,
                     "path":path_input,
@@ -506,6 +446,7 @@ if st.session_state["authentication_status"]:
                         if b.name not in all_pics:
                             b.delete()
                     os.remove(pic_name)
+                st.rerun()
         character_name = st.session_state['form_char']
     if 'form_path' in st.session_state:
         path = st.session_state['form_path']
@@ -519,7 +460,10 @@ if st.session_state["authentication_status"]:
             st.session_state['point_spend'] = 0
         points_available = skill_points - st.session_state['point_spend']
         st.write("### Points Available :",points_available)
-        st.info('Make sure to update your Events for full Tier/Skill Points')
+        st.info(
+            f'Make sure to update your [Events]({APP_PATH}/Events) for full Tier/Skill Points. Skill dropdown selectors are searchable.',
+            icon=':material/info:'
+            )
         df = pd.read_excel('Skills_Table.xlsx')
         df['Tier'] = df.Tier.astype(int)
         skill_path = path[2:]

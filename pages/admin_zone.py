@@ -432,7 +432,9 @@ if st.session_state["authentication_status"]:
                         'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
                         'Information': [character_data['character_name'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Player'].values[0],character_data['path'],character_data['faction'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Tier'].values[0],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Available Points'].values[0]]
                                         })
-                    st.dataframe(player_data, hide_index=True, use_container_width=True)
+                    for index, row in player_data.iterrows():
+                        st.subheader(f'{row.Category} {row.Information}', divider='orange')
+                    # st.dataframe(player_data, hide_index=True, use_container_width=True)
                     bucket = storage.bucket()
                     if character_data['faction'] != "🧝 Unaffilated" or "🤖 NPC":
                         blob = bucket.blob("faction_logos/{}.jpg".format(character_data['faction']))
@@ -442,8 +444,9 @@ if st.session_state["authentication_status"]:
                         blob = bucket.blob("faction_logos/la_logo.jpg")
                         logo = blob.download_as_bytes()
                         st.image(logo)
-                st.markdown("<u><h2 style='text-align: center;'>Known Skills</h2></u>", unsafe_allow_html=True)
-                st.dataframe(display_data, hide_index=True, use_container_width=True)
+                if st.session_state['username'] in st.secrets['admins']:
+                    st.markdown("<u><h2 style='text-align: center;'>Known Skills</h2></u>", unsafe_allow_html=True)
+                    st.dataframe(display_data, hide_index=True, use_container_width=True)
             # except:
             #     st.info("Data does not exist for this user")
         with tab3:

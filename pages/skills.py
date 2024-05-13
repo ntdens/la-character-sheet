@@ -1,18 +1,11 @@
-import yaml
-from yaml.loader import SafeLoader
 import streamlit as st
 import streamlit_authenticator as stauth
 import pandas as pd
-from pandas.api.types import (
-    is_categorical_dtype,
-    is_datetime64_any_dtype,
-    is_numeric_dtype,
-    is_object_dtype,
-)
 from st_pages import show_pages_from_config, add_page_title, hide_pages
 import firebase_admin
 from firebase_admin import credentials, db
 import json
+from helpers import filter_dataframe
 
 add_page_title(layout='wide')
 
@@ -22,82 +15,6 @@ hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Man
 
 with open( "style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
-
-def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Adds a UI on top of a dataframe to let viewers filter columns
-
-    Args:
-        df (pd.DataFrame): Original dataframe
-
-    Returns:
-        pd.DataFrame: Filtered dataframe
-    """
-    modify = st.checkbox("Add filters")
-
-    if not modify:
-        return df
-
-    df = df.copy()
-    df['Spell'] = df['Spell'].astype(str)
-    df = df.fillna('None')
-    modification_container = st.container()
-
-    with modification_container:
-        for column in df.columns:
-            left, right = st.columns((1, 20))
-            if is_numeric_dtype(df[column]):
-                _min = df[column].min()
-                _max = df[column].max()
-                if _min != _max:
-                    if not df.empty:
-                        user_num_input = right.slider(
-                            f"{column}",
-                            min_value=_min,
-                            max_value=_max,
-                            value=(_min, _max),
-                            step=1,
-                        )
-                        df = df[df[column].between(*user_num_input, inclusive='both')]
-                df = df[df[column].between(*user_num_input)]
-            # Treat columns with < 10 unique values as categorical
-            elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
-                if column == 'Spell':
-                    user_spell_input = right.selectbox(
-                        'Spell?',
-                        ['', 'Yes', 'No'],
-                    )
-                    if user_spell_input == 'Yes':
-                        df = df[df['Spell'] == 'True']
-                    elif user_spell_input == 'No':
-                        df = df[df['Spell'] == 'False']
-                else:
-                    user_cat_input = right.multiselect(
-                        f"{column}",
-                        df[column].unique(),
-                        default=list(df[column].unique()),
-                    )
-                    df = df[df[column].isin(user_cat_input)]
-            elif is_datetime64_any_dtype(df[column]):
-                user_date_input = right.date_input(
-                    f"{column}",
-                    value=(
-                        df[column].min(),
-                        df[column].max(),
-                    ),
-                )
-                if len(user_date_input) == 2:
-                    user_date_input = tuple(map(pd.to_datetime, user_date_input))
-                    start_date, end_date = user_date_input
-                    df = df.loc[df[column].between(start_date, end_date)]
-            else:
-                user_text_input = right.text_input(
-                    f"Search in {column}",
-                )
-                if user_text_input:
-                    df = df[df[column].astype(str).str.lower().str.contains(user_text_input.lower())]
-
-    return df
 
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
