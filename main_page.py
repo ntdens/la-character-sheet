@@ -241,6 +241,12 @@ def generate_pdf(player_data, profile_image, logo_image, bio, display_data = pd.
     styles["Title"].fontSize = 10
     styles["Title"].alignment = TA_LEFT
 
+    bio_style = ParagraphStyle('bio')
+    bio_style.fontName = 'SedanSC'
+    bio_style.fontSize = 10
+    bio_style.alignment = TA_LEFT
+    bio_style.firstLineIndent = 1*cm
+
     break_style = ParagraphStyle('breakstyle',
         fontSize=14,
         fontName='Zelda',
@@ -285,19 +291,19 @@ def generate_pdf(player_data, profile_image, logo_image, bio, display_data = pd.
     doc = SimpleDocTemplate("character_sheet.pdf", pagesize=PAGESIZE, title='LARP Adventures Character Sheet')
     Story = [Spacer(1,1*inch)]
     Story.append(final_table)
-    Story.append(Spacer(1,1*inch))
+    Story.append(Spacer(1,2*cm))
     Story.append(Paragraph('<u>Biography</u>', style=break_style))
-    Story.append(Spacer(1,.5*inch))
-    Story.append(Paragraph(bio, style=styles['Title']))
+    Story.append(Spacer(1,1*cm))
+    Story.append(Paragraph(bio, style=bio_style))
     Story.append(PageBreak())
     if not display_data.empty:
         Story.append(Paragraph('<u>Skills</u>', style=break_style))
-        Story.append(Spacer(1,.5*inch))
+        Story.append(Spacer(1,1*cm))
         Story.append(t2)
         Story.append(PageBreak())
     if not user_events.empty:
         Story.append(Paragraph('<u>Events</u>', style=break_style))
-        Story.append(Spacer(1,.5*inch))
+        Story.append(Spacer(1,1*cm))
         Story.append(t3)
     doc.build(Story, onFirstPage=myFirstPage, onLaterPages=myLaterPages)
 
@@ -592,10 +598,8 @@ if st.session_state["authentication_status"]:
                             os.remove('character_sheet.pdf')
                             os.remove(profile_image)
                             os.remove(logo_image)
-                            try:
+                            if os.path.isfile('la_logo.png'):
                                 os.remove('la_logo.png')
-                            except:
-                                pass
                             blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                             pdf_data = blob.download_as_bytes()
                             st.download_button(label="Download Character Sheet",
@@ -637,10 +641,8 @@ if st.session_state["authentication_status"]:
                             os.remove('character_sheet.pdf')
                             os.remove(profile_image)
                             os.remove(logo_image)
-                            try:
+                            if os.path.isfile('la_logo.png'):
                                 os.remove('la_logo.png')
-                            except:
-                                pass
                             blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                             pdf_data = blob.download_as_bytes()
                             st.download_button(label="Download Character Sheet",
@@ -692,10 +694,8 @@ if st.session_state["authentication_status"]:
                         os.remove('character_sheet.pdf')
                         os.remove(profile_image)
                         os.remove(logo_image)
-                        try:
+                        if os.path.isfile('la_logo.png'):
                             os.remove('la_logo.png')
-                        except:
-                            pass
                         blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                         pdf_data = blob.download_as_bytes()
                         st.download_button(label="Download Character Sheet",
