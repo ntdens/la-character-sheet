@@ -25,7 +25,7 @@ show_pages_from_config()
 hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
 
 faction_list = [
-    "🧝 Unaffilated",
+    "🧝 Unaffiliated",
     # "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
     "🛡 Eponore",
@@ -46,7 +46,7 @@ faction_list = [
     "🕊️ The White Ravens"
 ]
 faction_colors = {
-    "🧝 Unaffilated":'burlywood',
+    "🧝 Unaffiliated":'burlywood',
     # "🏴 Blackthorne Company":'darkslategray',
     "💰 Guild of the Black Sky":'darkkhaki',
     "🛡 Eponore":"yellow",
@@ -68,7 +68,7 @@ faction_colors = {
 }
 
 add_the = [
-    "🧝 Unaffilated",
+    "🧝 Unaffiliated",
     # "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
     "🎪 Prismatic Troupe",
@@ -446,12 +446,12 @@ if st.session_state["authentication_status"]:
                             st.subheader(f'{row.Category}   {row.Information}', divider='orange')
                         # st.dataframe(player_data, hide_index=True, use_container_width=True)
                         bucket = storage.bucket()
-                        if character_data['faction'] != "🧝 Unaffilated" or "🤖 NPC":
+                        if character_data['faction'] not in ["🧝 Unaffiliated","🤖 NPC"]:
                             blob = bucket.blob("faction_logos/{}.jpg".format(character_data['faction']))
                             logo = blob.download_as_bytes()
                             st.image(logo)
                         else:
-                            blob = bucket.blob("faction_logos/la_logo.jpg")
+                            blob = bucket.blob("faction_logos/la_logo.png")
                             logo = blob.download_as_bytes()
                             st.image(logo)
                     if st.session_state['username'] in st.secrets['admins']:

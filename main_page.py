@@ -33,7 +33,7 @@ show_pages_from_config()
 hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
 
 faction_list = [
-    "🧝 Unaffilated",
+    "🧝 Unaffiliated",
     # "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
     "⚜️ Catalpa",
@@ -374,7 +374,7 @@ if st.session_state["authentication_status"]:
         try:
             faction = user_data['faction']
         except:
-            faction = "🧝 Unaffilated"
+            faction = "🧝 Unaffiliated"
         try:
             image_location = user_data['pic_name']
             all_pics.append(image_location)
@@ -402,7 +402,7 @@ if st.session_state["authentication_status"]:
         tier = 0
         character_name = ""
         path = '🗡 Warrior'
-        faction = "🧝 Unaffilated"
+        faction = "🧝 Unaffiliated"
         profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
         bio = ''
         st.session_state["known"] = []
@@ -542,14 +542,14 @@ if st.session_state["authentication_status"]:
                 # st.dataframe(player_data, hide_index=True, use_container_width=True)
                 bucket = storage.bucket()
                 try:
-                    if faction != "🧝 Unaffilated" or "🤖 NPC":
+                    if faction not in ["🧝 Unaffiliated","🤖 NPC"]:
                         blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                         logo = blob.download_as_bytes()
                     else:
-                        blob = bucket.blob("faction_logos/la_logo.jpg")
+                        blob = bucket.blob("faction_logos/la_logo.png")
                         logo = blob.download_as_bytes()
                 except:
-                        blob = bucket.blob("faction_logos/la_logo.jpg")
+                        blob = bucket.blob("faction_logos/la_logo.png")
                         logo = blob.download_as_bytes()
                 fi1, fi2, fi3 = st.columns([1,6,1])
                 with fi1:
@@ -572,17 +572,17 @@ if st.session_state["authentication_status"]:
                                 profile_image = user_data['pic_name'].split('/')[1]
                             except:
                                 bucket = storage.bucket()
-                                blob = bucket.blob("faction_logos/la_logo.jpg")
+                                blob = bucket.blob("faction_logos/la_logo.png")
                                 blob.download_to_filename('logo.jpg')
                                 profile_image = 'logo.jpg'
-                            if faction not in ["🧝 Unaffilated","🤖 NPC"]:
+                            if faction not in ["🧝 Unaffiliated","🤖 NPC"]:
                                 blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                                 blob.download_to_filename(faction + '.jpg')
                                 logo_image = faction + '.jpg'
                             else:
-                                blob = bucket.blob("faction_logos/la_logo.jpg")
-                                blob.download_to_filename('la_logo.jpg')
-                                logo_image = 'la_logo.jpg'
+                                blob = bucket.blob("faction_logos/la_logo.png")
+                                blob.download_to_filename('la_logo.png')
+                                logo_image = 'la_logo.png'
                             generate_pdf(player_data, profile_image, logo_image, bio)
                             blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                             blob.upload_from_filename('character_sheet.pdf')
@@ -612,17 +612,17 @@ if st.session_state["authentication_status"]:
                                 profile_image = user_data['pic_name'].split('/')[1]
                             except:
                                 bucket = storage.bucket()
-                                blob = bucket.blob("faction_logos/la_logo.jpg")
+                                blob = bucket.blob("faction_logos/la_logo.png")
                                 blob.download_to_filename('logo.jpg')
                                 profile_image = 'logo.jpg'
-                            if faction != "🧝 Unaffilated" or "🤖 NPC":
+                            if faction not in ["🧝 Unaffiliated","🤖 NPC"]:
                                 blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                                 blob.download_to_filename(faction + '.jpg')
                                 logo_image = faction + '.jpg'
                             else:
-                                blob = bucket.blob("faction_logos/la_logo.jpg".format(faction))
-                                blob.download_to_filename('la_logo.jpg')
-                                logo_image = 'la_logo.jpg'
+                                blob = bucket.blob("faction_logos/la_logo.png".format(faction))
+                                blob.download_to_filename('la_logo.png')
+                                logo_image = 'la_logo.png'
                             
                             generate_pdf(player_data, profile_image, logo_image, bio, display_data[['Skill Name', 'Description']])
                             blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
@@ -643,55 +643,55 @@ if st.session_state["authentication_status"]:
                             st.warning('Not enough data to generate')
                 if st.button('Generate Character Sheet PDF w/ Skills and Events', use_container_width=True):
                     with st.spinner('Generating PDF'):
+                        # try:
+                        user_data = db.reference("users/").child(st.session_state['username']).get()
                         try:
-                            user_data = db.reference("users/").child(st.session_state['username']).get()
-                            try:
-                                image_location = user_data['pic_name']
-                                bucket = storage.bucket()
-                                blob = bucket.blob(image_location)
-                                blob.download_to_filename(user_data['pic_name'].split('/')[1])
-                                profile_image = user_data['pic_name'].split('/')[1]
-                            except:
-                                bucket = storage.bucket()
-                                blob = bucket.blob("faction_logos/la_logo.jpg")
-                                blob.download_to_filename('logo.jpg')
-                                profile_image = 'logo.jpg'
-                            if faction != "🧝 Unaffilated" or "🤖 NPC":
-                                blob = bucket.blob("faction_logos/{}.jpg".format(faction))
-                                blob.download_to_filename(faction + '.jpg')
-                                logo_image = faction + '.jpg'
-                            else:
-                                blob = bucket.blob("faction_logos/la_logo.jpg".format(faction))
-                                blob.download_to_filename('la_logo.jpg')
-                                logo_image = 'la_logo.jpg'
-                            user_events = pd.DataFrame(json.loads(user_events))
-                            user_events.reset_index(drop=True, inplace=True)
-                            try:
-                                user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y").apply(lambda x:x.strftime("%B %Y"))
-                            except:
-                                pass
-                            try:
-                                user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms').apply(lambda x:x.strftime("%B %Y"))
-                            except:
-                                pass
-                            user_events[['Bonus Skill Points', 'Skill Points']] = user_events[['Bonus Skill Points', 'Skill Points']].astype(int)
-                            generate_pdf(player_data, profile_image, logo_image, bio, display_data[['Skill Name', 'Description']], user_events)
-                            blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
-                            blob.upload_from_filename('character_sheet.pdf')
-                            os.remove('character_sheet.pdf')
-                            os.remove(profile_image)
-                            os.remove(logo_image)
-                            blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
-                            pdf_data = blob.download_as_bytes()
-                            st.download_button(label="Download Character Sheet",
-                                data=pdf_data,
-                                file_name="{}.pdf".format(character_name),
-                                mime='application/octet-stream',
-                                use_container_width=True,
-                                type='primary'
-                            )
+                            image_location = user_data['pic_name']
+                            bucket = storage.bucket()
+                            blob = bucket.blob(image_location)
+                            blob.download_to_filename(user_data['pic_name'].split('/')[1])
+                            profile_image = user_data['pic_name'].split('/')[1]
                         except:
-                            st.warning('Not enough data to generate')
+                            bucket = storage.bucket()
+                            blob = bucket.blob("faction_logos/la_logo.png")
+                            blob.download_to_filename('logo.jpg')
+                            profile_image = 'logo.jpg'
+                        if faction not in ["🧝 Unaffiliated","🤖 NPC"]:
+                            blob = bucket.blob("faction_logos/{}.jpg".format(faction))
+                            blob.download_to_filename(faction + '.jpg')
+                            logo_image = faction + '.jpg'
+                        else:
+                            blob = bucket.blob("faction_logos/la_logo.png".format(faction))
+                            blob.download_to_filename('la_logo.png')
+                            logo_image = 'la_logo.png'
+                        user_events = pd.DataFrame(json.loads(user_events))
+                        user_events.reset_index(drop=True, inplace=True)
+                        try:
+                            user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y").apply(lambda x:x.strftime("%B %Y"))
+                        except:
+                            pass
+                        try:
+                            user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms').apply(lambda x:x.strftime("%B %Y"))
+                        except:
+                            pass
+                        user_events[['Bonus Skill Points', 'Skill Points']] = user_events[['Bonus Skill Points', 'Skill Points']].astype(int)
+                        generate_pdf(player_data, profile_image, logo_image, bio, display_data[['Skill Name', 'Description']], user_events)
+                        blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                        blob.upload_from_filename('character_sheet.pdf')
+                        os.remove('character_sheet.pdf')
+                        os.remove(profile_image)
+                        os.remove(logo_image)
+                        blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                        pdf_data = blob.download_as_bytes()
+                        st.download_button(label="Download Character Sheet",
+                            data=pdf_data,
+                            file_name="{}.pdf".format(character_name),
+                            mime='application/octet-stream',
+                            use_container_width=True,
+                            type='primary'
+                        )
+                        # except:
+                        #     st.warning('Not enough data to generate')
             st.markdown("<u><h2 style='text-align: center;'>Biography</h2></u>", unsafe_allow_html=True)
             st.write(bio)
             st.markdown("<u><h2 style='text-align: center;'>Known Skills</h2></u>", unsafe_allow_html=True)
