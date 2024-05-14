@@ -47,7 +47,7 @@ faction_list = [
 ]
 faction_colors = {
     "🧝 Unaffilated":'burlywood',
-    # "🏴 Blackthorne Company":'black',
+    # "🏴 Blackthorne Company":'darkslategray',
     "💰 Guild of the Black Sky":'darkkhaki',
     "🛡 Eponore":"yellow",
     "⚜️ Catalpa":"red",
@@ -266,7 +266,7 @@ if st.session_state["authentication_status"]:
                 add_the_string = 'the '
             else:
                 add_the_string = ''
-            st.write("## Welcome {}, Leader of {}{}".format(leader_data['Character'].values[0], add_the_string, leader_data['Faction'].values[0]))
+            st.header("Welcome {} ,  Leader of {}{} !".format(leader_data['Character'].values[0], add_the_string, leader_data['Faction'].values[0]), divider='rainbow')
             user_df = filter_dataframe(user_df)
             st.dataframe(user_df.drop(columns=['Event Info']), hide_index=True, use_container_width=True)
             if not user_df.empty:
