@@ -74,16 +74,6 @@ def get_tier(events):
 
 def available_skills(df, skill_path, tier, user_data):
     df = df.copy()
-    try:
-        st.session_state['point_spend'] = int(user_data['point_spend'])
-    except:
-        st.session_state['point_spend'] = 0
-    if "available" not in st.session_state:
-        st.session_state['available'] = skill_points - st.session_state['point_spend']
-    try:
-        st.session_state['known'] = ast.literal_eval(user_data['known'])
-    except:
-        st.session_state["known"] = []
     point_cost = []
     for _, row in df.iterrows():
         if row['Path'] != skill_path:
@@ -397,6 +387,16 @@ if st.session_state["authentication_status"]:
             bio = user_data['bio']
         except:
             bio = ''
+        try:
+            st.session_state['point_spend'] = int(user_data['point_spend'])
+        except:
+            st.session_state['point_spend'] = 0
+        if "available" not in st.session_state:
+            st.session_state['available'] = skill_points - st.session_state['point_spend']
+        try:
+            st.session_state['known'] = ast.literal_eval(user_data['known'])
+        except:
+            st.session_state["known"] = []
     except:
         skill_points = 0
         tier = 0
@@ -405,6 +405,9 @@ if st.session_state["authentication_status"]:
         faction = "🧝 Unaffilated"
         profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
         bio = ''
+        st.session_state["known"] = []
+        st.session_state['point_spend'] = 0
+        st.session_state['available'] = skill_points - st.session_state['point_spend']
 
     st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Character%20Sheet) for more info", icon=":material/help:")
     

@@ -178,7 +178,7 @@ if st.session_state["authentication_status"]:
         st.subheader('Edit Character Tab')
         st.markdown(
             f'''
-                Here is where you can update your character's name, faction, path, and upload an image for your character sheet. Currently
+                Here is where you can update your character's name, faction, path, biography, and upload an image for your character sheet. Currently
                 only accepting png, jpg, and gif image types. If you change your path, you will lose all current known skills and point spend
                 and will have to rebuild your skills from the beginning. 
             '''
