@@ -51,6 +51,10 @@ html, body, [class*="css"] {
     background-size: cover;
 }
 
+[data-testid='stSidebarNav'] > ul {
+    min-height: 60vh;
+} 
+
 /* .st-emotion-cache-1r4qj8v { ! buttons and deploy menu
     color: blue;
 } */
