@@ -523,7 +523,15 @@ if st.session_state["authentication_status"]:
                     profile_image = blob.download_as_bytes()
                 except:
                     pass
-                st.container(border=True).image(profile_image)
+                i1, i2, i3 = st.columns([1,6,1])
+                with i1:
+                    st.write("")
+
+                with i2:
+                    st.image(profile_image)
+
+                with i3:
+                    st.write("")
             with col2:
                 player_data = pd.DataFrame({
                     'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Tier  : ','Skill Points  : '],
@@ -537,15 +545,21 @@ if st.session_state["authentication_status"]:
                     if faction != "🧝 Unaffilated" or "🤖 NPC":
                         blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                         logo = blob.download_as_bytes()
-                        st.image(logo)
                     else:
                         blob = bucket.blob("faction_logos/la_logo.jpg")
                         logo = blob.download_as_bytes()
-                        st.image(logo)
                 except:
                         blob = bucket.blob("faction_logos/la_logo.jpg")
                         logo = blob.download_as_bytes()
-                        st.image(logo)
+                fi1, fi2, fi3 = st.columns([1,6,1])
+                with fi1:
+                    st.write("")
+
+                with fi2:
+                    st.image(logo, use_column_width=True)
+
+                with fi3:
+                    st.write("")
                 if st.button('Generate Character Sheet PDF', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         try:
