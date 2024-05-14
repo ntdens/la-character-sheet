@@ -560,6 +560,9 @@ if st.session_state["authentication_status"]:
 
                 with fi3:
                     st.write("")
+                blob = bucket.blob("faction_logos/la_logo.png")
+                blob.download_to_filename('la_logo.png')
+                logo_image = 'la_logo.png'
                 if st.button('Generate Character Sheet PDF', use_container_width=True):
                     with st.spinner('Generating PDF'):
                         try:
@@ -589,6 +592,10 @@ if st.session_state["authentication_status"]:
                             os.remove('character_sheet.pdf')
                             os.remove(profile_image)
                             os.remove(logo_image)
+                            try:
+                                os.remove('la_logo.png')
+                            except:
+                                pass
                             blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                             pdf_data = blob.download_as_bytes()
                             st.download_button(label="Download Character Sheet",
@@ -630,6 +637,10 @@ if st.session_state["authentication_status"]:
                             os.remove('character_sheet.pdf')
                             os.remove(profile_image)
                             os.remove(logo_image)
+                            try:
+                                os.remove('la_logo.png')
+                            except:
+                                pass
                             blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                             pdf_data = blob.download_as_bytes()
                             st.download_button(label="Download Character Sheet",
@@ -681,6 +692,10 @@ if st.session_state["authentication_status"]:
                         os.remove('character_sheet.pdf')
                         os.remove(profile_image)
                         os.remove(logo_image)
+                        try:
+                            os.remove('la_logo.png')
+                        except:
+                            pass
                         blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                         pdf_data = blob.download_as_bytes()
                         st.download_button(label="Download Character Sheet",
