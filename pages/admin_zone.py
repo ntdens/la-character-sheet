@@ -420,6 +420,10 @@ if st.session_state["authentication_status"]:
                     known = ast.literal_eval(character_data['known'])
                 except:
                     known = []
+                try:
+                    bio = character_data['bio']
+                except:
+                    bio = ''
                 known_data = df[df['Skill Name'].isin(known)]
                 display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
                 try:
@@ -435,11 +439,11 @@ if st.session_state["authentication_status"]:
                         st.container(border=True).image(profile_image)
                     with col2:
                         player_data = pd.DataFrame({
-                            'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
+                            'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Tier  : ','Skill Points  : '],
                             'Information': [character_data['character_name'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Player'].values[0],character_data['path'],character_data['faction'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Tier'].values[0],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Available Points'].values[0]]
                                             })
                         for index, row in player_data.iterrows():
-                            st.subheader(f'{row.Category} {row.Information}', divider='orange')
+                            st.subheader(f'{row.Category}   {row.Information}', divider='orange')
                         # st.dataframe(player_data, hide_index=True, use_container_width=True)
                         bucket = storage.bucket()
                         if character_data['faction'] != "🧝 Unaffilated" or "🤖 NPC":
@@ -451,6 +455,8 @@ if st.session_state["authentication_status"]:
                             logo = blob.download_as_bytes()
                             st.image(logo)
                     if st.session_state['username'] in st.secrets['admins']:
+                        st.markdown("<u><h2 style='text-align: center;'>Biography</h2></u>", unsafe_allow_html=True)
+                        st.write(bio)
                         st.markdown("<u><h2 style='text-align: center;'>Known Skills</h2></u>", unsafe_allow_html=True)
                         st.dataframe(display_data, hide_index=True, use_container_width=True)
             except:

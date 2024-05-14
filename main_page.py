@@ -182,9 +182,6 @@ def skill_gain(df, skill_path, tier, char_path, user_data):
             st.rerun()
         return df
 
-
-
-
 def replace_with_emoji_pdf(text, size):
     """
     Reportlab's Paragraph doesn't accept normal html <image> tag's attributes
@@ -205,7 +202,7 @@ def replace_with_emoji_pdf(text, size):
             text = text.replace(e_icon, '<img height={} width={} src="{}"/>'.format(size, size, url))
     return normalize('NFKD', text).encode('ascii','ignore')
 
-def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataFrame(), user_events = pd.DataFrame()):
+def generate_pdf(player_data, profile_image, logo_image, bio, display_data = pd.DataFrame(), user_events = pd.DataFrame()):
     PAGE_WIDTH, PAGE_HEIGHT= letter
     styles = getSampleStyleSheet()
 
@@ -218,7 +215,6 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
     font_file = 'The_Wild_Breath_of_Zelda.otf'
     zelda_font = TTFont('Zelda', font_file)
     pdfmetrics.registerFont(zelda_font)
-
 
     Title = "LARP Adventures Character Sheet"
     def myFirstPage(canvas, doc):
@@ -238,8 +234,6 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
         canvas.drawString(inch, 0.75 * inch, "Page %d" % (doc.page))
         canvas.restoreState()
 
-
-
     character_info_style = TableStyle(
         [
             ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
@@ -252,7 +246,6 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
             ('BOX', (0,0), (-1,-1), 0.25, colors.black),
         ]
     )
-
 
     styles["Title"].fontName = 'SedanSC'
     styles["Title"].fontSize = 10
@@ -301,15 +294,18 @@ def generate_pdf(player_data, profile_image, logo_image, display_data = pd.DataF
 
     doc = SimpleDocTemplate("character_sheet.pdf", pagesize=PAGESIZE, title='LARP Adventures Character Sheet')
     Story = [Spacer(1,1*inch)]
-    style = styles["Normal"]
     Story.append(final_table)
+    Story.append(Spacer(1,1*inch))
+    Story.append(Paragraph('<u>Biography</u>', style=break_style))
+    Story.append(Spacer(1,.5*inch))
+    Story.append(Paragraph(bio, style=styles['Title']))
+    Story.append(PageBreak())
     if not display_data.empty:
-        Story.append(Spacer(1,1*inch))
         Story.append(Paragraph('<u>Skills</u>', style=break_style))
         Story.append(Spacer(1,.5*inch))
         Story.append(t2)
+        Story.append(PageBreak())
     if not user_events.empty:
-        Story.append(Spacer(1,1*inch))
         Story.append(Paragraph('<u>Events</u>', style=break_style))
         Story.append(Spacer(1,.5*inch))
         Story.append(t3)
@@ -397,6 +393,10 @@ if st.session_state["authentication_status"]:
             profile_image = blob.download_as_bytes()
         except:
             profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
+        try:
+            bio = user_data['bio']
+        except:
+            bio = ''
     except:
         skill_points = 0
         tier = 0
@@ -404,6 +404,7 @@ if st.session_state["authentication_status"]:
         path = '🗡 Warrior'
         faction = "🧝 Unaffilated"
         profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
+        bio = ''
 
     st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Character%20Sheet) for more info", icon=":material/help:")
     
@@ -417,6 +418,7 @@ if st.session_state["authentication_status"]:
             character_name_input = st.text_input('Character Name', value=character_name, key='form_char')
             path_input = st.selectbox('Path', path_list, index=path_list.index(path), key='form_path')
             faction_input = st.selectbox('Faction', faction_list, index=faction_list.index(faction), key='form_faction')
+            bio_input = st.text_area('Biography', value=bio, key='form_bio')
             uploaded_file = st.file_uploader('Upload Profile Picture', type=['png','gif','jpg','jpeg'], key='form_image')
             if uploaded_file is not None:
                 form_image = uploaded_file.getvalue()
@@ -433,6 +435,7 @@ if st.session_state["authentication_status"]:
                     "character_name":character_name_input,
                     "path":path_input,
                     "faction":faction_input,
+                    "bio":bio_input
                 })
                 if uploaded_file is not None:
                     origial_character = db.reference("users/").child(st.session_state['username']).get()
@@ -457,6 +460,8 @@ if st.session_state["authentication_status"]:
         path = st.session_state['form_path']
     if 'form_faction' in st.session_state:
         faction = st.session_state['form_faction']
+    if 'form_bio' in st.session_state:
+        bio = st.session_state['form_bio']
 
     with tab3:
         try:
@@ -518,11 +523,11 @@ if st.session_state["authentication_status"]:
                 st.container(border=True).image(profile_image)
             with col2:
                 player_data = pd.DataFrame({
-                    'Category': ['Character: ','Player: ','Path: ','Faction: ','Tier: ','Skill Points: '],
+                    'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Tier  : ','Skill Points  : '],
                     'Information': [character_name,player,path,faction,tier,points_available]
                                     })
                 for index, row in player_data.iterrows():
-                    st.subheader(f'{row.Category} {row.Information}', divider='orange')
+                    st.subheader(f'{row.Category}   {row.Information}', divider='orange')
                 # st.dataframe(player_data, hide_index=True, use_container_width=True)
                 bucket = storage.bucket()
                 try:
@@ -561,7 +566,7 @@ if st.session_state["authentication_status"]:
                                 blob = bucket.blob("faction_logos/la_logo.jpg")
                                 blob.download_to_filename('la_logo.jpg')
                                 logo_image = 'la_logo.jpg'
-                            generate_pdf(player_data, profile_image, logo_image)
+                            generate_pdf(player_data, profile_image, logo_image, bio)
                             blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                             blob.upload_from_filename('character_sheet.pdf')
                             os.remove('character_sheet.pdf')
@@ -602,7 +607,7 @@ if st.session_state["authentication_status"]:
                                 blob.download_to_filename('la_logo.jpg')
                                 logo_image = 'la_logo.jpg'
                             
-                            generate_pdf(player_data, profile_image, logo_image, display_data[['Skill Name', 'Description']])
+                            generate_pdf(player_data, profile_image, logo_image, bio, display_data[['Skill Name', 'Description']])
                             blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                             blob.upload_from_filename('character_sheet.pdf')
                             os.remove('character_sheet.pdf')
@@ -653,7 +658,7 @@ if st.session_state["authentication_status"]:
                             except:
                                 pass
                             user_events[['Bonus Skill Points', 'Skill Points']] = user_events[['Bonus Skill Points', 'Skill Points']].astype(int)
-                            generate_pdf(player_data, profile_image, logo_image, display_data[['Skill Name', 'Description']], user_events)
+                            generate_pdf(player_data, profile_image, logo_image, bio, display_data[['Skill Name', 'Description']], user_events)
                             blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
                             blob.upload_from_filename('character_sheet.pdf')
                             os.remove('character_sheet.pdf')
@@ -670,6 +675,8 @@ if st.session_state["authentication_status"]:
                             )
                         except:
                             st.warning('Not enough data to generate')
+            st.markdown("<u><h2 style='text-align: center;'>Biography</h2></u>", unsafe_allow_html=True)
+            st.write(bio)
             st.markdown("<u><h2 style='text-align: center;'>Known Skills</h2></u>", unsafe_allow_html=True)
             st.dataframe(display_data.astype(str), hide_index=True, use_container_width=True, height=800)
 
