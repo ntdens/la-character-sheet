@@ -220,11 +220,11 @@ if st.session_state["authentication_status"]:
             if 'professions' in user_data[key].keys():
                 prof = ast.literal_eval(user_data[key]['professions'])
             else:
-                prof = None
+                prof = []
             if 'orgs' in user_data[key].keys():
                 orgs = ast.literal_eval(user_data[key]['orgs'])
             else:
-                orgs = None
+                orgs = []
             try:
                 user_table.append({
                     'Username':key,
@@ -262,11 +262,11 @@ if st.session_state["authentication_status"]:
                     if 'professions' in c_info.keys():
                         prof = ast.literal_eval(c_info['professions'])
                     else:
-                        prof = None
+                        prof = []
                     if 'orgs' in c_info.keys():
                         orgs = ast.literal_eval(c_info['orgs'])
                     else:
-                        orgs = None
+                        orgs = []
                     user_table.append({
                         'Username':key,
                         'Player':user_auth[key]['name'],
