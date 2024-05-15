@@ -281,8 +281,8 @@ if st.session_state["authentication_status"]:
                         'Event Info': event_info
                     })
         user_df = pd.DataFrame(user_table)
-        st.session_state['Profession(s)_select'] = list(user_df['Profession(s)'].explode.unique())
-        st.session_state['Organization(s)_select'] = list(user_df['Organization(s)'].explode.unique())
+        st.session_state['Profession(s)_select'] = list(user_df['Profession(s)'].explode().unique())
+        st.session_state['Organization(s)_select'] = list(user_df['Organization(s)'].explode().unique())
         user_df = user_df[user_df['Faction'] != "🤖 NPC"]
         if faction_filter != None:
             user_df = user_df[user_df['Faction'] == faction_filter]
