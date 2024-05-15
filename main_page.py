@@ -582,7 +582,7 @@ if st.session_state["authentication_status"]:
                     profile_image = blob.download_as_bytes()
                 except:
                     pass
-                i1, i2, i3 = st.columns([1,6,1])
+                i1, i2, i3 = st.columns([1,10,1])
                 with i1:
                     st.write("")
 
@@ -610,7 +610,7 @@ if st.session_state["authentication_status"]:
                 except:
                         blob = bucket.blob("faction_logos/la_logo.png")
                         logo = blob.download_as_bytes()
-                fi1, fi2, fi3 = st.columns([1,6,1])
+                fi1, fi2, fi3 = st.columns([1,10,1])
                 with fi1:
                     st.write("")
 

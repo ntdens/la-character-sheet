@@ -207,6 +207,14 @@ if st.session_state["authentication_status"]:
                 tier = 0
                 avail_points = skill_points
                 event_info = "{}"
+            if 'professions' in user_data[key].keys():
+                prof = ast.literal_eval(user_data[key]['professions'])
+            else:
+                prof = None
+            if 'orgs' in user_data[key].keys():
+                orgs = ast.literal_eval(user_data[key]['orgs'])
+            else:
+                orgs = None
             try:
                 user_table.append({
                     'Username':key,
@@ -215,6 +223,8 @@ if st.session_state["authentication_status"]:
                     'Faction':user_data[key]['faction'],
                     'Path':user_data[key]['path'],
                     'Tier':tier,
+                    'Profession(s)':prof,
+                    'Organization(s)':orgs,
                     'Earned Points':skill_points,
                     "Available Points":avail_points,
                     'Event Info':event_info
@@ -239,6 +249,14 @@ if st.session_state["authentication_status"]:
                         tier = 0
                         avail_points = skill_points
                         event_info = "{}"
+                    if 'professions' in c_info.keys():
+                        prof = ast.literal_eval(c_info[key]['professions'])
+                    else:
+                        prof = None
+                    if 'orgs' in c_info.keys():
+                        orgs = ast.literal_eval(c_info[key]['orgs'])
+                    else:
+                        orgs = None
                     user_table.append({
                         'Username':key,
                         'Player':user_auth[key]['name'],
@@ -246,6 +264,8 @@ if st.session_state["authentication_status"]:
                         'Faction':c_info['faction'],
                         'Path':c_info['path'],
                         'Tier':tier,
+                        'Profession(s)':prof,
+                        'Organization(s)':orgs,
                         'Earned Points':skill_points,
                         "Available Points":avail_points,
                         'Event Info': event_info
@@ -266,6 +286,8 @@ if st.session_state["authentication_status"]:
             if not user_df.empty:
                 tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 path_df = user_df.groupby('Path')['Username'].count().reset_index().rename(columns={'Username':'Players'})
+                prof_df = user_df.explode('Profession(s)').groupby('Profession(s)')['Username'].nunique().reset_index().rename(columns={'Username':'Players', 'Profession(s)':'Profession'})
+                org_df = user_df.explode('Organization(s)').groupby('Organization(s)')['Username'].nunique().reset_index().rename(columns={'Username':'Players', 'Organization(s)':'Organization'})
                 st.plotly_chart(
                     px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
                         xaxis = dict(
@@ -284,6 +306,28 @@ if st.session_state["authentication_status"]:
                 , use_container_width=True)
                 st.plotly_chart(
                     px.bar(path_df, x='Path', y='Players', title='Number of Players by Path').update_layout(
+                        yaxis = dict(
+                                tickmode = 'linear',
+                                tick0 = 0,
+                                dtick = 1
+                        ),
+                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
+                    ).update_traces(marker_color='rgb(230,171,2)')
+                , use_container_width=True)          
+                st.plotly_chart(
+                    px.bar(prof_df, x='Profession', y='Players', title='Number of Players by Profession').update_layout(
+                        yaxis = dict(
+                                tickmode = 'linear',
+                                tick0 = 0,
+                                dtick = 1
+                        ),
+                        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+                        paper_bgcolor= 'rgba(0, 0, 0, 0)'
+                    ).update_traces(marker_color='rgb(230,171,2)')
+                , use_container_width=True)
+                st.plotly_chart(
+                    px.bar(org_df, x='Organization', y='Players', title='Number of Players by Organization').update_layout(
                         yaxis = dict(
                                 tickmode = 'linear',
                                 tick0 = 0,
@@ -430,11 +474,20 @@ if st.session_state["authentication_status"]:
                 with st.container(border=True):
                     col1, col2 = st.columns([6,4])
                     with col1:
-                        st.container(border=True).image(profile_image)
+                        i1, i2, i3 = st.columns([1,10,1])
+                        with i1:
+                            st.write("")
+
+                        with i2:
+                            st.image(profile_image)
+
+                        with i3:
+                            st.write("")
                     with col2:
+                        char_df = user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]
                         player_data = pd.DataFrame({
-                            'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Tier  : ','Skill Points  : '],
-                            'Information': [character_data['character_name'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Player'].values[0],character_data['path'],character_data['faction'],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Tier'].values[0],user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]['Available Points'].values[0]]
+                            'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Profession(s)  : ','Organization(s)  : ','Tier  : ','Skill Points  : '],
+                            'Information': [character_data['character_name'],char_df['Player'].values[0],char_df['Path'].values[0],char_df['Faction'].values[0],' , '.join(char_df['Profession(s)'].values[0]),' , '.join(char_df['Organization(s)'].values[0]),char_df['Tier'].values[0],char_df['Available Points'].values[0]]
                                             })
                         for index, row in player_data.iterrows():
                             st.subheader(f'{row.Category}   {row.Information}', divider='orange')
