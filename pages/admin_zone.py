@@ -220,11 +220,11 @@ if st.session_state["authentication_status"]:
             if 'professions' in user_data[key].keys():
                 prof = ast.literal_eval(user_data[key]['professions'])
             else:
-                prof = []
+                prof = None
             if 'orgs' in user_data[key].keys():
                 orgs = ast.literal_eval(user_data[key]['orgs'])
             else:
-                orgs = []
+                orgs = None
             try:
                 user_table.append({
                     'Username':key,
@@ -262,11 +262,11 @@ if st.session_state["authentication_status"]:
                     if 'professions' in c_info.keys():
                         prof = ast.literal_eval(c_info['professions'])
                     else:
-                        prof = []
+                        prof = None
                     if 'orgs' in c_info.keys():
                         orgs = ast.literal_eval(c_info['orgs'])
                     else:
-                        orgs = []
+                        orgs = None
                     user_table.append({
                         'Username':key,
                         'Player':user_auth[key]['name'],
@@ -491,9 +491,15 @@ if st.session_state["authentication_status"]:
                         st.image(profile_image, use_column_width=True)
                     with col2:
                         char_df = user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]
+                        prof_data = char_df['Profession(s)'].values[0]
+                        if isinstance(prof_data,list):
+                            prof_data = ' , '.join(prof_data)
+                        org_data = char_df['Organization(s)'].values[0]
+                        if isinstance(prof_data,list):
+                            org_data = ' , '.join(prof_data)
                         player_data = pd.DataFrame({
                             'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Profession(s)  : ','Organization(s)  : ','Tier  : ','Skill Points  : '],
-                            'Information': [character_data['character_name'],char_df['Player'].values[0],char_df['Path'].values[0],char_df['Faction'].values[0],' , '.join(char_df['Profession(s)'].values[0]),' , '.join(char_df['Organization(s)'].values[0]),char_df['Tier'].values[0],char_df['Available Points'].values[0]]
+                            'Information': [character_data['character_name'],char_df['Player'].values[0],char_df['Path'].values[0],char_df['Faction'].values[0],prof_data,org_data,char_df['Tier'].values[0],char_df['Available Points'].values[0]]
                                             })
                         for index, row in player_data.iterrows():
                             st.subheader(f'{row.Category}   {row.Information}', divider='orange')
