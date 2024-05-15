@@ -24,7 +24,7 @@ import emoji
 import requests
 from PIL import Image as ImageCheck
 from unicodedata import normalize
-from sheet_helpers import APP_PATH, filter_dataframe
+from sheet_helpers import APP_PATH, filter_dataframe, sidebar_about
 
 add_page_title(layout='wide')
 
@@ -351,13 +351,7 @@ with open( "style.css" ) as css:
 config = db.reference("auth").get()
 
 st.sidebar.title("About")
-st.sidebar.markdown(
-    """
-    **This app is maintained by Nate Densmore (Kython). Please reach out to him if you have 
-    any questions or concerns. This app is a volunteer passion project, not an official product 
-    of LARP Adventures.**
-"""
-)
+sidebar_about()
 
 #login widget
 authenticator = stauth.Authenticate(

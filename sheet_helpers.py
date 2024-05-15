@@ -65,3 +65,12 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                 if user_text_input:
                     df = df[df[column].astype(str).str.lower().str.contains(user_text_input.lower())]
         return df
+    
+def sidebar_about():
+    return st.sidebar.markdown(
+    """
+    **This app is maintained by Nate (Kython). Please reach out to him if you have 
+    any questions or concerns. This app is a volunteer passion project, not an official product 
+    of LARP Adventures.**
+"""
+)

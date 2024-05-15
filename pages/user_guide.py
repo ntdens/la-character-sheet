@@ -5,9 +5,8 @@ from st_pages import show_pages_from_config, add_page_title, hide_pages
 from streamlit_modal import Modal
 import pandas as pd
 import firebase_admin
-from firebase_admin import credentials, db, storage
-from math import floor, sqrt
-from sheet_helpers import APP_PATH
+from firebase_admin import credentials, db
+from sheet_helpers import APP_PATH, sidebar_about
 import uuid
 
 
@@ -70,13 +69,7 @@ authenticator = stauth.Authenticate(
 )
 
 st.sidebar.title("About")
-st.sidebar.markdown(
-    """
-    **This app is maintained by Nate Densmore (Kython). Please reach out to him if you have 
-    any questions or concerns. This app is a volunteer passion project, not an official product 
-    of LARP Adventures.**
-"""
-)
+sidebar_about()
 
 
 #authenticate login
