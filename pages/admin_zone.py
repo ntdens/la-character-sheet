@@ -281,8 +281,6 @@ if st.session_state["authentication_status"]:
                         'Event Info': event_info
                     })
         user_df = pd.DataFrame(user_table)
-        st.session_state['Profession(s)_select'] = list(user_df['Profession(s)'].explode().unique())
-        st.session_state['Organization(s)_select'] = list(user_df['Organization(s)'].explode().unique())
         user_df = user_df[user_df['Faction'] != "🤖 NPC"]
         if faction_filter != None:
             user_df = user_df[user_df['Faction'] == faction_filter]
@@ -299,9 +297,11 @@ if st.session_state["authentication_status"]:
                 tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 path_df = user_df.groupby('Path')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 prof_df = user_df.explode('Profession(s)').groupby('Profession(s)')['Username'].nunique().reset_index().rename(columns={'Username':'Players', 'Profession(s)':'Profession'})
-                prof_df = prof_df[prof_df['Profession'].isin(st.session_state['Profession(s)_select'])]
+                if 'Profession(s)_select' in st.session_state:
+                    prof_df = prof_df[prof_df['Profession'].isin(st.session_state['Profession(s)_select'])]
                 org_df = user_df.explode('Organization(s)').groupby('Organization(s)')['Username'].nunique().reset_index().rename(columns={'Username':'Players', 'Organization(s)':'Organization'})
-                org_df = org_df[org_df['Organization'].isin(st.session_state['Organization(s)_select'])]
+                if 'Organization(s)_select' in st.session_state:
+                    org_df = org_df[org_df['Organization'].isin(st.session_state['Organization(s)_select'])]
                 st.plotly_chart(
                     px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
                         xaxis = dict(
