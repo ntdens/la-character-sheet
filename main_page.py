@@ -40,7 +40,7 @@ faction_list = [
     "🍷 Cedar Hill",
     "🧚‍♀️ The Court of Ashes",
     "🧛‍♂️ The Dismissed",
-    "🛡 Eponore",
+    "👑 Eponore",
     "💀 Geth",
     "❄️ Grimfrost",
     "🌳 The Grove",
@@ -64,9 +64,20 @@ path_list = [
 
 prof_list = [
     '🎵 Bard',
-    '🛍️ Merchant',
+    '🪙 Merchant',
     '📐 Artificer'
 ]
+
+org_list = [
+    '🔍 The Sentinels',
+    '🛡️ The Shield',
+    '🔆 Order of Light',
+    '🗡️ Sanguine Order',
+    '🧿 THoTH',
+    "🏦 Merchant's Guild",
+    "📚 Archivist Guild"
+]
+
 
 professions = [
     'Bard',
@@ -293,6 +304,7 @@ def generate_pdf(player_data, profile_image, logo_image, bio, display_data = pd.
         else:
             t1 = Table(np.array(table_data.map(lambda x:Paragraph(x, style=styles['Title']))).tolist(), style=tstyle, repeatRows=1)
         return t1
+    player_data['Information'] = player_data['Information'].apply(lambda x:str(x).replace(',','<br />'))
     t1 = table_gen(player_data)
     doc = SimpleDocTemplate("table.pdf", pagesize=letter)
 
@@ -321,7 +333,7 @@ def generate_pdf(player_data, profile_image, logo_image, bio, display_data = pd.
     doc = SimpleDocTemplate("character_sheet.pdf", pagesize=PAGESIZE, title='LARP Adventures Character Sheet')
     Story = [Spacer(1,1*inch)]
     Story.append(final_table)
-    Story.append(Spacer(1,2*cm))
+    Story.append(PageBreak())
     Story.append(Paragraph('<u>Biography</u>', style=break_style))
     Story.append(Spacer(1,1*cm))
     Story.append(Paragraph(bio, style=bio_style))
@@ -384,49 +396,57 @@ if st.session_state["authentication_status"]:
             if char_select != user_data['character_name']:
                 user_data = user_data['characters'][char_select]
                 char_path = "{}/characters/{}".format(st.session_state['username'], char_select)
-        try:
+        if 'event_info' in user_data.keys():
             user_events = user_data['event_info']
             data_df = pd.DataFrame(json.loads(user_events))
             data_df.reset_index(drop=True, inplace=True)
             skill_points = int(data_df["Skill Points"].sum())
             tier = get_tier(len(data_df[data_df['Event Type'] != "🪚 Work Weekend"]))
-        except:
+        else:
             skill_points = 0
             tier = 0
-        try:
+        if 'character_name' in user_data.keys():
             character_name = user_data['character_name']
-        except:
+        else:
             character_name = ""
-        try:
+        if 'path' in user_data.keys():
             path = user_data['path']
-        except:
+        else:
             path = '🗡 Warrior'
-        try:
+        if 'faction' in user_data.keys():
             faction = user_data['faction']
-        except:
+        else:
             faction = "🧝 Unaffiliated"
-        try:
+        if 'pic_name' in user_data.keys():
             image_location = user_data['pic_name']
             all_pics.append(image_location)
             bucket = storage.bucket()
             blob = bucket.blob(image_location)
             profile_image = blob.download_as_bytes()
-        except:
+        else:
             profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
-        try:
+        if 'bio' in user_data.keys():
             bio = user_data['bio']
-        except:
+        else:
             bio = ''
-        try:
+        if 'point_spend' in user_data.keys():
             st.session_state['point_spend'] = int(user_data['point_spend'])
-        except:
+        else:
             st.session_state['point_spend'] = 0
         if "available" not in st.session_state:
             st.session_state['available'] = skill_points - st.session_state['point_spend']
-        try:
+        if 'known' in user_data.keys():
             st.session_state['known'] = ast.literal_eval(user_data['known'])
-        except:
+        else:
             st.session_state["known"] = []
+        if 'professions' in user_data.keys():
+            prof = ast.literal_eval(user_data['professions'])
+        else:
+            prof = None
+        if 'orgs' in user_data.keys():
+            orgs = ast.literal_eval(user_data['orgs'])
+        else:
+            orgs = None
     except:
         skill_points = 0
         tier = 0
@@ -438,6 +458,8 @@ if st.session_state["authentication_status"]:
         st.session_state["known"] = []
         st.session_state['point_spend'] = 0
         st.session_state['available'] = skill_points - st.session_state['point_spend']
+        prof = None
+        orgs = None
 
     st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Character%20Sheet) for more info", icon=":material/help:")
     
@@ -451,6 +473,8 @@ if st.session_state["authentication_status"]:
             character_name_input = st.text_input('Character Name', value=character_name, key='form_char')
             path_input = st.selectbox('Path', path_list, index=path_list.index(path), key='form_path')
             faction_input = st.selectbox('Faction', faction_list, index=faction_list.index(faction), key='form_faction')
+            prof_input = st.multiselect('Profession(s)', prof_list, default=prof, key='form_prof')
+            org_input = st.multiselect('Organization(s)', org_list, default=orgs, key='form_org')
             bio_input = st.text_area('Biography', value=bio, key='form_bio')
             uploaded_file = st.file_uploader('Upload Profile Picture', type=['png','gif','jpg','jpeg'], key='form_image')
             if uploaded_file is not None:
@@ -468,7 +492,9 @@ if st.session_state["authentication_status"]:
                     "character_name":character_name_input,
                     "path":path_input,
                     "faction":faction_input,
-                    "bio":bio_input
+                    "bio":bio_input,
+                    "professions":str(prof_input),
+                    "orgs":str(org_input)
                 })
                 if uploaded_file is not None:
                     origial_character = db.reference("users/").child(st.session_state['username']).get()
@@ -495,7 +521,10 @@ if st.session_state["authentication_status"]:
         faction = st.session_state['form_faction']
     if 'form_bio' in st.session_state:
         bio = st.session_state['form_bio']
-
+    if 'form_prof' in st.session_state:
+        prof = st.session_state['form_prof']
+    if 'form_org' in st.session_state:
+        orgs = st.session_state['form_org']
     with tab3:
         try:
             st.session_state['point_spend'] = int(user_data['point_spend'])
@@ -564,8 +593,8 @@ if st.session_state["authentication_status"]:
                     st.write("")
             with col2:
                 player_data = pd.DataFrame({
-                    'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Tier  : ','Skill Points  : '],
-                    'Information': [character_name,player,path,faction,tier,points_available]
+                    'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Profession(s)  : ','Organization(s)  : ','Tier  : ','Skill Points  : '],
+                    'Information': [character_name,player,path,faction,' , '.join(prof), ' , '.join(orgs),tier,points_available]
                                     })
                 for index, row in player_data.iterrows():
                     st.subheader(f'{row.Category}   {row.Information}', divider='orange')
