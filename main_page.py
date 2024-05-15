@@ -62,6 +62,17 @@ path_list = [
     '🔮 Mage'
 ]
 
+prof_list = [
+    '🎵 Bard',
+    '🛍️ Merchant',
+    '📐 Artificer'
+]
+
+professions = [
+    'Bard',
+    'Artificer'
+]
+
 skill_paths = [
     'Warrior',
     'Rogue',
@@ -77,7 +88,7 @@ def available_skills(df, skill_path, tier, user_data):
     point_cost = []
     for _, row in df.iterrows():
         if row['Path'] != skill_path:
-            if row['Path'] != 'Bard':
+            if row['Path'] not in professions:
                 if row['Tier'] == 0:
                     point_cost.append(2)
                 else:
@@ -97,12 +108,13 @@ def available_skills(df, skill_path, tier, user_data):
                 path_data.append(df[(df['Path'] == p) & (df['Tier'] <= path_max)])
             else:
                 path_data.append(df[(df['Path'] == p) & (df['Tier'] == 0)])
-        if tier >= 3:
-            if not known_data[known_data['Path'] == 'Bard'].empty:
-                path_max = known_data[known_data['Path'] == 'Bard']['Tier'].max() + 1
-                path_data.append(df[(df['Path'] == 'Bard') & (df['Tier'] <= path_max)])
-            else:
-                path_data.append(df[(df['Path'] == 'Bard') & (df['Tier'] == 1)])
+        for p in professions:
+            if tier >= 3:
+                if not known_data[known_data['Path'] == p].empty:
+                    path_max = known_data[known_data['Path'] == p]['Tier'].max() + 1
+                    path_data.append(df[(df['Path'] == p) & (df['Tier'] <= path_max)])
+                else:
+                    path_data.append(df[(df['Path'] == p) & (df['Tier'] == 1)])
         df = pd.concat(path_data)
         current_path = known_data[known_data['Path'] == skill_path]['Tier'].max() + 1
         df = df[df['Point Cost'] <= current_path]
@@ -112,6 +124,11 @@ def available_skills(df, skill_path, tier, user_data):
     df = df[df['Skill Name'] != 'Cross-Training']
     if 'Read/Write Arcana' not in list(known_data['Skill Name']):
         df = df[df['Spell'] == False]
+    if 'Appraise' not in list(known_data['Skill Name']):
+        if 'Appraise' in list(df['Skill Name']):
+            appraise = df[df['Skill Name'] == 'Appraise']
+            df = df[df['Path'] != 'Artificer']
+            df = pd.concat([df, appraise])
     known_skills = list(known_data['Skill Name'].unique())
     filter_known = []
     for _, row in df.iterrows():
@@ -157,6 +174,19 @@ def skill_gain(df, skill_path, tier, char_path, user_data):
         remove_button = st.button('Remove Skill', disabled=True)
     else:
         if st.button("Remove Skill"):
+            point_cost = []
+            for _, row in df1.iterrows():
+                if row['Path'] != skill_path:
+                    if row['Path'] not in professions:
+                        if row['Tier'] == 0:
+                            point_cost.append(2)
+                        else:
+                            point_cost.append(row['Tier']*2)
+                    else:
+                        point_cost.append(row['Tier'])
+                else:
+                    point_cost.append(row['Tier'])
+            df1['Point Cost'] = point_cost
             gain_df = df1[df1['Skill Name'] == remove_skill].copy()
             idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
             skill_df = gain_df.loc[idxmin]
