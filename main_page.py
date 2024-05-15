@@ -7,7 +7,6 @@ import firebase_admin
 from firebase_admin import credentials, db, storage
 from math import floor, sqrt
 import io
-import PIL.Image as Image
 import os
 import ast
 import plotly.graph_objects as go
@@ -422,7 +421,7 @@ if st.session_state["authentication_status"]:
             all_pics.append(image_location)
             bucket = storage.bucket()
             blob = bucket.blob(image_location)
-            profile_image = blob.download_as_bytes()
+            profile_image = ImageCheck.open(io.BytesIO(blob.download_as_bytes()))
         else:
             profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
         if 'bio' in user_data.keys():

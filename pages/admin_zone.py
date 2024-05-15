@@ -17,6 +17,8 @@ from pandas.api.types import (
     is_numeric_dtype,
 )
 from sheet_helpers import APP_PATH, sidebar_about
+from PIL import Image
+import io
 
 add_page_title(layout='wide')
 
@@ -468,7 +470,7 @@ if st.session_state["authentication_status"]:
                     image_location = character_data['pic_name']
                     bucket = storage.bucket()
                     blob = bucket.blob(image_location)
-                    profile_image = blob.download_as_bytes()
+                    profile_image = Image.open(io.BytesIO(blob.download_as_bytes()))
                 except:
                     profile_image = "https://64.media.tumblr.com/ac71f483d395c1ad2c627621617149be/tumblr_o8wg3kqct31uxrf2to1_640.jpg"
                 with st.container(border=True):
