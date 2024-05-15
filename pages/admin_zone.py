@@ -126,11 +126,19 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                             )
                             df = df[df[column].between(*user_num_input, inclusive='both')]
                 # Treat columns with < 10 unique values as categorical
+                elif column in ['Profession(s)', 'Organization(s)']:
+                    user_list_input = right.multiselect(
+                        f"{column}",
+                        list(df.explode(column)[column].unique()),
+                        default=list(df.explode(column)[column].unique()),
+                        key=f'{column}_select'
+                    )
+                    df = df[df[column].apply(lambda x:any(a in x for a in user_list_input))]
                 elif isinstance(df[column], pd.CategoricalDtype) or df[column].nunique() < 10:
                     user_cat_input = right.multiselect(
                         f"{column}",
                         df[column].unique(),
-                        default=list(df[column].unique()),
+                        default=list(df[column].unique())
                     )
                     df = df[df[column].isin(user_cat_input)]
                 elif is_datetime64_any_dtype(df[column]):
@@ -289,7 +297,9 @@ if st.session_state["authentication_status"]:
                 tier_df = user_df.groupby('Tier')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 path_df = user_df.groupby('Path')['Username'].count().reset_index().rename(columns={'Username':'Players'})
                 prof_df = user_df.explode('Profession(s)').groupby('Profession(s)')['Username'].nunique().reset_index().rename(columns={'Username':'Players', 'Profession(s)':'Profession'})
+                prof_df = prof_df[prof_df['Profession'].isin(st.session_state['Profession(s)_select'])]
                 org_df = user_df.explode('Organization(s)').groupby('Organization(s)')['Username'].nunique().reset_index().rename(columns={'Username':'Players', 'Organization(s)':'Organization'})
+                org_df = org_df[org_df['Organization'].isin(st.session_state['Organization(s)_select'])]
                 st.plotly_chart(
                     px.bar(tier_df, x='Tier', y='Players', title='Number of Players by Tier').update_layout(
                         xaxis = dict(
