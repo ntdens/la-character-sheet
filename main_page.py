@@ -582,15 +582,7 @@ if st.session_state["authentication_status"]:
                     profile_image = blob.download_as_bytes()
                 except:
                     pass
-                i1, i2, i3 = st.columns([1,10,1])
-                with i1:
-                    st.write("")
-
-                with i2:
-                    st.image(profile_image)
-
-                with i3:
-                    st.write("")
+                st.image(profile_image, use_column_width=True)
             with col2:
                 player_data = pd.DataFrame({
                     'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Profession(s)  : ','Organization(s)  : ','Tier  : ','Skill Points  : '],
@@ -610,15 +602,7 @@ if st.session_state["authentication_status"]:
                 except:
                         blob = bucket.blob("faction_logos/la_logo.png")
                         logo = blob.download_as_bytes()
-                fi1, fi2, fi3 = st.columns([1,10,1])
-                with fi1:
-                    st.write("")
-
-                with fi2:
-                    st.image(logo, use_column_width=True)
-
-                with fi3:
-                    st.write("")
+                st.image(logo, use_column_width=True)
                 blob = bucket.blob("faction_logos/la_logo.png")
                 blob.download_to_filename('la_logo.png')
                 logo_image = 'la_logo.png'
@@ -634,9 +618,9 @@ if st.session_state["authentication_status"]:
                                 profile_image = user_data['pic_name'].split('/')[1]
                             except:
                                 bucket = storage.bucket()
-                                blob = bucket.blob("faction_logos/la_logo.png")
-                                blob.download_to_filename('logo.jpg')
-                                profile_image = 'logo.jpg'
+                                blob = bucket.blob("faction_logos/profile.jpg")
+                                blob.download_to_filename('profile.jpg')
+                                profile_image = 'profile.jpg'
                             if faction not in ["🧝 Unaffiliated","🤖 NPC"]:
                                 blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                                 blob.download_to_filename(faction + '.jpg')

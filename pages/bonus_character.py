@@ -20,14 +20,14 @@ show_pages_from_config()
 hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
 
 faction_list = [
-    "🧝 Unaffilated",
+    "🧝 Unaffiliated",
     # "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
     "⚜️ Catalpa",
     "🍷 Cedar Hill",
     "🧚‍♀️ The Court of Ashes",
     "🧛‍♂️ The Dismissed",
-    "🛡 Eponore",
+    "👑 Eponore",
     "💀 Geth",
     "❄️ Grimfrost",
     "🌳 The Grove",

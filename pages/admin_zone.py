@@ -250,11 +250,11 @@ if st.session_state["authentication_status"]:
                         avail_points = skill_points
                         event_info = "{}"
                     if 'professions' in c_info.keys():
-                        prof = ast.literal_eval(c_info[key]['professions'])
+                        prof = ast.literal_eval(c_info['professions'])
                     else:
                         prof = None
                     if 'orgs' in c_info.keys():
-                        orgs = ast.literal_eval(c_info[key]['orgs'])
+                        orgs = ast.literal_eval(c_info['orgs'])
                     else:
                         orgs = None
                     user_table.append({
@@ -474,15 +474,7 @@ if st.session_state["authentication_status"]:
                 with st.container(border=True):
                     col1, col2 = st.columns([6,4])
                     with col1:
-                        i1, i2, i3 = st.columns([1,10,1])
-                        with i1:
-                            st.write("")
-
-                        with i2:
-                            st.image(profile_image)
-
-                        with i3:
-                            st.write("")
+                        st.image(profile_image, use_column_width=True)
                     with col2:
                         char_df = user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]
                         player_data = pd.DataFrame({
@@ -496,11 +488,11 @@ if st.session_state["authentication_status"]:
                         if character_data['faction'] not in ["🧝 Unaffiliated","🤖 NPC"]:
                             blob = bucket.blob("faction_logos/{}.jpg".format(character_data['faction']))
                             logo = blob.download_as_bytes()
-                            st.image(logo)
+                            st.image(logo, use_column_width=True)
                         else:
                             blob = bucket.blob("faction_logos/la_logo.png")
                             logo = blob.download_as_bytes()
-                            st.image(logo)
+                            st.image(logo, use_column_width=True)
                     if st.session_state['username'] in st.secrets['admins']:
                         st.markdown("<u><h2 style='text-align: center;'>Biography</h2></u>", unsafe_allow_html=True)
                         st.write(bio)
