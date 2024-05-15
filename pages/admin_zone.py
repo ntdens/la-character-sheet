@@ -82,8 +82,8 @@ add_the = [
 path_list = [
     '🗡 Warrior',
     '🪤 Rogue',
-    '🩹 Healer',
-    '🔮 Wizard'
+    '🩸 Healer',
+    '🔮 Mage'
 ]
 
 def get_tier(events):
@@ -319,7 +319,7 @@ if st.session_state["authentication_status"]:
                     ).update_traces(marker_color='rgb(230,171,2)')
                 , use_container_width=True)
                 st.plotly_chart(
-                    px.bar(path_df, x='Path', y='Players', title='Number of Players by Path').update_layout(
+                    px.bar(path_df, x='Path', y='Players', title='Number of Players by Path', category_orders={'Path':path_list}).update_layout(
                         yaxis = dict(
                                 tickmode = 'linear',
                                 tick0 = 0,
