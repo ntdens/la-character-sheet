@@ -115,8 +115,8 @@ if st.session_state["authentication_status"]:
             f'''
                 Once your events are all recorded, it's time to head over to the [Character Sheet]({APP_PATH})
                 page. This page is divided into three tabs. The first tab holds your completed character sheet. The second tab is where you
-                actually create and edit your character. It is here you should go next. Enter your character name, path, faction, and even 
-                upload a picture if you wish!
+                actually create and edit your character. It is here you should go next. Enter your character name, path, faction, professions, 
+                organziations, and even upload a picture if you wish!
             '''
         ,unsafe_allow_html=True)
         st.subheader('Adding Skills')
@@ -171,9 +171,9 @@ if st.session_state["authentication_status"]:
         st.subheader('Edit Character Tab')
         st.markdown(
             f'''
-                Here is where you can update your character's name, faction, path, biography, and upload an image for your character sheet. Currently
-                only accepting png, jpg, and gif image types. If you change your path, you will lose all current known skills and point spend
-                and will have to rebuild your skills from the beginning. 
+                Here is where you can update your character's name, faction, path, biography, professions, organizations, and upload an image 
+                for your character sheet. Currently only accepting png, jpg, and gif image types. If you change your path, you will lose all 
+                current known skills and point spend and will have to rebuild your skills from the beginning. 
             '''
         ,unsafe_allow_html=True)
         st.subheader('Add Skills Tab')
