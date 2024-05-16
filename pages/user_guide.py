@@ -206,6 +206,7 @@ if st.session_state["authentication_status"]:
                 * **🎆 Festival Event**: These are Thursday-Sunday events and are worth three skill points.
                 * **👾 Virtual Event**: These are counted the same as day events.
                 * **🪚 Work Weekend**: These are for working up in Oakenshield outside of an event. You get one skill point but no Tier progress.
+                * **🗳️ Survey/Misc**: For completing surveys/any other bonus points earned outside of an event.
             '''
         ,unsafe_allow_html=True)
         st.subheader('Adding a New Event')
