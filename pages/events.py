@@ -97,6 +97,7 @@ if st.session_state["authentication_status"]:
                 'Skill Points': [1]
             }
         )
+    data_df = data_df.sort_values('Event Date', ascending=True).reset_index(drop=True)
     with st.form('event_data'):
         event_df = st.data_editor(
         data_df,
