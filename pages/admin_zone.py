@@ -206,7 +206,7 @@ if st.session_state["authentication_status"]:
             try:
                 user_events = pd.DataFrame(json.loads(user_data[key]['event_info']))
                 user_events.reset_index(drop=True, inplace=True)
-                tier = get_tier(len(user_events[user_events['Event Type'] != "🪚 Work Weekend"]))
+                tier = get_tier(len(user_events[(user_events['Event Type'] != "🪚 Work Weekend")  & (user_events['Event Type'] != "🗳️ Survey/Misc")]))
                 skill_points = int(user_events["Skill Points"].sum())
                 try:
                     avail_points = int(user_events["Skill Points"].sum()) - int(user_data[key]['point_spend'])
@@ -252,7 +252,7 @@ if st.session_state["authentication_status"]:
                     try:
                         user_events = pd.DataFrame(json.loads(c_info['event_info']))
                         user_events.reset_index(drop=True, inplace=True)
-                        tier = get_tier(len(user_events[user_events['Event Type'] != "🪚 Work Weekend"]))
+                        tier = get_tier(len(user_events[(user_events['Event Type'] != "🪚 Work Weekend")  & (user_events['Event Type'] != "🗳️ Survey/Misc")]))
                         skill_points = int(user_events["Skill Points"].sum())
                         try:
                             avail_points = int(user_events["Skill Points"].sum()) - int(c_info['point_spend'])
@@ -385,7 +385,7 @@ if st.session_state["authentication_status"]:
                     try:
                         user_events = pd.DataFrame(json.loads(row['Event Info']))
                         if not user_events.empty:
-                            user_events = user_events[user_events['Event Type'] != "🪚 Work Weekend"]
+                            user_events = user_events[(user_events['Event Type'] != "🪚 Work Weekend")  & (user_events['Event Type'] != "🗳️ Survey/Misc")]
                             try:
                                 user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y")
                             except:

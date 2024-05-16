@@ -19,7 +19,8 @@ event_dict = {
     "⛺️ Campout Event":2,
     "🎆 Festival Event":3,
     "👾 Virtual Event":1,
-    "🪚 Work Weekend":1
+    "🪚 Work Weekend":1,
+    "🗳️ Survey/Misc":1
 }
 
 def df_on_change(df):
@@ -114,7 +115,8 @@ if st.session_state["authentication_status"]:
                     "⛺️ Campout Event",
                     "🎆 Festival Event",
                     "👾 Virtual Event",
-                    "🪚 Work Weekend"
+                    "🪚 Work Weekend",
+                    "🗳️ Survey/Misc"
                 ],
                 width='medium',
                 default="☀️ Day Event"

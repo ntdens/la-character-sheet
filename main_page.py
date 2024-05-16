@@ -400,7 +400,7 @@ if st.session_state["authentication_status"]:
             data_df = pd.DataFrame(json.loads(user_events))
             data_df.reset_index(drop=True, inplace=True)
             skill_points = int(data_df["Skill Points"].sum())
-            tier = get_tier(len(data_df[data_df['Event Type'] != "🪚 Work Weekend"]))
+            tier = get_tier(len(data_df[(data_df['Event Type'] != "🪚 Work Weekend")  & (data_df['Event Type'] != "🗳️ Survey/Misc")]))
         else:
             skill_points = 0
             tier = 0
