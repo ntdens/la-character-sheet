@@ -200,7 +200,7 @@ if st.session_state["authentication_status"]:
         st.subheader('Types of Events')
         st.markdown(
             f'''
-                There are currently five different event types being tracked:
+                There are currently six different event types being tracked:
                 * **☀️ Day Event**: These are normal one day events and worth one skill point.
                 * **⛺️ Campout Event**: These are Friday-Sunday events and are worth two skill points.
                 * **🎆 Festival Event**: These are Thursday-Sunday events and are worth three skill points.
