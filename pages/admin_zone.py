@@ -127,6 +127,7 @@ def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                             df = df[df[column].between(*user_num_input, inclusive='both')]
                 # Treat columns with < 10 unique values as categorical
                 elif column in ['Profession(s)', 'Organization(s)']:
+                    print(list(df.explode(column)[column].unique()))
                     user_list_input = right.multiselect(
                         f"{column}",
                         list(df.explode(column)[column].unique()),
@@ -219,10 +220,14 @@ if st.session_state["authentication_status"]:
                 event_info = "{}"
             if 'professions' in user_data[key].keys():
                 prof = ast.literal_eval(user_data[key]['professions'])
+                if not prof:
+                    prof = None
             else:
                 prof = None
             if 'orgs' in user_data[key].keys():
                 orgs = ast.literal_eval(user_data[key]['orgs'])
+                if not orgs:
+                    orgs = None
             else:
                 orgs = None
             try:
