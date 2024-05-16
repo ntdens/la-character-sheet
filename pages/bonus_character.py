@@ -135,7 +135,8 @@ if st.session_state["authentication_status"]:
                 if st.button('Yes, Delete', type='primary'):
                     bucket = storage.bucket()
                     for b in bucket.list_blobs(prefix=st.session_state['username']):
-                        all_pics = re.compile(fr"^{char_to_delete}\.[a-zA-Z]{{3,4}}$")
+                        all_pics = re.compile(fr"^{st.session_state['username']}/{char_to_delete}\.[a-zA-Z]{{3,4}}$")
+                        print(all_pics, b)
                         if all_pics.match(b.name):
                             b.delete()
                     db.reference("users/").child("{}/characters/{}".format(st.session_state['username'],char_to_delete)).delete()
