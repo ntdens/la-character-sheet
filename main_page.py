@@ -385,7 +385,6 @@ if st.session_state["authentication_status"]:
         except:
             pass
         char_path = st.session_state['username']
-        char_select = user_data['character_name']
         if 'characters' in user_data.keys():
             for c in user_data['characters']:
                 try:
@@ -497,11 +496,14 @@ if st.session_state["authentication_status"]:
                     "orgs":str(org_input)
                 })
                 if uploaded_file is not None:
-                    origial_character = db.reference("users/").child(st.session_state['username']).get()
-                    if char_select == origial_character['character_name']:
-                        pic_location = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
+                    if 'characters' in user_data.keys():
+                        origial_character = db.reference("users/").child(st.session_state['username']).get()
+                        if char_select == origial_character['character_name']:
+                            pic_location = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
+                        else:
+                            pic_location = '{}/{}.{}'.format(st.session_state['username'],char_select,uploaded_file.name.split('.')[1])
                     else:
-                        pic_location = '{}/{}.{}'.format(st.session_state['username'],char_select,uploaded_file.name.split('.')[1])
+                        pic_location = '{}/profile_pic.{}'.format(st.session_state['username'],uploaded_file.name.split('.')[1])
                     all_pics.append(pic_location)
                     doc_ref.update({
                     "pic_name":pic_location
@@ -512,7 +514,7 @@ if st.session_state["authentication_status"]:
                     for b in bucket.list_blobs(prefix=st.session_state['username']):
                         if b.name not in all_pics:
                             b.delete()
-                    os.remove(pic_name)
+                    os.remove(pic_name)  
                 st.rerun()
         character_name = st.session_state['form_char']
     if 'form_path' in st.session_state:
