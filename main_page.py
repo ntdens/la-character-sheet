@@ -385,6 +385,7 @@ if st.session_state["authentication_status"]:
         except:
             pass
         char_path = st.session_state['username']
+        char_select = user_data['character_name']
         if 'characters' in user_data.keys():
             for c in user_data['characters']:
                 try:
