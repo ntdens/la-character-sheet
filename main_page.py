@@ -134,8 +134,8 @@ def available_skills(df, skill_path, tier):
     df = df[df['Skill Name'] != 'Cross-Training']
     if 'Read/Write Arcana' not in list(known_data['Skill Name']):
         df = df[df['Spell'] == False]
-    if 'Appraise' not in list(known_data['Skill Name']):
-        if 'Appraise' in list(df['Skill Name']):
+    if len([i for i in list(known_data['Skill Name']) if 'Appraise' in i]) == 0:
+        if len([i for i in list(df['Skill Name']) if 'Appraise' in i]) > 0:
             appraise = df[df['Skill Name'].str.contains('Appraise')]
             df = df[df['Path'] != 'Artificer']
             df = pd.concat([df, appraise])
