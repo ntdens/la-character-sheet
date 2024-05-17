@@ -93,7 +93,7 @@ skill_paths = [
 def get_tier(events):
     return floor((sqrt(8*events)-1)/2)
 
-def available_skills(df, skill_path, tier, user_data):
+def available_skills(df, skill_path, tier):
     df = df.copy()
     point_cost = []
     for _, row in df.iterrows():
@@ -136,7 +136,7 @@ def available_skills(df, skill_path, tier, user_data):
         df = df[df['Spell'] == False]
     if 'Appraise' not in list(known_data['Skill Name']):
         if 'Appraise' in list(df['Skill Name']):
-            appraise = df[df['Skill Name'] == 'Appraise']
+            appraise = df[df['Skill Name'].str.contains('Appraise')]
             df = df[df['Path'] != 'Artificer']
             df = pd.concat([df, appraise])
     known_skills = list(known_data['Skill Name'].unique())
@@ -156,60 +156,68 @@ def available_skills(df, skill_path, tier, user_data):
         df = pd.DataFrame(columns=df.columns)
     return df
 
-def skill_gain(df, skill_path, tier, char_path, user_data):
+def skill_gain(df, skill_path, tier, char_path):
     df = df.copy()
     df1 = df.copy()
-    df = available_skills(df, skill_path, tier, user_data)
-    new_skill = st.selectbox('Pick New Skill', list(df['Skill Name'].unique()))
-    if df.empty:
-        gain_button = st.button('Gain Skill', disabled=True)
-    else:
-        if st.button('Gain Skill'):
-            gain_df = df[df['Skill Name'] == new_skill].copy()
-            idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
-            skill_df = gain_df.loc[idxmin]
-            st.session_state['point_spend'] = st.session_state['point_spend'] + skill_df['Point Cost'].values[0]
-            st.session_state['available'] = skill_points - st.session_state['point_spend']
-            known_list = st.session_state['known']
-            known_list.append(skill_df['Skill Name'].values[0])
-            doc_ref = db.reference("users/").child(char_path)
-            doc_ref.update({
-                "known":str(st.session_state['known']),
-                "point_spend":str(st.session_state['point_spend']),
-            })
-            df = available_skills(df, skill_path, tier, user_data)
-            st.rerun()
-    remove_skill = st.selectbox('Pick Skill To Remove', st.session_state['known'])
-    if len(st.session_state['known']) == 0:
-        remove_button = st.button('Remove Skill', disabled=True)
-    else:
-        if st.button("Remove Skill"):
-            point_cost = []
-            for _, row in df1.iterrows():
-                if row['Path'] != skill_path:
-                    if row['Path'] not in professions:
-                        if row['Tier'] == 0:
-                            point_cost.append(2)
+    df = available_skills(df, skill_path, tier)
+    with st.form('Gain Skill'):
+        new_skill = st.selectbox('Pick New Skill', list(df['Skill Name'].unique()))
+        is_free = st.checkbox('Earned for Free?', key='free_gain')
+        if df.empty:
+            gain_button = st.form_submit_button('Gain Skill', disabled=True)
+        else:
+            gain_button = st.form_submit_button('Gain Skill')
+            if gain_button:
+                gain_df = df[df['Skill Name'] == new_skill].copy()
+                idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
+                skill_df = gain_df.loc[idxmin]
+                if not is_free:
+                    st.session_state['point_spend'] = st.session_state['point_spend'] + skill_df['Point Cost'].values[0]
+                    st.session_state['available'] = skill_points - st.session_state['point_spend']
+                known_list = st.session_state['known']
+                known_list.append(skill_df['Skill Name'].values[0])
+                doc_ref = db.reference("users/").child(char_path)
+                doc_ref.update({
+                    "known":str(st.session_state['known']),
+                    "point_spend":str(st.session_state['point_spend']),
+                })
+                df = available_skills(df, skill_path, tier)
+                st.rerun()
+    with st.form('Remove Skill'):
+        remove_skill = st.selectbox('Pick Skill To Remove', st.session_state['known'])
+        remove_free = st.checkbox('Earned for Free?', key='free_remove')
+        if len(st.session_state['known']) == 0:
+            remove_button = st.form_submit_button('Remove Skill', disabled=True)
+        else:
+            remove_button = st.form_submit_button('Remove Skill')
+            if remove_button:
+                point_cost = []
+                for _, row in df1.iterrows():
+                    if row['Path'] != skill_path:
+                        if row['Path'] not in professions:
+                            if row['Tier'] == 0:
+                                point_cost.append(2)
+                            else:
+                                point_cost.append(row['Tier']*2)
                         else:
-                            point_cost.append(row['Tier']*2)
+                            point_cost.append(row['Tier'])
                     else:
                         point_cost.append(row['Tier'])
-                else:
-                    point_cost.append(row['Tier'])
-            df1['Point Cost'] = point_cost
-            gain_df = df1[df1['Skill Name'] == remove_skill].copy()
-            idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
-            skill_df = gain_df.loc[idxmin]
-            st.session_state['point_spend'] = st.session_state['point_spend'] - skill_df['Point Cost'].values[0]
-            st.session_state['available'] = skill_points - st.session_state['point_spend']
-            known_list = st.session_state['known']
-            known_list.remove(skill_df['Skill Name'].values[0])
-            doc_ref = db.reference("users/").child(char_path)
-            doc_ref.update({
-                "known":str(st.session_state['known']),
-                "point_spend":str(st.session_state['point_spend']),
-            })
-            st.rerun()
+                df1['Point Cost'] = point_cost
+                gain_df = df1[df1['Skill Name'] == remove_skill].copy()
+                idxmin = gain_df.groupby(['Skill Name'])['Point Cost'].idxmin()
+                skill_df = gain_df.loc[idxmin]
+                if not remove_free:
+                    st.session_state['point_spend'] = st.session_state['point_spend'] - skill_df['Point Cost'].values[0]
+                    st.session_state['available'] = skill_points - st.session_state['point_spend']
+                known_list = st.session_state['known']
+                known_list.remove(skill_df['Skill Name'].values[0])
+                doc_ref = db.reference("users/").child(char_path)
+                doc_ref.update({
+                    "known":str(st.session_state['known']),
+                    "point_spend":str(st.session_state['point_spend']),
+                })
+                st.rerun()
         return df
 
 def replace_with_emoji_pdf(text, size):
@@ -554,7 +562,7 @@ if st.session_state["authentication_status"]:
             else:
                 point_cost.append(row['Tier'])
         df['Point Cost'] = point_cost
-        df = skill_gain(df, skill_path, tier, char_path, user_data)
+        df = skill_gain(df, skill_path, tier, char_path)
         "## Known Skills"
         df1 = pd.read_excel('Skills_Table.xlsx')
         known = st.session_state['known']
