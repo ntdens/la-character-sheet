@@ -461,7 +461,7 @@ if st.session_state["authentication_status"]:
         with tab2:
             df = pd.read_excel('Skills_Table.xlsx')
             try:
-                character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user', index=list(user_df['Username'].unique()).index(st.session_state['username']))
+                character_choice = st.selectbox('Select User:', user_df['Username'].unique(), key='sheet_user', index=list(user_df['Username'].unique()).index(st.session_state['username']))
             except:
                 character_choice = st.selectbox('Select User:', user_df['Username'], key='sheet_user')
             try:
