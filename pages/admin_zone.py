@@ -86,6 +86,11 @@ path_list = [
     '🔮 Mage'
 ]
 
+def use_calc(path, base, mod, unit):
+    tier = tier_df[tier_df['Path'] == path].iloc[0]['Tier']
+    use_count = base + eval(str(mod).replace('t', str(tier)))
+    return f'{use_count} {unit}', use_count
+
 def get_tier(events):
     return floor((sqrt(8*events)-1)/2)
 
@@ -482,7 +487,13 @@ if st.session_state["authentication_status"]:
                 except:
                     bio = ''
                 known_data = df[df['Skill Name'].isin(known)]
-                display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Prerequisite']].drop_duplicates(subset=['Skill Name']).copy()
+                use_df = pd.read_excel('Skill Use.xlsx')
+                tier_df = pd.DataFrame({'Path':['Warrior', 'Rogue', 'Healer', 'Mage', 'Bard', 'Artificer'], 'Tier':[0,0,0,0,0,0]})
+                tier_df = pd.concat([known_data, tier_df]).groupby('Path')['Tier'].max().reset_index()
+                use_df[['Uses', 'Use Count']] = pd.DataFrame(use_df.apply(lambda x:use_calc(x['Path'], x['Base'], x['Tier Modifer'], x['Unit']), axis=1).to_list())
+                use_df = use_df[['Skill Name', 'Path', 'Tier', 'Uses', 'Use Count']]
+                known_data = pd.merge(known_data, use_df, on=['Skill Name','Path','Tier'], how='left')
+                display_data = known_data.sort_values('Use Count', ascending=False).drop_duplicates('Skill Name').sort_index().sort_values('Tier')[['Skill Name', 'Uses', 'Description', 'Limitations', 'Phys Rep']].copy()
                 try:
                     image_location = character_data['pic_name']
                     bucket = storage.bucket()
