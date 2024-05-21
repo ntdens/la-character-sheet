@@ -81,12 +81,13 @@ if st.session_state["authentication_status"]:
         'Getting Started',
         'Character Sheet',
         'Events',
+        'Spellbook',
         'Skills',
         'Additional Characters',
         'Profile',
         'Admin Zone'
         ]
-    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs(list_of_tabs)
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs(list_of_tabs)
     query = st.query_params.to_dict()
     if "tab" in query.keys():
         js_click_component(f"tab-{list_of_tabs.index(query['tab'])}")
@@ -237,6 +238,22 @@ if st.session_state["authentication_status"]:
             '''
         ,unsafe_allow_html=True)
     with tab4:
+        st.header('Spellbook', divider='orange')
+        st.subheader('How It Works')
+        st.markdown(
+            f'''
+                Here you can keep track of and add text to all of the spells you have learned through your Path(s) skill tree.
+            '''
+        ,unsafe_allow_html=True)
+        st.subheader('Editing a Spell')
+        st.markdown(
+            f'''
+                To edit a spell, hit the Edit Spell checkbox within the spell you want to add or edit the text for. Once selected, an editable 
+                text box will appear. Once done, hit the Save Spell button to add the changes to the database. If the spell does not meet 
+                length requirements it will not save.
+            '''
+        ,unsafe_allow_html=True)
+    with tab5:
         st.header('Skills', divider='orange')
         st.subheader('How It Works')
         st.markdown(
@@ -248,7 +265,7 @@ if st.session_state["authentication_status"]:
                 in the same location.
             '''
         ,unsafe_allow_html=True)
-    with tab5:
+    with tab6:
         st.header('Additional Characters', divider='orange')
         st.subheader('How It Works')
         st.markdown(
@@ -276,7 +293,7 @@ if st.session_state["authentication_status"]:
                 confirming your intent to delete. Once you confirm a second time, the character is deleted from the database.
             '''
         ,unsafe_allow_html=True)
-    with tab6:
+    with tab7:
         st.header('Profile', divider='orange')
         st.subheader("Overview")
         st.markdown(
@@ -300,7 +317,7 @@ if st.session_state["authentication_status"]:
                 will be updated. You are not able to update your username at this time.
             '''
         ,unsafe_allow_html=True)
-    with tab7:
+    with tab8:
         st.header('Admin Zone', divider='orange')
         st.subheader("What Is It?")
         st.markdown(

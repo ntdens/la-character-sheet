@@ -3,7 +3,7 @@ from pandas.api.types import is_numeric_dtype
 import streamlit as st
 
 APP_PATH = 'https://larp-adventures-character-sheet.streamlit.app'
-
+# APP_PATH = 'http://localhost:8501'
 def filter_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     """
     Adds a UI on top of a dataframe to let viewers filter columns
