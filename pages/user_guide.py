@@ -256,8 +256,8 @@ if st.session_state["authentication_status"]:
         st.subheader('Generating Spell Cards')
         st.markdown(
             f'''
-                You can generate printable spell cards by using the form at the top of the page. Each card should be about the size of an 
-                index card.
+                You can generate printable spell cards by using the form at the top of the page. You can set the cards to either be playing 
+                card or index car sized.
             '''
         ,unsafe_allow_html=True)
     with tab5:

@@ -11,8 +11,6 @@ import ast
 import os
 from PIL import Image as ImageCheck
 from reportlab.platypus import *
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import B7, B8, portrait
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
@@ -35,10 +33,13 @@ def use_calc(path, base, mod, unit):
 def get_tier(events):
     return floor((sqrt(8*events)-1)/2)
 
-def generate_pdf(spells, print_friendly):
+def generate_pdf(spells, print_friendly, card_size):
     styles = getSampleStyleSheet()
 
-    PAGESIZE = portrait(B7)
+    if card_size == 'Playing Card':
+        PAGESIZE = (2.5*inch, 3.5*inch)
+    elif card_size == 'Index Card':
+        PAGESIZE = (3*inch, 5*inch)
 
     font_file = 'GaramondUS.ttf'
     sedan_font = TTFont('GaramondUS', font_file)
@@ -75,24 +76,14 @@ def generate_pdf(spells, print_friendly):
             canvas.drawImage('OLD_PAPER_TEXTURE.jpg',0,0)
         canvas.restoreState()
 
-    styles["Title"].fontName = 'SedanSC'
-    styles["Title"].fontSize = 10
-    styles["Title"].alignment = TA_LEFT
-
-    bio_style = ParagraphStyle('bio')
-    bio_style.fontName = 'SedanSC'
-    bio_style.fontSize = 10
-    bio_style.alignment = TA_LEFT
-    bio_style.firstLineIndent = 1*cm
-
     spell_name = ParagraphStyle('spellname',
-        fontSize=12,
+        fontSize=10,
         fontName='Zelda',
         alignment = TA_LEFT
     )
 
     spell_style = ParagraphStyle('spellstyle',
-        fontSize=10,
+        fontSize=8,
         fontName='GaramondUS',
         alignment = TA_LEFT
     )
@@ -105,12 +96,14 @@ def generate_pdf(spells, print_friendly):
             spell_text = user_data['spellbook'][row['Skill Name'].replace('/','_')]
         except:
             spell_text = ''
-        Story.append(Paragraph(f"<i>{spell_text}</i>"))
-        Story.append(Paragraph(f'<b>Description:</b> {")".join(row["Description"].split(")")[1:])}'))
+        Story.append(Paragraph(f"<i>{spell_text}</i>", style=spell_style))
+        if card_size == 'Index Card':
+            Story.append(Paragraph(f'<b>Description:</b> {")".join(row["Description"].split(")")[1:])}', style=spell_style))
         if row['Uses'] != '':
-            Story.append(Paragraph(f'<b>Uses:</b> {row["Uses"]}'))
-        Story.append(Paragraph(f'<b>Limitations:</b> {row["Limitations"]}'))
-        Story.append(Paragraph(f'<b>Phys Rep:</b> {row["Phys Rep"]}'))
+            Story.append(Paragraph(f'<b>Uses:</b> {row["Uses"]}', style=spell_style))
+        Story.append(Paragraph(f'<b>Limitations:</b> {row["Limitations"]}', style=spell_style))
+        if card_size == 'Index Card':
+            Story.append(Paragraph(f'<b>Phys Rep:</b> {row["Phys Rep"]}', style=spell_style))
         Story.append(PageBreak())
     doc.build(Story, onFirstPage=myFirstPage, onLaterPages=myLaterPages)
 
@@ -244,11 +237,12 @@ if st.session_state["authentication_status"]:
     else:
         with st.form('spell_card_generation'):
             st.markdown('**Spell Card PDF Options:**')
+            card_size = st.radio('Card Size',['Index Card', 'Playing Card'], horizontal=True)
             print_friendly = st.checkbox('Printer Friendly Sheet')
-            pdf_submit = st.form_submit_button('Generate Spell Cards PDF', use_container_width=True)
+            pdf_submit = st.form_submit_button('Generate Spell Cards PDF')
         if pdf_submit:
             with st.spinner('Generating PDF'):
-                generate_pdf(spells, print_friendly)
+                generate_pdf(spells, print_friendly, card_size)
                 blob = bucket.blob(st.session_state['username'] + '/spell_cards.pdf')
                 blob.upload_from_filename('spell_cards.pdf')
                 os.remove('spell_cards.pdf')
@@ -258,7 +252,6 @@ if st.session_state["authentication_status"]:
                     data=pdf_data,
                     file_name="{}_spells.pdf".format(character_name),
                     mime='application/octet-stream',
-                    use_container_width=True,
                     type='primary'
                 )
         for _, row in spells.iterrows():
