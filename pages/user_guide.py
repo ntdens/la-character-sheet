@@ -253,6 +253,13 @@ if st.session_state["authentication_status"]:
                 length requirements it will not save.
             '''
         ,unsafe_allow_html=True)
+        st.subheader('Generating Spell Cards')
+        st.markdown(
+            f'''
+                You can generate printable spell cards by using the form at the top of the page. Each card should be about the size of an 
+                index card.
+            '''
+        ,unsafe_allow_html=True)
     with tab5:
         st.header('Skills', divider='orange')
         st.subheader('How It Works')
