@@ -136,7 +136,6 @@ if st.session_state["authentication_status"]:
                     bucket = storage.bucket()
                     for b in bucket.list_blobs(prefix=st.session_state['username']):
                         all_pics = re.compile(fr"^{st.session_state['username']}/{char_to_delete}\.[a-zA-Z]{{3,4}}$")
-                        print(all_pics, b)
                         if all_pics.match(b.name):
                             b.delete()
                     db.reference("users/").child("{}/characters/{}".format(st.session_state['username'],char_to_delete)).delete()
@@ -155,6 +154,7 @@ if st.session_state["authentication_status"]:
             path_input = st.selectbox('Path', path_list, key='form_path')
             faction_input = st.selectbox('Faction', faction_list, key='form_faction')
             uploaded_file = st.file_uploader('Upload Profile Picture', type=['png','gif','jpg','jpeg'], key='form_image')
+            copy_events = st.checkbox('Copy Main Character Events?')
             if uploaded_file is not None:
                 form_image = uploaded_file.getvalue()
                 pic_name = '{}.{}'.format(character_name_input,uploaded_file.name.split('.')[1])
@@ -173,6 +173,11 @@ if st.session_state["authentication_status"]:
                         "path":path_input,
                         "faction":faction_input,
                     })
+                    if copy_events:
+                        if 'event_info' in user_data.keys():
+                            doc_ref.update({
+                                "event_info":user_data['event_info']
+                            })
                     if uploaded_file is not None:
                         pic_location = '{}/{}.{}'.format(st.session_state['username'],character_name_input,uploaded_file.name.split('.')[1])
                         doc_ref.update({
