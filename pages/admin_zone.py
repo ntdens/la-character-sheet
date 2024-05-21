@@ -488,7 +488,8 @@ if st.session_state["authentication_status"]:
                     bio = ''
                 known_data = df[df['Skill Name'].isin(known)]
                 use_df = pd.read_excel('Skill Use.xlsx')
-                tier_df = pd.DataFrame({'Path':['Warrior', 'Rogue', 'Healer', 'Mage', 'Bard', 'Artificer'], 'Tier':[0,0,0,0,0,0]})
+                char_df = user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]
+                tier_df = pd.DataFrame({'Path':['Warrior', 'Rogue', 'Healer', 'Mage', 'Bard', 'Artificer', char_df['Path'].values[0].split(' ')[1]], 'Tier':[0,0,0,0,0,0, char_df['Tier'].values[0]]})
                 tier_df = pd.concat([known_data, tier_df]).groupby('Path')['Tier'].max().reset_index()
                 use_df[['Uses', 'Use Count']] = pd.DataFrame(use_df.apply(lambda x:use_calc(x['Path'], x['Base'], x['Tier Modifer'], x['Unit']), axis=1).to_list())
                 use_df = use_df[['Skill Name', 'Path', 'Tier', 'Uses', 'Use Count']]
