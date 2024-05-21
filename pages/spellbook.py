@@ -8,7 +8,16 @@ from firebase_admin import credentials, db, storage
 from math import floor, sqrt
 import io
 import ast
+import os
 from PIL import Image as ImageCheck
+from reportlab.platypus import *
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import B7, B8, portrait
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch, cm
 from sheet_helpers import APP_PATH, sidebar_about
 
 add_page_title(layout='wide')
@@ -25,6 +34,85 @@ def use_calc(path, base, mod, unit):
 
 def get_tier(events):
     return floor((sqrt(8*events)-1)/2)
+
+def generate_pdf(spells, print_friendly):
+    styles = getSampleStyleSheet()
+
+    PAGESIZE = portrait(B7)
+
+    font_file = 'GaramondUS.ttf'
+    sedan_font = TTFont('GaramondUS', font_file)
+    pdfmetrics.registerFont(sedan_font)
+
+    font_file = 'GaramondUSB.ttf'
+    sedan_font = TTFont('GaramondUSB', font_file)
+    pdfmetrics.registerFont(sedan_font)
+
+    font_file = 'GaramondUSI.ttf'
+    sedan_font = TTFont('GaramondUSI', font_file)
+    pdfmetrics.registerFont(sedan_font)
+
+    font_file = 'GaramondUSBI.ttf'
+    sedan_font = TTFont('GaramondUSBI', font_file)
+    pdfmetrics.registerFont(sedan_font)
+
+    pdfmetrics.registerFontFamily('GaramondUS',normal='GaramondUS',bold='GaramondUSB',italic='GaramondUSI',boldItalic='GaramondUSBI')
+
+    font_file = 'The_Wild_Breath_of_Zelda.otf'
+    zelda_font = TTFont('Zelda', font_file)
+    pdfmetrics.registerFont(zelda_font)
+
+    Title = "LARP Adventures Spell Cards"
+    def myFirstPage(canvas, doc):
+        canvas.saveState()
+        if not print_friendly:
+            canvas.drawImage('OLD_PAPER_TEXTURE.jpg',0,0)
+        canvas.restoreState()
+
+    def myLaterPages(canvas, doc):
+        canvas.saveState()
+        if not print_friendly:
+            canvas.drawImage('OLD_PAPER_TEXTURE.jpg',0,0)
+        canvas.restoreState()
+
+    styles["Title"].fontName = 'SedanSC'
+    styles["Title"].fontSize = 10
+    styles["Title"].alignment = TA_LEFT
+
+    bio_style = ParagraphStyle('bio')
+    bio_style.fontName = 'SedanSC'
+    bio_style.fontSize = 10
+    bio_style.alignment = TA_LEFT
+    bio_style.firstLineIndent = 1*cm
+
+    spell_name = ParagraphStyle('spellname',
+        fontSize=12,
+        fontName='Zelda',
+        alignment = TA_LEFT
+    )
+
+    spell_style = ParagraphStyle('spellstyle',
+        fontSize=10,
+        fontName='GaramondUS',
+        alignment = TA_LEFT
+    )
+
+    doc = SimpleDocTemplate("spell_cards.pdf", pagesize=PAGESIZE, title='LARP Adventures Spell Cards', rightMargin=.1*cm,leftMargin=.1*cm,topMargin=.1*cm,bottom_margin=.1*cm)
+    Story = []
+    for _, row in spells.iterrows():
+        Story.append(Paragraph(row['Skill Name'], style=spell_name))
+        try:
+            spell_text = user_data['spellbook'][row['Skill Name'].replace('/','_')]
+        except:
+            spell_text = ''
+        Story.append(Paragraph(f"<i>{spell_text}</i>"))
+        Story.append(Paragraph(f'<b>Description:</b> {")".join(row["Description"].split(")")[1:])}'))
+        if row['Uses'] != '':
+            Story.append(Paragraph(f'<b>Uses:</b> {row["Uses"]}'))
+        Story.append(Paragraph(f'<b>Limitations:</b> {row["Limitations"]}'))
+        Story.append(Paragraph(f'<b>Phys Rep:</b> {row["Phys Rep"]}'))
+        Story.append(PageBreak())
+    doc.build(Story, onFirstPage=myFirstPage, onLaterPages=myLaterPages)
 
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
@@ -153,37 +241,57 @@ if st.session_state["authentication_status"]:
     spells = spells.fillna('')
     if spells.empty:
         st.warning(f'{character_name} knowns no spells',icon=':material/psychology_alt:')
-    for _, row in spells.iterrows():
-        st.subheader(row['Skill Name'], divider='orange')
-        col1, col2 = st.columns([1,1])
-        with col1:
-            st.markdown(f'**Description:** {")".join(row["Description"].split(")")[1:])}')
-            if row['Uses'] != '':
-                st.markdown(f'**Uses:** {row["Uses"]}')
-            st.markdown(f'**Limitations:** {row["Limitations"]}')
-            st.markdown(f'**Phys Rep:** {row["Phys Rep"]}')
-        with col2:
-            word_count = int(row['Phys Rep'].split(' ')[0])
-            try:
-                spell_text = user_data['spellbook'][row['Skill Name'].replace('/','_')]
-            except:
-                spell_text = ''
-            st.markdown(f'**Spell:**  *{spell_text}*')
-            allow_editing = st.checkbox('Edit Spell', key=f'{row["Skill Name"]}_edit')
-            if allow_editing:
-                with st.form(f'spell_input_{row["Skill Name"]}'):
-                    spell_input = st.text_area('Spell Text', key=f'text_area_{row["Skill Name"]}', value=spell_text)
-                    submit = st.form_submit_button('Save Spell')
-                    spell_length = len(spell_input.split())
-                    if submit:
-                        if spell_length >= word_count:
-                            doc_ref = db.reference("users/").child(char_path)
-                            doc_ref.update({
-                                f"spellbook/{row['Skill Name'].replace('/','_')}":spell_input
-                            })
-                            st.rerun()
-                        else:
-                            st.warning('Spell too short. Need {} more word(s)'.format(word_count - spell_length), icon=':material/trending_up:')
+    else:
+        with st.form('spell_card_generation'):
+            st.markdown('**Spell Card PDF Options:**')
+            print_friendly = st.checkbox('Printer Friendly Sheet')
+            pdf_submit = st.form_submit_button('Generate Spell Cards PDF', use_container_width=True)
+        if pdf_submit:
+            with st.spinner('Generating PDF'):
+                generate_pdf(spells, print_friendly)
+                blob = bucket.blob(st.session_state['username'] + '/spell_cards.pdf')
+                blob.upload_from_filename('spell_cards.pdf')
+                os.remove('spell_cards.pdf')
+                blob = bucket.blob(st.session_state['username'] + '/spell_cards.pdf')
+                pdf_data = blob.download_as_bytes()
+                st.download_button(label="Download Spell Cards",
+                    data=pdf_data,
+                    file_name="{}_spells.pdf".format(character_name),
+                    mime='application/octet-stream',
+                    use_container_width=True,
+                    type='primary'
+                )
+        for _, row in spells.iterrows():
+            st.subheader(row['Skill Name'], divider='orange')
+            col1, col2 = st.columns([1,1])
+            with col1:
+                st.markdown(f'**Description:** {")".join(row["Description"].split(")")[1:])}')
+                if row['Uses'] != '':
+                    st.markdown(f'**Uses:** {row["Uses"]}')
+                st.markdown(f'**Limitations:** {row["Limitations"]}')
+                st.markdown(f'**Phys Rep:** {row["Phys Rep"]}')
+            with col2:
+                word_count = int(row['Phys Rep'].split(' ')[0])
+                try:
+                    spell_text = user_data['spellbook'][row['Skill Name'].replace('/','_')]
+                except:
+                    spell_text = ''
+                st.markdown(f'**Spell:**  *{spell_text}*')
+                allow_editing = st.checkbox('Edit Spell', key=f'{row["Skill Name"]}_edit')
+                if allow_editing:
+                    with st.form(f'spell_input_{row["Skill Name"]}'):
+                        spell_input = st.text_area('Spell Text', key=f'text_area_{row["Skill Name"]}', value=spell_text)
+                        submit = st.form_submit_button('Save Spell')
+                        spell_length = len(spell_input.split())
+                        if submit:
+                            if spell_length >= word_count:
+                                doc_ref = db.reference("users/").child(char_path)
+                                doc_ref.update({
+                                    f"spellbook/{row['Skill Name'].replace('/','_')}":spell_input
+                                })
+                                st.rerun()
+                            else:
+                                st.warning('Spell too short. Need {} more word(s)'.format(word_count - spell_length), icon=':material/trending_up:')
 
 
 elif st.session_state["authentication_status"] is False:

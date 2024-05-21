@@ -255,6 +255,24 @@ def generate_pdf(player_data, user_data, profile_image, logo_image, bio, display
     sedan_font = TTFont('SedanSC', font_file)
     pdfmetrics.registerFont(sedan_font)
 
+    font_file = 'GaramondUS.ttf'
+    sedan_font = TTFont('GaramondUS', font_file)
+    pdfmetrics.registerFont(sedan_font)
+
+    font_file = 'GaramondUSB.ttf'
+    sedan_font = TTFont('GaramondUSB', font_file)
+    pdfmetrics.registerFont(sedan_font)
+
+    font_file = 'GaramondUSI.ttf'
+    sedan_font = TTFont('GaramondUSI', font_file)
+    pdfmetrics.registerFont(sedan_font)
+
+    font_file = 'GaramondUSBI.ttf'
+    sedan_font = TTFont('GaramondUSBI', font_file)
+    pdfmetrics.registerFont(sedan_font)
+
+    pdfmetrics.registerFontFamily('GaramondUS',normal='GaramondUS',bold='GaramondUSB',italic='GaramondUSI',boldItalic='GaramondUSBI')
+
     font_file = 'The_Wild_Breath_of_Zelda.otf'
     zelda_font = TTFont('Zelda', font_file)
     pdfmetrics.registerFont(zelda_font)
@@ -304,9 +322,15 @@ def generate_pdf(player_data, user_data, profile_image, logo_image, bio, display
     bio_style.alignment = TA_LEFT
     bio_style.firstLineIndent = 1*cm
 
-    spell_name = ParagraphStyle('spellstyle',
+    spell_name = ParagraphStyle('spellname',
         fontSize=12,
         fontName='Zelda',
+        alignment = TA_LEFT
+    )
+
+    spell_style = ParagraphStyle('spellstyle',
+        fontSize=10,
+        fontName='GaramondUS',
         alignment = TA_LEFT
     )
 
@@ -375,12 +399,12 @@ def generate_pdf(player_data, user_data, profile_image, logo_image, bio, display
                 spell_text = user_data['spellbook'][row['Skill Name'].replace('/','_')]
             except:
                 spell_text = ''
-            Story.append(Paragraph(f"<i>{spell_text}</i>"))
-            Story.append(Paragraph(f'<b>Description:</b> {")".join(row["Description"].split(")")[1:])}'))
+            Story.append(Paragraph(f"<i>{spell_text}</i>", style=spell_style))
+            Story.append(Paragraph(f'<b>Description:</b> {")".join(row["Description"].split(")")[1:])}', style=spell_style))
             if row['Uses'] != '':
-                Story.append(Paragraph(f'<b>Uses:</b> {row["Uses"]}'))
-            Story.append(Paragraph(f'<b>Limitations:</b> {row["Limitations"]}'))
-            Story.append(Paragraph(f'<b>Phys Rep:</b> {row["Phys Rep"]}'))
+                Story.append(Paragraph(f'<b>Uses:</b> {row["Uses"]}', style=spell_style))
+            Story.append(Paragraph(f'<b>Limitations:</b> {row["Limitations"]}', style=spell_style))
+            Story.append(Paragraph(f'<b>Phys Rep:</b> {row["Phys Rep"]}', style=spell_style))
             Story.append(Spacer(1,.25*inch))
         Story.append(PageBreak())
     if not user_events.empty:
@@ -665,90 +689,92 @@ if st.session_state["authentication_status"]:
                     pdf_submit = st.form_submit_button('Generate Character Sheet PDF', use_container_width=True)
                 if pdf_submit:
                     with st.spinner('Generating PDF'):
+                        # try:
+                        user_data = db.reference("users/").child(st.session_state['username']).get()
                         try:
-                            user_data = db.reference("users/").child(st.session_state['username']).get()
-                            try:
-                                image_location = user_data['pic_name']
-                                bucket = storage.bucket()
-                                blob = bucket.blob(image_location)
-                                blob.download_to_filename(user_data['pic_name'].split('/')[1])
-                                profile_image = user_data['pic_name'].split('/')[1]
-                            except:
-                                bucket = storage.bucket()
-                                blob = bucket.blob("faction_logos/la_logo.png")
-                                blob.download_to_filename('logo.jpg')
-                                profile_image = 'logo.jpg'
-                            if faction not in ["🧝 Unaffiliated","🤖 NPC"]:
-                                blob = bucket.blob("faction_logos/{}.jpg".format(faction))
-                                blob.download_to_filename(faction + '.jpg')
-                                logo_image = faction + '.jpg'
-                            else:
-                                blob = bucket.blob("faction_logos/la_logo.png".format(faction))
-                                blob.download_to_filename('la_logo.png')
-                                logo_image = 'la_logo.png'
-                            if not add_bio:
-                                bio = ''
-                            if add_skills:
-                                try:
-                                    skills_df = display_data[['Skill Name', 'Description', 'Uses']]
-                                except:
-                                    skills_df = pd.DataFrame()
-                            else:
-                                skills_df = pd.DataFrame()
-                            if add_events:
-                                try:
-                                    user_events = pd.DataFrame(json.loads(user_events))
-                                    user_events.reset_index(drop=True, inplace=True)
-                                    try:
-                                        user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y").apply(lambda x:x.strftime("%B %Y"))
-                                    except:
-                                        pass
-                                    try:
-                                        user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms').apply(lambda x:x.strftime("%B %Y"))
-                                    except:
-                                        pass
-                                    user_events[['Bonus Skill Points', 'Skill Points']] = user_events[['Bonus Skill Points', 'Skill Points']].astype(int)
-                                except:
-                                    user_events = pd.DataFrame()
-                            else:
-                                user_events = pd.DataFrame()
-                            if add_spells:
-                                try:
-                                    df = pd.read_excel('Skills_Table.xlsx')
-                                    df = df[df['Spell'] == True]
-                                    known = st.session_state['known']
-                                    known_data = df[df['Skill Name'].isin(known)]
-                                    use_df = pd.read_excel('Skill Use.xlsx')
-                                    tier_df = pd.DataFrame({'Path':['Warrior', 'Rogue', 'Healer', 'Mage', 'Bard', 'Artificer', path.split(' ')[1]], 'Tier':[0,0,0,0,0,0, tier]})
-                                    tier_df = pd.concat([known_data, tier_df]).groupby('Path')['Tier'].max().reset_index()
-                                    use_df[['Uses', 'Use Count']] = pd.DataFrame(use_df.apply(lambda x:use_calc(x['Path'], x['Base'], x['Tier Modifer'], x['Unit']), axis=1).to_list())
-                                    use_df = use_df[['Skill Name', 'Path', 'Tier', 'Uses', 'Use Count']]
-                                    known_data = pd.merge(known_data, use_df, on=['Skill Name','Path','Tier'], how='left')
-                                    spells = known_data.sort_values('Use Count', ascending=False).drop_duplicates('Skill Name').sort_index().sort_values('Tier')[['Skill Name', 'Uses', 'Description', 'Limitations', 'Phys Rep']].copy()
-                                    spells = spells.fillna('')
-                                except:
-                                    spells = pd.DataFrame()
-                            else:
-                                spells = pd.DataFrame()
-                            generate_pdf(player_data, user_data, profile_image, logo_image, bio, skills_df, user_events, print_friendly, spells)
-                            blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
-                            blob.upload_from_filename('character_sheet.pdf')
-                            os.remove('character_sheet.pdf')
-                            os.remove(profile_image)
-                            os.remove(logo_image)
-                            if os.path.isfile('la_logo.png'):
-                                os.remove('la_logo.png')
-                            blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
-                            pdf_data = blob.download_as_bytes()
-                            st.download_button(label="Download Character Sheet",
-                                data=pdf_data,
-                                file_name="{}.pdf".format(character_name),
-                                mime='application/octet-stream',
-                                use_container_width=True,
-                                type='primary'
-                            )
+                            image_location = user_data['pic_name']
+                            bucket = storage.bucket()
+                            blob = bucket.blob(image_location)
+                            blob.download_to_filename(user_data['pic_name'].split('/')[1])
+                            profile_image = user_data['pic_name'].split('/')[1]
                         except:
-                            st.warning('Not enough data to generate')
+                            bucket = storage.bucket()
+                            blob = bucket.blob("faction_logos/la_logo.png")
+                            blob.download_to_filename('logo.jpg')
+                            profile_image = 'logo.jpg'
+                        if faction not in ["🧝 Unaffiliated","🤖 NPC"]:
+                            blob = bucket.blob("faction_logos/{}.jpg".format(faction))
+                            blob.download_to_filename(faction + '.jpg')
+                            logo_image = faction + '.jpg'
+                        else:
+                            blob = bucket.blob("faction_logos/la_logo.png".format(faction))
+                            blob.download_to_filename('la_logo.png')
+                            logo_image = 'la_logo.png'
+                        if add_bio:
+                            bio_sheet = bio
+                        else:
+                            bio_sheet = ''
+                        if add_skills:
+                            try:
+                                skills_df = display_data[['Skill Name', 'Description', 'Uses']]
+                            except:
+                                skills_df = pd.DataFrame()
+                        else:
+                            skills_df = pd.DataFrame()
+                        if add_events:
+                            try:
+                                user_events = pd.DataFrame(json.loads(user_events))
+                                user_events.reset_index(drop=True, inplace=True)
+                                try:
+                                    user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], format="%B %Y").apply(lambda x:x.strftime("%B %Y"))
+                                except:
+                                    pass
+                                try:
+                                    user_events['Event Date'] = pd.to_datetime(user_events['Event Date'], unit='ms').apply(lambda x:x.strftime("%B %Y"))
+                                except:
+                                    pass
+                                user_events[['Bonus Skill Points', 'Skill Points']] = user_events[['Bonus Skill Points', 'Skill Points']].astype(int)
+                            except:
+                                user_events = pd.DataFrame()
+                        else:
+                            user_events = pd.DataFrame()
+                        if add_spells:
+                            try:
+                                df = pd.read_excel('Skills_Table.xlsx')
+                                df = df[df['Spell'] == True]
+                                known = st.session_state['known']
+                                known_data = df[df['Skill Name'].isin(known)]
+                                use_df = pd.read_excel('Skill Use.xlsx')
+                                tier_df = pd.DataFrame({'Path':['Warrior', 'Rogue', 'Healer', 'Mage', 'Bard', 'Artificer', path.split(' ')[1]], 'Tier':[0,0,0,0,0,0, tier]})
+                                tier_df = pd.concat([known_data, tier_df]).groupby('Path')['Tier'].max().reset_index()
+                                use_df[['Uses', 'Use Count']] = pd.DataFrame(use_df.apply(lambda x:use_calc(x['Path'], x['Base'], x['Tier Modifer'], x['Unit']), axis=1).to_list())
+                                use_df = use_df[['Skill Name', 'Path', 'Tier', 'Uses', 'Use Count']]
+                                known_data = pd.merge(known_data, use_df, on=['Skill Name','Path','Tier'], how='left')
+                                spells = known_data.sort_values('Use Count', ascending=False).drop_duplicates('Skill Name').sort_index().sort_values('Tier')[['Skill Name', 'Uses', 'Description', 'Limitations', 'Phys Rep']].copy()
+                                spells = spells.fillna('')
+                            except:
+                                spells = pd.DataFrame()
+                        else:
+                            spells = pd.DataFrame()
+                        generate_pdf(player_data, user_data, profile_image, logo_image, bio_sheet, skills_df, user_events, print_friendly, spells)
+                        blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                        blob.upload_from_filename('character_sheet.pdf')
+                        os.remove('character_sheet.pdf')
+                        os.remove(profile_image)
+                        os.remove(logo_image)
+                        if os.path.isfile('la_logo.png'):
+                            os.remove('la_logo.png')
+                        blob = bucket.blob(st.session_state['username'] + '/character_sheet.pdf')
+                        pdf_data = blob.download_as_bytes()
+                        st.download_button(label="Download Character Sheet",
+                            data=pdf_data,
+                            file_name="{}.pdf".format(character_name),
+                            mime='application/octet-stream',
+                            use_container_width=True,
+                            type='primary'
+                        )
+                        # except:
+                        #     st.warning('Not enough data to generate')
             st.markdown("<u><h2 style='text-align: center;'>Biography</h2></u>", unsafe_allow_html=True)
             st.write(bio)
             st.markdown("<u><h2 style='text-align: center;'>Known Skills</h2></u>", unsafe_allow_html=True)
