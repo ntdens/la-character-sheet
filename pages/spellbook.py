@@ -16,7 +16,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, cm
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, portrait
 from sheet_helpers import APP_PATH, sidebar_about
+import numpy as np
 
 add_page_title(layout='wide')
 
@@ -33,13 +36,14 @@ def use_calc(path, base, mod, unit):
 def get_tier(events):
     return floor((sqrt(8*events)-1)/2)
 
-def generate_pdf(spells, print_friendly, card_size):
-    styles = getSampleStyleSheet()
+def split(a, n):
+    k, m = divmod(len(a), n)
+    return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
-    if card_size == 'Playing Card':
-        PAGESIZE = (2.5*inch, 3.5*inch)
-    elif card_size == 'Index Card':
-        PAGESIZE = (3*inch, 5*inch)
+def generate_pdf(spells, print_friendly, card_size):
+
+    PAGESIZE = portrait(letter)
+
 
     font_file = 'GaramondUS.ttf'
     sedan_font = TTFont('GaramondUS', font_file)
@@ -88,23 +92,41 @@ def generate_pdf(spells, print_friendly, card_size):
         alignment = TA_LEFT
     )
 
-    doc = SimpleDocTemplate("spell_cards.pdf", pagesize=PAGESIZE, title='LARP Adventures Spell Cards', rightMargin=.1*cm,leftMargin=.1*cm,topMargin=.1*cm,bottom_margin=.1*cm)
+    tstyle = TableStyle(
+        [
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ('VALIGN', (0,0), (-1,-1), 'TOP')
+        ]
+    )
+
+    doc = SimpleDocTemplate("spell_cards.pdf", pagesize=PAGESIZE, title='LARP Adventures Spell Cards', rightMargin=0, leftMargin=0, topMargin=0, bottomMargin=0)
     Story = []
+    card_list = []
     for _, row in spells.iterrows():
-        Story.append(Paragraph(row['Skill Name'], style=spell_name))
+        card_details = []
+        card_details.append(Paragraph(row['Skill Name'], style=spell_name))
         try:
             spell_text = user_data['spellbook'][row['Skill Name'].replace('/','_')]
         except:
             spell_text = ''
-        Story.append(Paragraph(f"<i>{spell_text}</i>", style=spell_style))
+        card_details.append(Paragraph(f"<i>{spell_text}</i>", style=spell_style))
         if card_size == 'Index Card':
-            Story.append(Paragraph(f'<b>Description:</b> {")".join(row["Description"].split(")")[1:])}', style=spell_style))
+            card_details.append(Paragraph(f'<b>Description:</b> {")".join(row["Description"].split(")")[1:])}', style=spell_style))
         if row['Uses'] != '':
-            Story.append(Paragraph(f'<b>Uses:</b> {row["Uses"]}', style=spell_style))
-        Story.append(Paragraph(f'<b>Limitations:</b> {row["Limitations"]}', style=spell_style))
+            card_details.append(Paragraph(f'<b>Uses:</b> {row["Uses"]}', style=spell_style))
+        card_details.append(Paragraph(f'<b>Limitations:</b> {row["Limitations"]}', style=spell_style))
         if card_size == 'Index Card':
-            Story.append(Paragraph(f'<b>Phys Rep:</b> {row["Phys Rep"]}', style=spell_style))
-        Story.append(PageBreak())
+            card_details.append(Paragraph(f'<b>Phys Rep:</b> {row["Phys Rep"]}', style=spell_style))
+        card_list.append(card_details)
+        # Story.append(PageBreak())
+    if card_size == 'Playing Card':
+        card_table_data = pd.DataFrame(split(card_list, 3)).transpose()
+        t = Table(np.array(card_table_data).tolist(), style=tstyle, colWidths=2.5*inch, rowHeights=3.5*inch)
+    else:
+        card_table_data = pd.DataFrame(split(card_list, 2)).transpose()
+        t = Table(np.array(card_table_data).tolist(), style=tstyle, colWidths=3*inch, rowHeights=5*inch)
+    Story.append(t)
     doc.build(Story, onFirstPage=myFirstPage, onLaterPages=myLaterPages)
 
 if not firebase_admin._apps:
