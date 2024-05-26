@@ -255,7 +255,7 @@ if st.session_state["authentication_status"]:
     spells = known_data.sort_values('Use Count', ascending=False).drop_duplicates('Skill Name').sort_index().sort_values('Tier')[['Skill Name', 'Uses', 'Description', 'Limitations', 'Phys Rep']].copy()
     spells = spells.fillna('')
     if spells.empty:
-        st.warning(f'{character_name} knowns no spells',icon=':material/psychology_alt:')
+        st.warning(f'{character_name} knows no spells',icon=':material/psychology_alt:')
     else:
         with st.form('spell_card_generation'):
             st.markdown('**Spell Card PDF Options:**')
