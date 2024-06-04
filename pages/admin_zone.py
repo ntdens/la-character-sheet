@@ -494,7 +494,7 @@ if st.session_state["authentication_status"]:
                 use_df[['Uses', 'Use Count']] = pd.DataFrame(use_df.apply(lambda x:use_calc(x['Path'], x['Base'], x['Tier Modifer'], x['Unit']), axis=1).to_list())
                 use_df = use_df[['Skill Name', 'Path', 'Tier', 'Uses', 'Use Count']]
                 known_data = pd.merge(known_data, use_df, on=['Skill Name','Path','Tier'], how='left')
-                display_data = known_data.sort_values('Use Count', ascending=False).drop_duplicates('Skill Name').sort_index().sort_values('Tier')[['Skill Name', 'Uses', 'Description', 'Limitations', 'Phys Rep']].copy()
+                display_data = known_data.sort_values('Use Count', ascending=False).drop_duplicates('Skill Name').sort_index().sort_values('Tier')[['Skill Name', 'Uses', 'Description', 'Limitations', 'Phys Rep', 'Augment', 'Special']].copy()
                 try:
                     image_location = character_data['pic_name']
                     bucket = storage.bucket()

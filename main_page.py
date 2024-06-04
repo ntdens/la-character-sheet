@@ -639,7 +639,7 @@ if st.session_state["authentication_status"]:
         df1 = pd.read_excel('Skills_Table.xlsx')
         known = st.session_state['known']
         known_data = df1[df1['Skill Name'].isin(known)]
-        display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep']].drop_duplicates(subset=['Skill Name']).copy()
+        display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep', 'Augment', 'Special']].drop_duplicates(subset=['Skill Name']).copy()
         st.dataframe(display_data, hide_index=True, use_container_width=True)
         "## Available Skills"
         # try:
@@ -658,7 +658,7 @@ if st.session_state["authentication_status"]:
         use_df[['Uses', 'Use Count']] = pd.DataFrame(use_df.apply(lambda x:use_calc(x['Path'], x['Base'], x['Tier Modifer'], x['Unit']), axis=1).to_list())
         use_df = use_df[['Skill Name', 'Path', 'Tier', 'Uses', 'Use Count']]
         known_data = pd.merge(known_data, use_df, on=['Skill Name','Path','Tier'], how='left')
-        display_data = known_data.sort_values('Use Count', ascending=False).drop_duplicates('Skill Name').sort_index().sort_values('Tier')[['Skill Name', 'Uses', 'Description', 'Limitations', 'Phys Rep']].copy()
+        display_data = known_data.sort_values('Use Count', ascending=False).drop_duplicates('Skill Name').sort_index().sort_values('Tier')[['Skill Name', 'Uses', 'Description', 'Limitations', 'Phys Rep', 'Augment', 'Special']].copy()
         display_data = display_data.fillna('')
         points_available = skill_points - st.session_state['point_spend']
         with st.container(border=True):
