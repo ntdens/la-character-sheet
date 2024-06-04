@@ -125,9 +125,22 @@ def available_skills(df, skill_path, tier):
                 path_data.append(df[(df['Path'] == p) & (df['Tier'] == 0)])
         for p in professions:
             if tier >= 3:
-                if not known_data[known_data['Path'] == p].empty:
-                    path_max = known_data[known_data['Path'] == p]['Tier'].max() + 1
-                    path_data.append(df[(df['Path'] == p) & (df['Tier'] <= path_max)])
+                known_prof = known_data[known_data['Path'] == p]
+                other_prof_list = professions.copy()
+                other_prof_list.remove(p)
+                other_prof = known_data[known_data['Path'].isin(other_prof_list)]
+                if not known_prof.empty:
+                    path_max = known_prof['Tier'].max() + 1
+                    if not other_prof.empty:
+                        if other_prof['Tier'].max() >=3:
+                            path_data.append(df[(df['Path'] == p) & (df['Tier'] <= 2)])
+                    elif p=='Artificer':
+                        if len(known_prof) < 4:
+                            path_data.append(df[(df['Path'] == p) & (df['Tier'] <= min([2, path_max]))])
+                        else:
+                            path_data.append(df[(df['Path'] == p) & (df['Tier'] <= path_max)])
+                    else:
+                        path_data.append(df[(df['Path'] == p) & (df['Tier'] <= path_max)])
                 else:
                     path_data.append(df[(df['Path'] == p) & (df['Tier'] == 1)])
         df = pd.concat(path_data)
@@ -154,7 +167,9 @@ def available_skills(df, skill_path, tier):
     df['Known'] = filter_known
     df = df[df['Known'] == False]
     known_skills.append('None')
-    df = df[df['Prerequisite'].fillna('None').isin(known_skills)]
+    df['Prerequisite'] = df['Prerequisite'].fillna('None').str.split(' or ')
+    df = df.explode('Prerequisite')
+    df = df[df['Prerequisite'].isin(known_skills)]
     df = df.drop(columns=['Known'])
     # df = pd.merge(df, known_data, on=list(df.columns), how='outer', indicator=True).query("_merge != 'both'").drop('_merge', axis=1).reset_index(drop=True)
     if tier == 0 and len(known_skills) >= 4:
