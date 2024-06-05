@@ -157,6 +157,8 @@ def available_skills(df, skill_path, tier):
             appraise = df[df['Skill Name'].str.contains('Appraise')]
             df = df[df['Path'] != 'Artificer']
             df = pd.concat([df, appraise])
+    if known_data[known_data['Path'] == 'Artificer']['Tier'].max() == len(known_data[known_data['Skill Name'].str.contains('Appraise')]):
+        df = df[~df['Skill Name'].str.contains('Appraise')]
     known_skills = list(known_data['Skill Name'].unique())
     filter_known = []
     for _, row in df.iterrows():
