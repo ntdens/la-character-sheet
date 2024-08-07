@@ -1,7 +1,7 @@
 import json
 import streamlit as st
 import streamlit_authenticator as stauth
-from st_pages import show_pages_from_config, add_page_title, hide_pages
+from st_pages import get_nav_from_toml, add_page_title, hide_pages
 import pandas as pd
 import firebase_admin
 from firebase_admin import credentials, db, storage
@@ -25,11 +25,12 @@ from PIL import Image as ImageCheck
 from unicodedata import normalize
 from sheet_helpers import APP_PATH, filter_dataframe, sidebar_about
 
-add_page_title(layout='wide')
-
-show_pages_from_config()
-
-hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
+nav = get_nav_from_toml(".streamlit/pages.toml")
+st.logo('la_logo.png')
+pg = st.navigation(nav)
+add_page_title(pg)
+hide_pages(['Register New User', 'Forgot Username', 'Forgot Password'])
+pg.run()
 
 faction_list = [
     "🧝 Unaffiliated",
@@ -443,15 +444,16 @@ with open( "style.css" ) as css:
 
 config = db.reference("auth").get()
 
-st.sidebar.title("About")
-sidebar_about()
+# st.sidebar.title("About")
+# sidebar_about()
 
 #login widget
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
     config['cookie']['key'],
-    config['cookie']['expiry_days']
+    config['cookie']['expiry_days'],
+    key='auth'
 )
 
 #authenticate login
