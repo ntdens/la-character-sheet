@@ -1,16 +1,9 @@
 import streamlit as st
 import streamlit_authenticator as stauth
-from st_pages import show_pages_from_config, add_page_title, hide_pages
 import firebase_admin
 from firebase_admin import credentials, db
 import json
 from sheet_helpers import sidebar_about
-
-add_page_title()
-
-show_pages_from_config()
-
-hide_pages(['Forgot Username', 'Forgot Password'])
 
 config = db.reference("auth").get()
 
@@ -28,18 +21,10 @@ with open( "style.css" ) as css:
 st.sidebar.title("About")
 sidebar_about()
 
-#login widget
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
-
 #new user registration
 try:
     st.info('Use real name for Name field, used to track player across characters')
-    email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(pre_authorization=False)
+    email_of_registered_user, username_of_registered_user, name_of_registered_user = st.session_state['auth_data'].register_user(pre_authorization=False)
     if email_of_registered_user:
         user_auth = db.reference("auth").child(f'credentials/usernames/{username_of_registered_user}')
         user_auth.update(config['credentials']['usernames'][username_of_registered_user])

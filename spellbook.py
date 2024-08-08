@@ -1,7 +1,7 @@
 import json
 import streamlit as st
 import streamlit_authenticator as stauth
-from st_pages import show_pages_from_config, add_page_title, hide_pages
+from st_pages import get_nav_from_toml, add_page_title, hide_pages
 import pandas as pd
 import firebase_admin
 from firebase_admin import credentials, db, storage
@@ -20,13 +20,6 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, portrait
 from sheet_helpers import APP_PATH, sidebar_about
 import numpy as np
-
-add_page_title(layout='wide')
-
-show_pages_from_config()
-
-hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
-
 
 def use_calc(path, base, mod, unit):
     tier = tier_df[tier_df['Path'] == path].iloc[0]['Tier']
@@ -140,21 +133,8 @@ if not firebase_admin._apps:
 with open( "style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
 
-config = db.reference("auth").get()
-
 st.sidebar.title("About")
 sidebar_about()
-
-#login widget
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
-
-#authenticate login
-authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
@@ -308,16 +288,16 @@ if st.session_state["authentication_status"]:
                             else:
                                 st.warning('Spell too short. Need {} more word(s)'.format(word_count - spell_length), icon=':material/trending_up:')
 
-
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
-    st.page_link("pages/register_user.py", label='Register New User', icon="📝")
-    st.page_link("pages/forgot_username.py", label='Forgot Username', icon="👤")
-    st.page_link("pages/forgot_password.py", label='Forgot Password', icon="🔑")
+    st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
+    st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
+    st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")
+
 elif st.session_state["authentication_status"] is None:
     st.warning('Please enter your username and password')
-    st.page_link("pages/register_user.py", label='Register New User', icon="📝")
-    st.page_link("pages/forgot_username.py", label='Forgot Username', icon="👤")
-    st.page_link("pages/forgot_password.py", label='Forgot Password', icon="🔑")
+    st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
+    st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
+    st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")
 
 

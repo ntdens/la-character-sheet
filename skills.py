@@ -1,17 +1,11 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 import pandas as pd
-from st_pages import show_pages_from_config, add_page_title, hide_pages
 import firebase_admin
 from firebase_admin import credentials, db
 import json
 from sheet_helpers import filter_dataframe, APP_PATH, sidebar_about
 
-add_page_title(layout='wide')
-
-show_pages_from_config()
-
-hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
 
 with open( "style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
@@ -29,17 +23,6 @@ config = db.reference("auth").get()
 st.sidebar.title("About")
 sidebar_about()
 
-#login widget
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
-
-#authenticate login
-authenticator.login()
-
 #authenticate users
 if st.session_state["authentication_status"]:
     df = pd.read_excel('Skills_Table.xlsx')
@@ -52,11 +35,12 @@ if st.session_state["authentication_status"]:
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
-    st.page_link("pages/register_user.py", label='Register New User', icon="📝")
-    st.page_link("pages/forgot_username.py", label='Forgot Username', icon="👤")
-    st.page_link("pages/forgot_password.py", label='Forgot Password', icon="🔑")
+    st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
+    st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
+    st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")
+
 elif st.session_state["authentication_status"] is None:
     st.warning('Please enter your username and password')
-    st.page_link("pages/register_user.py", label='Register New User', icon="📝")
-    st.page_link("pages/forgot_username.py", label='Forgot Username', icon="👤")
-    st.page_link("pages/forgot_password.py", label='Forgot Password', icon="🔑")
+    st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
+    st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
+    st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")

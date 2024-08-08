@@ -1,20 +1,12 @@
 import json
 import streamlit as st
 import streamlit_authenticator as stauth
-from st_pages import show_pages_from_config, add_page_title, hide_pages
 from streamlit_modal import Modal
 import pandas as pd
 import firebase_admin
 from firebase_admin import credentials, db
 from sheet_helpers import APP_PATH, sidebar_about
 import uuid
-
-
-add_page_title(layout='wide')
-
-show_pages_from_config()
-
-hide_pages(['Register New User', 'Forgot Username', 'Forgot Password', 'User Management'])
 
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
@@ -26,8 +18,6 @@ if not firebase_admin._apps:
 
 with open( "style.css" ) as css:
     st.markdown( f'<style>{css.read()}</style>' , unsafe_allow_html= True)
-
-config = db.reference("auth").get()
 
 def link_create(page):
     return f'[{page}]({APP_PATH}/{page.replace(" ","%20")})'
@@ -60,20 +50,8 @@ def js_click_component(component_id: str):
 
     inject_native_js_code(source)
 
-#login widget
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
-
 st.sidebar.title("About")
 sidebar_about()
-
-
-#authenticate login
-authenticator.login()
 
 #authenticate users
 if st.session_state["authentication_status"]:
@@ -354,11 +332,12 @@ if st.session_state["authentication_status"]:
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
-    st.page_link("pages/register_user.py", label='Register New User', icon="📝")
-    st.page_link("pages/forgot_username.py", label='Forgot Username', icon="👤")
-    st.page_link("pages/forgot_password.py", label='Forgot Password', icon="🔑")
+    st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
+    st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
+    st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")
+
 elif st.session_state["authentication_status"] is None:
     st.warning('Please enter your username and password')
-    st.page_link("pages/register_user.py", label='Register New User', icon="📝")
-    st.page_link("pages/forgot_username.py", label='Forgot Username', icon="👤")
-    st.page_link("pages/forgot_password.py", label='Forgot Password', icon="🔑")
+    st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
+    st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
+    st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")

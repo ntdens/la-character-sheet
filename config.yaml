@@ -4,45 +4,226 @@ cookie:
   name: la_character_sheet_login
 credentials:
   usernames:
+    1truemagick:
+      email: 1truemagicman@gmail.com
+      logged_in: false
+      name: Burton Peese
+      password: $2b$12$diSAG4R2C3uoip2PaSVMe.de38RAHPj/FzTGyby2bc57b5qzb8VMS
     adidner:
       email: adidner@gmail.com
-      failed_login_attempts: 0
       logged_in: false
       name: Aaron Didner
       password: $2b$12$lseT/v8UJt9M/heIi2HoXeVt.vxhwY0VrxZoWW3PioLgmwS51qpw.
+    aeri:
+      email: Dolphnkim@gmail.com
+      logged_in: false
+      name: Kim White
+      password: $2b$12$DLgWHvvw6Ek7MPHrvH3W9ufPcEjEfwM9IOvKHGHbRYTDnbKQGGpBm
+    andy832a:
+      email: andystawinski15@gmail.com
+      logged_in: false
+      name: Andy Stawinski
+      password: $2b$12$CjkyghsIqHzoY3JHB1HEqu./e9U5N39BIWICZ6uZRdk10YpmXJUMm
+    arwyn_ironfounderson:
+      email: Stevendcormican@gmail.com
+      logged_in: false
+      name: Steven Cormican
+      password: $2b$12$0LXw.IDWvJFo/53EBH9.WuM5n5gBOAfvNFvM5GAMs.uH/nyy0ErFy
+    bethytag:
+      email: bethytag@yahoo.com
+      logged_in: false
+      name: Violet
+      password: $2b$12$YT1fEqhenVl71GosKBmjc.jq8ek1AcVDE7utKHCGpbj2wZm8pUWD.
+    brotherbigfoot:
+      email: lukedorris74@gmail.com
+      logged_in: false
+      name: Luke Dorris
+      password: $2b$12$HjdKZN.2ZfWj0rU4PY3t2.lU/kxUALlOn3UEx.Eai.JEf/VrTFGC.
     caenis_macneary:
       email: nhunter2001@gmail.com
-      failed_login_attempts: 0
       logged_in: false
       name: Niki Hunter
       password: $2b$12$csvHP2oeZiC9EraMmpez5eKDWgefAr48EbhG7aJv8nFDptx0NrQsi
+    callan:
+      email: larp.revolution@gmail.com
+      logged_in: false
+      name: LisaKJacobus
+      password: $2b$12$uBGI9PFZxz8wJyw8.easduvu9QQAsN7SyM.xDqC/OXfNA5zzNOWXe
+    colm:
+      email: brucewschlegel@gmail.com
+      logged_in: false
+      name: Bruce
+      password: $2b$12$hgiJwLV5nSZ/nZbJkwJX/.wcSkn/tYTFpMn9U.tzUawXQhAgt6.hW
+    davethoatbloom:
+      email: david.jp.kim@gmail.com
+      logged_in: false
+      name: JP
+      password: $2b$12$hWPCAhaziD044DKLqaTdue.kGNd2SG6vFzNO6KPNtEiZC1cOHzCOq
+    dustpetal:
+      email: ahs.everett@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: 'Kacie Fonteyne '
+      password: $2b$12$OKBpgAwd98EhjpVitanQnOiAViyjR8/IS7k4vzcMguqt3hA4TmgIC
+    elboron:
+      email: SilvanHaven@Gmail.com
+      logged_in: false
+      name: Shaun
+      password: $2b$12$9zW9r2ngkQ7T5qwMhV/1gOOF66p1SDo6rls.ZzQ3a1xbBdAs8wab.
+    faeriebard:
+      email: kahoptiak@gmail.com
+      logged_in: false
+      name: Katie
+      password: $2b$12$1k5LYn7KWQC585.AEBzKE.6c54j8g31ajyX9q.KMtM9UQwSot2/ga
+    feawen:
+      email: novannabella@gmail.com
+      logged_in: false
+      name: Brianna
+      password: $2b$12$qKKCrZ0nD4T5pz9zBZ6J9..4pHf3kb79EbjaXnPSEMLohnEo.8Dc2
+    fire451:
+      email: dcissel725@gmail.com
+      logged_in: false
+      name: Daniel Cissel
+      password: $2b$12$Xvf7dXsf9Yct3/pqT9oI8O2ITSul0i6wCClqXKGugRu5L5/IRqJUS
+    fredrick04:
+      email: bowarcherwill@gmail.com
+      logged_in: false
+      name: William
+      password: $2b$12$bbO0ll8i3WzN8VNps8DHEOHG0vhlgkClyP4VjO4hSkXSuEXnnNXmK
     ghostfox:
       email: tigerpaw.hb.1997@gmail.com
       failed_login_attempts: 0
       logged_in: false
       name: Kara
       password: $2b$12$KiF6yEr0rZK6Ro4/dS9V9uLZr2zmwwtv67XSgtCYfWpbOhLQVVI9C
+    gimppac:
+      email: pachicka@gmail.com
+      logged_in: false
+      name: Tricia Chicka
+      password: $2b$12$GkXZpzrHPuGM6EoS5VTYleuq3OQc5RIXm9hA8M4xW5.In6jBnCiwi
+    glitterhooves:
+      email: coconutcream_pie@aol.com
+      logged_in: false
+      name: 'Bethany '
+      password: $2b$12$FA9oV7A2sCXC.PrTmxpy/.QRQdu25vCNbKsyTgjCJn9f9Vvg1nYIa
+    grimacedia:
+      email: Hopewellj1@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Jean H
+      password: $2b$12$1112r4iQEnRC5gVz1OE5k.kQgGQQ.bTr0dXh6/wwJ6EeKGZoxo5ky
+    jwbro:
+      email: josephbrown1789@gmail.com
+      logged_in: false
+      name: Joseph Brown
+      password: $2b$12$hfK6zMku0ido3xCaBgPepuF6yURGe6c49SqtBLjJAvJUwzJNo69Ge
+    kjtisler:
+      email: kjtisler@gmail.com
+      logged_in: false
+      name: Peri
+      password: $2b$12$QjPRLr2YF83udtAAzFfmquFaVmRNGsmGQ9oTMFJLi1YP0orB4EHsC
+    maple:
+      email: Breichart3@gmail.com
+      logged_in: false
+      name: Brady Reichart
+      password: $2b$12$3itZU5TVGDhoQWkMUWDrVu0/4NsLlPU90QNOyPmTS46MTYGZ6cx.y
+    marcher138:
+      email: marcher138@gmail.com
+      logged_in: false
+      name: Jake Dieter
+      password: $2b$12$BYC6TeBeqmcJpAqh9CD.zeUHz.vt3I6JbYqtBRlaN6t3sJQGfwLAK
     mbarron:
       email: maura.mcnamee.12@gmail.com
       failed_login_attempts: 0
       logged_in: false
       name: Maura
       password: $2b$12$D5zVITdHoe5q2G3IQ/2eR.2fe5TdFEFdBicgRZ5aiaOlQE6WQw7cW
+    mcdowell2908:
+      email: Mcdowell2908@comcast.net
+      failed_login_attempts: 0
+      logged_in: false
+      name: Brian Foreman
+      password: $2b$12$YLrBISnb0en43STLmGLCbO2X2GSeUG2JY3b0rZryOle/2etSbqE0e
+    moonslayer:
+      email: chmiller90@gmail.com
+      logged_in: false
+      name: Christopher Miller
+      password: $2b$12$yZF6cEIDN/./eOcOOf.VXev6ieupOD4XiUnTlo7Mv5k3RgRGIBLrW
+    nikosthanae:
+      email: kevinc9467@gmail.com
+      logged_in: false
+      name: Nikos Thanae
+      password: $2b$12$1nthPUrJIkcMviXnqAdDX.S8rEArZDhN9uxcOlFpFoahBCCqeRRCy
     ntdens:
       email: ntdens@gmail.com
       failed_login_attempts: 0
       logged_in: false
       name: Nate Densmore
       password: $2b$12$ZHdynQyq8MUpUG0U5rxrm.k8sy6WMkpiy4lyKUOlh4g6IjasAnwuW
+    orange:
+      email: matthewtaguding@gmail.com
+      logged_in: false
+      name: Matt T
+      password: $2b$12$cPs.Us2md3LgOZhIjR6M..vJbilD1Z8JcNMUjyG5FIkFAn/QcSuWy
     orion:
       email: Fontisian@gmail.com
       failed_login_attempts: 0
       logged_in: false
       name: Orion
       password: $2b$12$JfQlvMWf2G/KzACw93SHu.dp9bCcBbff.2979Y05wEM.hvy7VEZg6
+    osrickw:
+      email: rparson30@gmail.com
+      logged_in: false
+      name: Robert Parson
+      password: $2b$12$hqRIUbJmwYgvJKX3UZK/GehoqkbnUeaOOD1/2AcxRwfZQ/Lf3UwzW
+    ra_design:
+      email: ra_design@yahoo.com
+      logged_in: false
+      name: Ryan
+      password: $2b$12$ATCLzJZ7hXt4kzNm8brU/uEyrSEYeM3DIE6n13UiK5Z2iahs0i9hK
+    raisenbrin:
+      email: brin.tomasello@yahoo.com
+      logged_in: false
+      name: 'Brin Tomasello '
+      password: $2b$12$qfbw7Nbp3q8O3tEXnrxCbORiDpRjXEV2H/SXQrhq0Xjx6MW89D3HK
+    riastrad:
+      email: josephjl3@hotmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Joseph LoPreto
+      password: $2b$12$dTE64Vtf6oxr52oijEz4FOD2A7hgvKdWDmsUWwgqKXHO/.iiBY4ai
+    sawyer:
+      email: Shadowdragon064@gmail.com
+      logged_in: false
+      name: Dominique
+      password: $2b$12$m.DTgTxGGO2TNGqY0Uwf6OkO23BD1u7KC4SZSXpD1dpkWdqAvEjuO
+    shade:
+      email: johnpalmisano@protonmail.com
+      logged_in: false
+      name: John
+      password: $2b$12$TgPOsakwLty0PtCDCDJqiOW8w6gnL8VJO537Y2BTOc4CdtX9ypfNy
+    tanoskalstryder:
+      email: harper.c@hotmail.com
+      logged_in: false
+      name: Chris Harper
+      password: $2b$12$6kSJcLJ1RMECO4hwVbCKpuWOIXcsvHw589uqwCRwPTlNCYOxUDCkK
+    thetravinator:
+      email: tjroth91@gmail.com
+      logged_in: false
+      name: Travis
+      password: $2b$12$pewYFZkJTIGcMUgj5ggDEucmES1aRZwem9yMDcW4ddeDnGNT4v3LW
     toland:
       email: toland@blacksky.wiki
-      failed_login_attempts: 0
       logged_in: false
       name: Toland
       password: $2b$12$93DUOYX40VsNib9PbB6Y6O/sGpzD78FUshdXbuEUpEMAD/6hMYrJG
+    wondercustard:
+      email: wondercustard@gmail.com
+      logged_in: false
+      name: Korynn
+      password: $2b$12$X0bW2UQCveTve1NCTYKz1OLqJnmm92JLLX.XsjJlQeZcXL3moyYKS
+    yinxard:
+      email: yinxard@gmail.com
+      logged_in: false
+      name: EDUARDO
+      password: $2b$12$MX7n3AHhperMMDriZm9m.OA02I6E5n/RhL4jLaVYm5IwqRNE3t1qu

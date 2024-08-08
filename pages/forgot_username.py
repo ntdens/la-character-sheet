@@ -2,17 +2,11 @@ import streamlit as st
 import streamlit_authenticator as stauth
 import smtplib
 from email.mime.text import MIMEText
-from st_pages import show_pages_from_config, add_page_title, hide_pages
 import firebase_admin
 from firebase_admin import credentials, db
 import json
 from sheet_helpers import sidebar_about
 
-add_page_title()
-
-show_pages_from_config()
-
-hide_pages(['Register New User', 'Forgot Password'])
 
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
@@ -30,17 +24,9 @@ config = db.reference("auth").get()
 st.sidebar.title("About")
 sidebar_about()
 
-#login widget
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
-
 #forgot username
 try:
-    username_of_forgotten_username, email_of_forgotten_username = authenticator.forgot_username()
+    username_of_forgotten_username, email_of_forgotten_username = st.session_state['auth_data'].forgot_username()
     if username_of_forgotten_username:
         st.success('Username to be sent securely. Be sure to check your spam folder.')
         sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
