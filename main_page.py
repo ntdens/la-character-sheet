@@ -3,9 +3,12 @@ import json
 from st_pages import add_page_title, get_nav_from_toml, hide_pages
 import streamlit_authenticator as stauth
 import firebase_admin
-from firebase_admin import credentials, db, storage
+from firebase_admin import credentials, db
+from email.mime.text import MIMEText
+import smtplib
 
 st.set_page_config(layout="wide")
+    
 
 if not firebase_admin._apps:
     key_dict = json.loads(st.secrets["firebase"], strict=False)
@@ -22,10 +25,67 @@ authenticator = stauth.Authenticate(
     config['cookie']['key'],
     config['cookie']['expiry_days'],
 )
-st.session_state['auth_data'] = authenticator
-#authenticate login
-authenticator.login()
 
+st.session_state['auth_data'] = authenticator
+authenticator.login()
+if 'authentication_status' not in st.session_state or st.session_state["authentication_status"] is False or st.session_state["authentication_status"] is None:
+#authenticate login
+    tab1, tab2,tab3 = st.tabs(['Register User', 'Forget Username', 'Forget Password'])
+
+    with tab1:
+        #new user registration
+        st.info('Use real name for Name field, used to track player across characters')
+        email_of_registered_user, username_of_registered_user, name_of_registered_user = st.session_state['auth_data'].register_user(pre_authorization=False)
+        if email_of_registered_user:
+            user_auth = db.reference("auth").child(f'credentials/usernames/{username_of_registered_user}')
+            user_auth.update(config['credentials']['usernames'][username_of_registered_user])
+            st.success('User registered successfully')
+
+    with tab2:
+        #forgot username
+        username_of_forgotten_username, email_of_forgotten_username = st.session_state['auth_data'].forgot_username()
+        if username_of_forgotten_username:
+            st.success('Username to be sent securely. Be sure to check your spam folder.')
+            sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
+            receiver_email = email_of_forgotten_username  # Enter receiver address
+            password = st.secrets['email_password']
+            body = "Your username is {}.".format(username_of_forgotten_username)
+            msg = MIMEText(body)
+            msg['Subject'] = 'LARP Character Sheet Forgotten Username'
+            msg['From'] = "larpadventerurescharactersheet@gmail.com"
+            msg['To'] = email_of_forgotten_username
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            server.quit()
+            user_auth = db.reference("auth").child(f'credentials/usernames/{username_of_forgotten_username}')
+            user_auth.update(config['credentials']['usernames'][username_of_forgotten_username])
+        elif username_of_forgotten_username == False:
+            st.error('Email not found')
+
+    with tab3:
+        #forgot password
+        username_of_forgotten_password, email_of_forgotten_password, new_random_password = st.session_state['auth_data'].forgot_password()
+        if username_of_forgotten_password:
+            st.success('New password to be sent securely')
+            sender_email = "larpadventerurescharactersheet@gmail.com"  # Enter your address
+            receiver_email = email_of_forgotten_password  # Enter receiver address
+            password = st.secrets['email_password']
+            body = "Your new password is {}.".format(new_random_password)
+            msg = MIMEText(body)
+            msg['Subject'] = 'LARP Character Sheet Forgotten Username'
+            msg['From'] = "larpadventerurescharactersheet@gmail.com"
+            msg['To'] = email_of_forgotten_password
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            server.quit()
+            user_auth = db.reference("auth").child(f'credentials/usernames/{username_of_forgotten_password}')
+            user_auth.update(config['credentials']['usernames'][username_of_forgotten_password])
+        elif username_of_forgotten_password == False:
+            st.error('Username not found')
 
 nav = get_nav_from_toml(".streamlit/pages.toml")
 st.logo('la_logo.png')

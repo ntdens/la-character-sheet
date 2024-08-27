@@ -207,6 +207,11 @@ credentials:
       logged_in: false
       name: Chris Harper
       password: $2b$12$6kSJcLJ1RMECO4hwVbCKpuWOIXcsvHw589uqwCRwPTlNCYOxUDCkK
+    test:
+      email: ntdensmore@yahoo.com
+      logged_in: false
+      name: test
+      password: $2b$12$4DTatMwGa0vhHOad9E3qMO8PwRKJR4lOObQRgc2Pjd2LAvusqShLK
     thetravinator:
       email: tjroth91@gmail.com
       logged_in: false
