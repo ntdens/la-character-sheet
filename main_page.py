@@ -88,7 +88,7 @@ if 'authentication_status' not in st.session_state or st.session_state["authenti
             st.error('Username not found')
 
 nav = get_nav_from_toml(".streamlit/pages.toml")
-st.logo('la_logo.png')
+# st.logo('la_logo.png')
 pg = st.navigation(nav)
 add_page_title(pg)
 # hide_pages(['Register New User', 'Forgot Username', 'Forgot Password'])
