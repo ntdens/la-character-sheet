@@ -34,7 +34,7 @@ if 'authentication_status' not in st.session_state or st.session_state["authenti
 
     with tab1:
         #new user registration
-        st.info('Use real name for Name field, used to track player across characters')
+        st.info('Use real name for Name field, used to track player across characters. Password must have at least 1 uppercase, 1 lowercase, 1 number and 1 special character.')
         email_of_registered_user, username_of_registered_user, name_of_registered_user = st.session_state['auth_data'].register_user(pre_authorization=False)
         if email_of_registered_user:
             user_auth = db.reference("auth").child(f'credentials/usernames/{username_of_registered_user}')
