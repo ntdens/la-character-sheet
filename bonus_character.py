@@ -175,12 +175,12 @@ if st.session_state["authentication_status"]:
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
-    st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
-    st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
-    st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")
+    # st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
+    # st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
+    # st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")
 
 elif st.session_state["authentication_status"] is None:
     st.warning('Please enter your username and password')
-    st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
-    st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
-    st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")
+    # st.page_link(st.Page("pages/register_user.py"), label='Register New User', icon="📝")
+    # st.page_link(st.Page("pages/forgot_username.py"), label='Forgot Username', icon="👤")
+    # st.page_link(st.Page("pages/forgot_password.py"), label='Forgot Password', icon="🔑")
