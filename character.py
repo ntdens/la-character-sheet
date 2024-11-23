@@ -653,7 +653,7 @@ if st.session_state["authentication_status"]:
                     profile_image = blob.download_as_bytes()
                 except:
                     pass
-                st.image(profile_image, use_column_width=True)
+                st.image(profile_image, use_container_width=True)
             with col2:
                 player_data = pd.DataFrame({
                     'Category': ['Character  : ','Player  : ','Path  : ','Faction  : ','Profession(s)  : ','Organization(s)  : ','Tier  : ','Skill Points  : '],
@@ -673,7 +673,7 @@ if st.session_state["authentication_status"]:
                 except:
                         blob = bucket.blob("faction_logos/la_logo.png")
                         logo = blob.download_as_bytes()
-                st.image(logo, use_column_width=True)
+                st.image(logo, use_container_width=True)
                 blob = bucket.blob("faction_logos/la_logo.png")
                 blob.download_to_filename('la_logo.png')
                 logo_image = 'la_logo.png'

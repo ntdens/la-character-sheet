@@ -487,7 +487,7 @@ if st.session_state["authentication_status"]:
                 with st.container(border=True):
                     col1, col2 = st.columns([6,4])
                     with col1:
-                        st.image(profile_image, use_column_width=True)
+                        st.image(profile_image, use_container_width=True)
                     with col2:
                         char_df = user_df[(user_df['Username'] == character_choice) & (user_df['Character'] == char_name)]
                         prof_data = char_df['Profession(s)'].values[0]
@@ -507,11 +507,11 @@ if st.session_state["authentication_status"]:
                         if character_data['faction'] not in ["🧝 Unaffiliated","🤖 NPC"]:
                             blob = bucket.blob("faction_logos/{}.jpg".format(character_data['faction']))
                             logo = blob.download_as_bytes()
-                            st.image(logo, use_column_width=True)
+                            st.image(logo, use_container_width=True)
                         else:
                             blob = bucket.blob("faction_logos/la_logo.png")
                             logo = blob.download_as_bytes()
-                            st.image(logo, use_column_width=True)
+                            st.image(logo, use_container_width=True)
                     if st.session_state['username'] in st.secrets['admins']:
                         st.markdown("<u><h2 style='text-align: center;'>Biography</h2></u>", unsafe_allow_html=True)
                         st.write(bio)
