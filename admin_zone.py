@@ -232,6 +232,7 @@ if st.session_state["authentication_status"]:
             user_table.append({
                 'Username':key,
                 'Character':character_name,
+                'Player':user_auth[key]['name'],
                 'Faction':faction,
                 'Path':path,
                 'Tier':tier,
