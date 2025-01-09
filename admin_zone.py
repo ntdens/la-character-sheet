@@ -229,9 +229,11 @@ if st.session_state["authentication_status"]:
                 path = user_data[key]['path']
             else:
                 path = ''
-            try:
+            if 'name' in user_auth[key].keys():
                 player = user_auth[key]['name']
-            except:
+            elif 'first_name' in user_auth[key].keys():
+                player = user_auth[key]['first_name'] + ' ' + user_auth[key]['last_name']
+            else:
                 player = ''
             user_table.append({
                 'Username':key,
