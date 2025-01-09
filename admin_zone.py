@@ -217,22 +217,30 @@ if st.session_state["authentication_status"]:
                     orgs = None
             else:
                 orgs = None
-            try:
-                user_table.append({
-                    'Username':key,
-                    'Player':user_auth[key]['name'],
-                    'Character':user_data[key]['character_name'],
-                    'Faction':user_data[key]['faction'],
-                    'Path':user_data[key]['path'],
-                    'Tier':tier,
-                    'Profession(s)':prof,
-                    'Organization(s)':orgs,
-                    'Earned Points':skill_points,
-                    "Available Points":avail_points,
-                    'Event Info':event_info
-                })
-            except:
-                pass
+            if 'character_name' in user_data[key].keys():
+                character_name = user_data[key]['character_name']
+            else:
+                character_name = ''
+            if 'faction' in user_data[key].keys():
+                faction = user_data[key]['faction']
+            else:
+                faction = ''
+            if 'path' in user_data[key].keys():
+                path = user_data[key]['path']
+            else:
+                path = ''
+            user_table.append({
+                'Username':key,
+                'Character':character_name,
+                'Faction':faction,
+                'Path':path,
+                'Tier':tier,
+                'Profession(s)':prof,
+                'Organization(s)':orgs,
+                'Earned Points':skill_points,
+                "Available Points":avail_points,
+                'Event Info':event_info
+            })
             if 'characters' in user_data[key]:
                 for c in user_data[key]['characters']:
                     c_info = user_data[key]['characters'][c]
