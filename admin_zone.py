@@ -229,10 +229,14 @@ if st.session_state["authentication_status"]:
                 path = user_data[key]['path']
             else:
                 path = ''
+            try:
+                player = user_auth[key]['name'],
+            except:
+                player = ''
             user_table.append({
                 'Username':key,
                 'Character':character_name,
-                'Player':user_auth[key]['name'],
+                'Player':player,
                 'Faction':faction,
                 'Path':path,
                 'Tier':tier,
