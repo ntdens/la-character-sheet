@@ -27,7 +27,7 @@ from sheet_helpers import APP_PATH, filter_dataframe, sidebar_about
 
 faction_list = [
     "🧝 Unaffiliated",
-    # "🏴 Blackthorne Company",
+    "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
     "⚜️ Catalpa",
     "🍷 Cedar Hill",
@@ -37,6 +37,7 @@ faction_list = [
     "💀 Geth",
     "❄️ Grimfrost",
     "🌳 The Grove",
+    "🍃 The House of Silver Branches"
     "🌙 The Irregulars",
     "⚖️ The Order",
     "🎪 Prismatic Troupe",
@@ -664,7 +665,10 @@ if st.session_state["authentication_status"]:
                 # st.dataframe(player_data, hide_index=True, use_container_width=True)
                 bucket = storage.bucket()
                 try:
-                    if faction not in ["🧝 Unaffiliated","🤖 NPC"]:
+                    if faction == "🍃 The House of Silver Branches":
+                        blob = bucket.blob("faction_logos/{}.png".format(faction))
+                        logo = blob.download_as_bytes()
+                    elif faction not in ["🧝 Unaffiliated","🤖 NPC"]:
                         blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                         logo = blob.download_as_bytes()
                     else:
@@ -700,7 +704,11 @@ if st.session_state["authentication_status"]:
                                 blob = bucket.blob("faction_logos/la_logo.png")
                                 blob.download_to_filename('logo.jpg')
                                 profile_image = 'logo.jpg'
-                            if faction not in ["🧝 Unaffiliated","🤖 NPC"]:
+                            if faction == "🍃 The House of Silver Branches":
+                                blob = bucket.blob("faction_logos/{}.png".format(faction))
+                                logo = blob.download_to_filename(faction + '.png')
+                                logo_image = faction + '.png'
+                            elif faction not in ["🧝 Unaffiliated","🤖 NPC"]:
                                 blob = bucket.blob("faction_logos/{}.jpg".format(faction))
                                 blob.download_to_filename(faction + '.jpg')
                                 logo_image = faction + '.jpg'

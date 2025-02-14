@@ -23,16 +23,17 @@ import io
 
 faction_list = [
     "🧝 Unaffiliated",
-    # "🏴 Blackthorne Company",
+    "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
-    "👑 Eponore",
     "⚜️ Catalpa",
     "🍷 Cedar Hill",
     "🧚‍♀️ The Court of Ashes",
     "🧛‍♂️ The Dismissed",
+    "👑 Eponore",
     "💀 Geth",
     "❄️ Grimfrost",
     "🌳 The Grove",
+    "🍃 The House of Silver Branches"
     "🌙 The Irregulars",
     "⚖️ The Order",
     "🎪 Prismatic Troupe",
@@ -40,7 +41,8 @@ faction_list = [
     "🦁 Kult of Tharros",
     "🐴 Vidarian Khanate",
     "🏹 The Wardens",
-    "🕊️ The White Ravens"
+    "🕊️ The White Ravens",
+    "🤖 NPC"
 ]
 faction_colors = {
     "🧝 Unaffiliated":'burlywood',
