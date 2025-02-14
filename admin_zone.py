@@ -33,7 +33,7 @@ faction_list = [
     "💀 Geth",
     "❄️ Grimfrost",
     "🌳 The Grove",
-    "🍃 The House of Silver Branches"
+    "🍃 The House of Silver Branches",
     "🌙 The Irregulars",
     "⚖️ The Order",
     "🎪 Prismatic Troupe",
