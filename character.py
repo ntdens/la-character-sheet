@@ -87,6 +87,7 @@ skill_paths = [
     'Healer',
     'Mage'
 ]
+    
 
 def use_calc(path, base, mod, unit):
     tier = tier_df[tier_df['Path'] == path].iloc[0]['Tier']
@@ -120,32 +121,53 @@ def available_skills(df, skill_path, tier):
                 path_max = known_data[known_data['Path'] == p]['Tier'].max() + 1
                 path_data.append(df[(df['Path'] == p) & (df['Tier'] <= path_max)])
             else:
+                # assume non-professions start at Tier 0
                 path_data.append(df[(df['Path'] == p) & (df['Tier'] == 0)])
+
+        # --- professions rule: up to Tier 2 in any, Tier 3+ in only one ---
+        prof_known = known_data[known_data['Path'].isin(professions)]
+        # max tier per profession the player already has
+        prof_max_by_path = (
+            prof_known.groupby('Path')['Tier'].max()
+            if not prof_known.empty else pd.Series(dtype='int64')
+        )
+
+        # Determine the single profession (if any) where player is already ≥3
+        primary_prof = None
+        if not prof_max_by_path.empty:
+            candidates = prof_max_by_path[prof_max_by_path >= 3]
+            if not candidates.empty:
+                # choose the one with the highest tier; tie-breaker = first by index
+                primary_prof = candidates.sort_values(ascending=False).index[0]
+
         for p in professions:
-            if tier >= 3:
-                known_prof = known_data[known_data['Path'] == p]
-                other_prof_list = professions.copy()
-                other_prof_list.remove(p)
-                other_prof = known_data[known_data['Path'].isin(other_prof_list)]
-                if not known_prof.empty:
-                    path_max = known_prof['Tier'].max() + 1
-                    if not other_prof.empty:
-                        if other_prof['Tier'].max() >=3:
-                            path_data.append(df[(df['Path'] == p) & (df['Tier'] <= 2)])
-                    elif p=='Artificer':
-                        if len(known_prof) < 4:
-                            path_data.append(df[(df['Path'] == p) & (df['Tier'] <= min([2, path_max]))])
-                        else:
-                            path_data.append(df[(df['Path'] == p) & (df['Tier'] <= path_max)])
-                    else:
-                        path_data.append(df[(df['Path'] == p) & (df['Tier'] <= path_max)])
-                else:
-                    path_data.append(df[(df['Path'] == p) & (df['Tier'] == 1)])
-        df = pd.concat(path_data)
+            known_max = int(prof_max_by_path.get(p, -1))  # -1 means none known yet
+            next_unlock = known_max + 1                   # unlock only the next tier
+
+            if p == primary_prof:
+                # Primary profession can progress beyond Tier 2
+                cap = next_unlock
+            else:
+                # All other professions capped at Tier 2 total
+                cap = min(2, next_unlock)
+
+            if known_max == -1:
+                # no picks yet in this profession; start at Tier 1
+                path_data.append(df[(df['Path'] == p) & (df['Tier'] == 1)])
+            else:
+                path_data.append(df[(df['Path'] == p) & (df['Tier'] <= cap)])
+
+        df = pd.concat(path_data, ignore_index=True)
+    else:
+        # If nothing is known yet, allow starting tiers:
+        start_rows = []
+        for p in skill_paths:
+            start_rows.append(df[(df['Path'] == p) & (df['Tier'] == 0)])
+        for p in professions:
+            start_rows.append(df[(df['Path'] == p) & (df['Tier'] == 1)])
+        df = pd.concat(start_rows, ignore_index=True)
         current_path = known_data[known_data['Path'] == skill_path]['Tier'].max() + 1
         df = df[df['Point Cost'] <= current_path]
-    else:
-        df = df[(df['Path'] == skill_path) & (df['Tier'] == 0)]
     df = df[df['Point Cost'] <= st.session_state['available']]
     df = df[df['Skill Name'] != 'Cross-Training']
     if 'Read/Write Arcana' not in list(known_data['Skill Name']):
@@ -513,6 +535,10 @@ if st.session_state["authentication_status"]:
             orgs = ast.literal_eval(user_data['orgs'])
         else:
             orgs = None
+        if 'sharp_mind' in user_data.keys():
+            sharp_mind = ast.literal_eval(user_data['sharp_mind'])
+        else:
+            sharp_mind = None
     except:
         skill_points = 0
         tier = 0
@@ -526,6 +552,7 @@ if st.session_state["authentication_status"]:
         st.session_state['available'] = skill_points - st.session_state['point_spend']
         prof = None
         orgs = None
+        sharp_mind = {}
 
     st.info(f"Check out the [User Guide]({APP_PATH}/User%20Guide?tab=Character%20Sheet) for more info", icon=":material/help:")
     
@@ -628,6 +655,21 @@ if st.session_state["authentication_status"]:
         known_data = df1[df1['Skill Name'].isin(known)]
         display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep', 'Augment', 'Special']].drop_duplicates(subset=['Skill Name']).copy()
         st.dataframe(display_data, hide_index=True, use_container_width=True)
+        sharp_df = known_data[known_data['Skill Name'].str.contains('Sharp Mind')]
+        if len(sharp_df) > 0:
+            "## Sharp Mind Skills"
+            with st.form('sharp_mind_form'):
+                for _, row in sharp_df.iterrows():
+                    st.selectbox(label=row['Skill Name'],options=known,placeholder='Select Skill', index=None, key=f"sharp_skill_{row['Skill Name']}")
+                sharp_submit = st.form_submit_button(label='Confirm Skills')
+                if sharp_submit:
+                    sharp_dict = {}
+                    for _, row in sharp_df.iterrows():
+                        sharp_dict[row['Skill Name']] = st.session_state(f"sharp_skill_{row['Skill Name']}")
+                    sharp_mind = sharp_dict
+                    doc_ref = db.reference("users/").child(char_path)
+                    doc_ref.update(sharp_dict)
+
         "## Available Skills"
         # try:
         st.dataframe(filter_dataframe(df), hide_index=True, use_container_width=True)
@@ -668,7 +710,7 @@ if st.session_state["authentication_status"]:
                 # st.dataframe(player_data, hide_index=True, use_container_width=True)
                 bucket = storage.bucket()
                 try:
-                    if faction == "🍃 The House of Silver Branches":
+                    if faction == "🍃 The House of Silver Branches" or "🍈 Mellondor":
                         blob = bucket.blob("faction_logos/{}.png".format(faction))
                         logo = blob.download_as_bytes()
                     elif faction not in ["🧝 Unaffiliated","🤖 NPC"]:
