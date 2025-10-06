@@ -14,7 +14,7 @@ from sheet_helpers import APP_PATH, sidebar_about
 
 faction_list = [
     "🧝 Unaffiliated",
-    # "🏴 Blackthorne Company",
+    "🏴 Blackthorne Company",
     "💰 Guild of the Black Sky",
     "⚜️ Catalpa",
     "🍷 Cedar Hill",
@@ -24,7 +24,9 @@ faction_list = [
     "💀 Geth",
     "❄️ Grimfrost",
     "🌳 The Grove",
+    "🍃 The House of Silver Branches",
     "🌙 The Irregulars",
+    "🍈 Mellondor"
     "⚖️ The Order",
     "🎪 Prismatic Troupe",
     "⚔️ Sunsteel Company",
