@@ -59,7 +59,8 @@ path_list = [
 prof_list = [
     '🎵 Bard',
     '🪙 Merchant',
-    '📐 Artificer'
+    '📐 Artificer',
+    '📜 Scholar'
 ]
 
 org_list = [
@@ -75,7 +76,8 @@ org_list = [
 
 professions = [
     'Bard',
-    'Artificer'
+    'Artificer',
+    'Scholar'
 ]
 
 skill_paths = [
