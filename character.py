@@ -126,36 +126,38 @@ def available_skills(df, skill_path, tier):
 
         # --- professions rule: up to Tier 2 in any, Tier 3+ in only one ---
         prof_known = known_data[known_data['Path'].isin(professions)]
-        # max tier per profession the player already has
         prof_max_by_path = (
             prof_known.groupby('Path')['Tier'].max()
             if not prof_known.empty else pd.Series(dtype='int64')
         )
 
-        # Determine the single profession (if any) where player is already ≥3
+        # Identify the existing primary (if any)
         primary_prof = None
         if not prof_max_by_path.empty:
             candidates = prof_max_by_path[prof_max_by_path >= 3]
             if not candidates.empty:
-                # choose the one with the highest tier; tie-breaker = first by index
                 primary_prof = candidates.sort_values(ascending=False).index[0]
 
-        for p in professions:
-            known_max = int(prof_max_by_path.get(p, -1))  # -1 means none known yet
-            next_unlock = known_max + 1                   # unlock only the next tier
+        no_primary = primary_prof is None
 
-            if p == primary_prof:
-                # Primary profession can progress beyond Tier 2
-                cap = next_unlock
-            else:
-                # All other professions capped at Tier 2 total
-                cap = min(2, next_unlock)
+        for p in professions:
+            known_max = int(prof_max_by_path.get(p, -1))   # -1 = none yet
+            next_unlock = known_max + 1                    # sequential unlock only
 
             if known_max == -1:
-                # no picks yet in this profession; start at Tier 1
+                # first pick in a profession begins at Tier 1
                 path_data.append(df[(df['Path'] == p) & (df['Tier'] == 1)])
+                continue
+
+            if no_primary:
+                # let any profession that's at Tier 2 show Tier 3 as the next unlock
+                cap = min(3, next_unlock)
             else:
-                path_data.append(df[(df['Path'] == p) & (df['Tier'] <= cap)])
+                # after a primary exists, only it can progress >2
+                cap = next_unlock if p == primary_prof else min(2, next_unlock)
+
+            path_data.append(df[(df['Path'] == p) & (df['Tier'] <= cap)])
+
 
         df = pd.concat(path_data, ignore_index=True)
     else:
