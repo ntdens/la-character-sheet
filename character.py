@@ -89,6 +89,31 @@ skill_paths = [
 ]
     
 
+def compute_scholar_tier(known_df: pd.DataFrame) -> int:
+    s = known_df[known_df['Path'] == 'Scholar']
+    return int(s['Tier'].max()) if not s.empty else 0
+
+def compute_cross_train_cap(known_df: pd.DataFrame, main_path: str) -> int:
+    """
+    Cross-Training exists on the main path at T2, T4, T6...
+    Use the highest tier the character has on the main path to cap
+    the 'counted tier' for cross-trained targets.
+    """
+    ct = known_df[(known_df['Skill Name'] == 'Cross-Training') & (known_df['Path'] == main_path)]
+    return int(ct['Tier'].max()) if not ct.empty else 0
+
+def bump_uses_text(uses_str: str) -> str:
+    # Try to increment a leading integer; otherwise annotate
+    try:
+        uses_str = str(uses_str)
+        parts = uses_str.strip().split(' ', 1)
+        n = int(parts[0]) + 1
+        rest = parts[1] if len(parts) > 1 else ''
+        return f"{n} {rest}".strip()
+    except Exception:
+        return f"{uses_str} (+1 via Sharp Mind)"
+
+
 def use_calc(path, base, mod, unit):
     tier = tier_df[tier_df['Path'] == path].iloc[0]['Tier']
     use_count = base + eval(str(mod).replace('t', str(tier)))
@@ -189,6 +214,24 @@ def available_skills(df, skill_path, tier):
         else:
             filter_known.append(False)
     df['Known'] = filter_known
+    # Allow buying Sharp Mind multiple times up to Scholar Tier
+    try:
+        known_list = st.session_state.get('known', [])
+        known_sharp_count = sum(1 for n in known_list if isinstance(n, str) and 'Sharp Mind' in n)
+
+        scholar_tier = compute_scholar_tier(known_data)
+        sharp_mask = df['Skill Name'].str.contains('Sharp Mind', na=False)
+
+        if sharp_mask.any():
+            if known_sharp_count < scholar_tier:
+                # treat as NOT known so it stays purchasable
+                df.loc[sharp_mask, 'Known'] = False
+            else:
+                # at/over cap: hide it
+                df.loc[sharp_mask, 'Known'] = True
+    except Exception:
+        pass
+
     df = df[df['Known'] == False]
     known_skills.append('None')
     df['Prerequisite'] = df['Prerequisite'].fillna('None').str.split(' or ')
@@ -261,6 +304,28 @@ def skill_gain(df, skill_path, tier, char_path):
                     "known":str(st.session_state['known']),
                     "point_spend":str(st.session_state['point_spend']),
                 })
+                # After a successful "Remove Skill", prune sharp_mind
+                try:
+                    user = db.reference("users/").child(char_path).get()
+                    sm_raw = user.get('sharp_mind', '{}')
+                    sm_map = ast.literal_eval(sm_raw) if isinstance(sm_raw, str) else (sm_raw or {})
+                    changed = False
+
+                    # If a Sharp Mind instance was removed, drop its entry
+                    if remove_skill in sm_map:
+                        sm_map.pop(remove_skill, None)
+                        changed = True
+
+                    # If the removed skill was a target, drop any entries pointing to it
+                    drop_keys = [k for k, v in sm_map.items() if v == remove_skill]
+                    for k in drop_keys:
+                        sm_map.pop(k, None)
+                        changed = True
+
+                    if changed:
+                        db.reference("users/").child(char_path).update({"sharp_mind": str(sm_map)})
+                except Exception:
+                    pass
                 st.rerun()
         return df
 
@@ -657,20 +722,100 @@ if st.session_state["authentication_status"]:
         known_data = df1[df1['Skill Name'].isin(known)]
         display_data = known_data[['Skill Name', 'Description', 'Limitations', 'Phys Rep', 'Augment', 'Special']].drop_duplicates(subset=['Skill Name']).copy()
         st.dataframe(display_data, hide_index=True, use_container_width=True)
-        sharp_df = known_data[known_data['Skill Name'].str.contains('Sharp Mind')]
-        if len(sharp_df) > 0:
+        df_all = pd.read_excel('Skills_Table.xlsx')
+        known_list = st.session_state.get('known', [])
+        known = list(known_list)  # copy
+
+        known_data = df_all[df_all['Skill Name'].isin(known)].copy()
+        skill_path_clean = path.split(' ', 1)[1]  # '🗡 Warrior' -> 'Warrior'
+        scholar_tier = compute_scholar_tier(known_data)
+        ct_cap = compute_cross_train_cap(known_data, skill_path_clean)
+
+        # How many copies of Sharp Mind the player owns (supports identical names)
+        known_sharp_count = sum(1 for n in known_list if isinstance(n, str) and 'Sharp Mind' in n)
+
+        # Build eligible targets from KNOWN skills:
+        # - include main path and cross-trained paths
+        # - include spells
+        # - exclude Sharp Mind itself and Cross-Training
+        targets_full = (
+            df_all[df_all['Skill Name'].isin(known)]
+            .drop_duplicates(subset=['Skill Name'])
+        )
+        targets_full = targets_full[
+            ~targets_full['Skill Name'].str.contains('Sharp Mind', na=False)
+            & (targets_full['Skill Name'] != 'Cross-Training')
+        ]
+
+        # NEW: exclude profession paths from eligible targets
+        PROF_EXCLUDED = {'Bard', 'Artificer', 'Scholar'}
+        targets_full = targets_full[~targets_full['Path'].isin(PROF_EXCLUDED)]
+
+        # Compute the "counted tier":
+        def counted_tier(row) -> int:
+            t = int(row['Tier'])
+            if row['Path'] == skill_path_clean:
+                return t                           # main path: use native tier
+            return min(t, ct_cap)                  # cross-trained: cap at CT cap
+
+        targets_full['_counted_tier'] = targets_full.apply(counted_tier, axis=1)
+
+        # Eligibility: counted tier <= Scholar tier
+        eligible_targets = sorted(
+            targets_full[targets_full['_counted_tier'] <= scholar_tier]['Skill Name'].unique().tolist()
+        )
+
+        # Load saved mapping; we’ll store { "SM#1": "<skill>", "SM#2": "<skill>", ... }
+        saved_sm = {}
+        try:
+            user_blob = db.reference("users/").child(char_path).get() or {}
+            raw = user_blob.get('sharp_mind', '{}')
+            if isinstance(raw, str):
+                import ast
+                saved_sm = ast.literal_eval(raw) if raw.strip() else {}
+            elif isinstance(raw, dict):
+                saved_sm = raw
+        except Exception:
+            saved_sm = {}
+
+        if known_sharp_count > 0:
             "## Sharp Mind Skills"
+
             with st.form('sharp_mind_form'):
-                for _, row in sharp_df.iterrows():
-                    st.selectbox(label=row['Skill Name'],options=known,placeholder='Select Skill', index=None, key=f"sharp_skill_{row['Skill Name']}")
-                sharp_submit = st.form_submit_button(label='Confirm Skills')
-                if sharp_submit:
-                    sharp_dict = {}
-                    for _, row in sharp_df.iterrows():
-                        sharp_dict[row['Skill Name']] = st.session_state(f"sharp_skill_{row['Skill Name']}")
-                    sharp_mind = sharp_dict
-                    doc_ref = db.reference("users/").child(char_path)
-                    doc_ref.update(sharp_dict)
+                selections = {}
+                already = set(v for v in saved_sm.values() if v)
+
+                # render one selector per *owned* copy of Sharp Mind
+                for i in range(1, known_sharp_count + 1):
+                    key = f"SM#{i}"
+                    prev = saved_sm.get(key)
+
+                    # Don't allow duplicates; keep your own previous selection selectable
+                    options = [t for t in eligible_targets if (t not in already) or (t == prev)]
+                    idx = (options.index(prev) if (prev in options) else None)
+
+                    selections[key] = st.selectbox(
+                        label=f"Apply Sharp Mind {i} to…",
+                        options=options,
+                        index=idx,
+                        placeholder="Select a skill (spells allowed, CT allowed)",
+                        key=f"sharp_select_{i}",
+                    )
+
+                    if selections[key]:
+                        already.add(selections[key])
+
+                submit = st.form_submit_button("Confirm Skills")
+                if submit:
+                    # Validate (no dupes, still eligible)
+                    chosen = [v for v in selections.values() if v]
+                    if len(chosen) != len(set(chosen)):
+                        st.error("A skill can only receive Sharp Mind once. Resolve duplicates.")
+                    else:
+                        db.reference("users/").child(char_path).update({"sharp_mind": str(selections)})
+                        st.success("Sharp Mind selections saved.")
+                        st.rerun()
+
 
         "## Available Skills"
         # try:
@@ -689,6 +834,27 @@ if st.session_state["authentication_status"]:
         use_df[['Uses', 'Use Count']] = pd.DataFrame(use_df.apply(lambda x:use_calc(x['Path'], x['Base'], x['Tier Modifer'], x['Unit']), axis=1).to_list())
         use_df = use_df[['Skill Name', 'Path', 'Tier', 'Uses', 'Use Count']]
         known_data = pd.merge(known_data, use_df, on=['Skill Name','Path','Tier'], how='left')
+        # Apply Sharp Mind bonuses
+        try:
+            user_blob = db.reference("users/").child(char_path).get() or {}
+            raw = user_blob.get('sharp_mind', '{}')
+            if isinstance(raw, str):
+                import ast
+                sm_map = ast.literal_eval(raw) if raw.strip() else {}
+            elif isinstance(raw, dict):
+                sm_map = raw
+            else:
+                sm_map = {}
+
+            targets = set(v for v in (sm_map or {}).values() if v)
+            if targets:
+                known_data['Use Count'] = known_data['Use Count'].fillna(0)
+                mask = known_data['Skill Name'].isin(targets)
+                known_data.loc[mask, 'Use Count'] = known_data.loc[mask, 'Use Count'] + 1
+                known_data.loc[mask, 'Uses'] = known_data['Uses'].apply(bump_uses_text)
+        except Exception:
+            pass
+
         display_data = known_data.sort_values('Use Count', ascending=False).drop_duplicates('Skill Name').sort_index().sort_values('Tier')[['Skill Name', 'Uses', 'Description', 'Limitations', 'Phys Rep', 'Augment', 'Special']].copy()
         display_data = display_data.fillna('')
         points_available = skill_points - st.session_state['point_spend']
@@ -712,7 +878,7 @@ if st.session_state["authentication_status"]:
                 # st.dataframe(player_data, hide_index=True, use_container_width=True)
                 bucket = storage.bucket()
                 try:
-                    if faction == "🍃 The House of Silver Branches" or "🍈 Mellondor":
+                    if faction == ("🍃 The House of Silver Branches" or "🍈 Mellondor"):
                         blob = bucket.blob("faction_logos/{}.png".format(faction))
                         logo = blob.download_as_bytes()
                     elif faction not in ["🧝 Unaffiliated","🤖 NPC"]:
@@ -751,7 +917,7 @@ if st.session_state["authentication_status"]:
                                 blob = bucket.blob("faction_logos/la_logo.png")
                                 blob.download_to_filename('logo.jpg')
                                 profile_image = 'logo.jpg'
-                            if faction == "🍃 The House of Silver Branches":
+                            if faction == ("🍃 The House of Silver Branches" or "🍈 Mellondor"):
                                 blob = bucket.blob("faction_logos/{}.png".format(faction))
                                 logo = blob.download_to_filename(faction + '.png')
                                 logo_image = faction + '.png'
