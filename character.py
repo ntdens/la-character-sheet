@@ -39,7 +39,7 @@ faction_list = [
     "🌳 The Grove",
     "🍃 The House of Silver Branches",
     "🌙 The Irregulars",
-    "🍈 Mellondor"
+    "🍈 Mellondor",
     "⚖️ The Order",
     "🎪 Prismatic Troupe",
     "⚔️ Sunsteel Company",
